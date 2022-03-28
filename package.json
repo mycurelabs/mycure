@@ -7,7 +7,6 @@
   "private": true,
   "scripts": {
     "dev": "quasar dev",
-    "dev:custom": "quasar dev --config './src/config/emr.js'",
     "dev:android": "quasar dev -m capacitor -T android",
     "dev:ios": "quasar dev -m capacitor -T ios",
     "lint": "eslint --fix --ext .js,.vue ./",
@@ -24,25 +23,26 @@
     "pod:install:repo-update": "cd src-capacitor/ios/App && pod install --repo-update"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "vue-i18n": "^9.0.0",
-    "pinia": "^2.0.11",
     "@quasar/extras": "^1.0.0",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "pinia": "^2.0.11",
     "quasar": "^2.6.0",
     "vue": "^3.0.0",
+    "vue-i18n": "^9.0.0",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
+    "@quasar/app-webpack": "^3.0.0",
+    "commander": "^9.1.0",
     "eslint": "^8.10.0",
-    "eslint-plugin-vue": "^8.5.0",
-    "eslint-webpack-plugin": "^3.1.1",
     "eslint-config-standard": "^17.0.0-1",
     "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-n": "^14.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "@quasar/app-webpack": "^3.0.0"
+    "eslint-plugin-vue": "^8.5.0",
+    "eslint-webpack-plugin": "^3.1.1"
   },
   "browserslist": [
     "last 10 Chrome versions",
