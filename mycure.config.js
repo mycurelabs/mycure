@@ -12,10 +12,10 @@ module.exports = function (ctx) {
 
   let config = {};
 
-  if (!options.config) {
-    config = require('./config/default.js');
+  if (!options.mergeConfig) {
+    config = require('./config/default.js')({ ESLintPlugin });
   } else {
-    config = require('./config/' + options.config);
+    config = require('./config/' + options.mergeConfig)({ ESLintPlugin });
   }
 
   console.log('🚀 ~ file: mycure.config.js ~ line 14 ~ config', config);
@@ -23,11 +23,6 @@ module.exports = function (ctx) {
   const customQuasarConfig = config.quasarConfig;
 
   const defaultQuasarConfig = {
-    // customs
-    htmlVariables: {
-      title: 'foo',
-      description: 'Amet nulla minim consequat id cupidatat sunt occaecat amet voluptate.',
-    },
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: false,
 
@@ -61,36 +56,65 @@ module.exports = function (ctx) {
       'material-icons', // optional, you are not bound to it
     ],
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
-    build: {
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+    // // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
+    // build: {
+    //   vueRouterMode: 'hash', // available values: 'hash', 'history'
 
-      // transpile: false,
-      // publicPath: '/',
+    //   // transpile: false,
+    //   // publicPath: '/',
 
-      // Add dependencies for transpiling with Babel (Array of string/regex)
-      // (from node_modules, which are by default not transpiled).
-      // Applies only if "transpile" is set to true.
-      // transpileDependencies: [],
+    //   // Add dependencies for transpiling with Babel (Array of string/regex)
+    //   // (from node_modules, which are by default not transpiled).
+    //   // Applies only if "transpile" is set to true.
+    //   // transpileDependencies: [],
 
-      // rtl: true, // https://quasar.dev/options/rtl-support
-      // preloadChunks: true,
-      // showProgress: false,
-      // gzip: true,
-      // analyze: true,
+    //   // rtl: true, // https://quasar.dev/options/rtl-support
+    //   // preloadChunks: true,
+    //   // showProgress: false,
+    //   // gzip: true,
+    //   // analyze: true,
 
-      // Options below are automatically set depending on the env, set them if you want to override
-      // extractCSS: false,
+    //   // Options below are automatically set depending on the env, set them if you want to override
+    //   // extractCSS: false,
 
-      // https://v2.quasar.dev/quasar-cli-webpack/handling-webpack
-      // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
+    //   // https://v2.quasar.dev/quasar-cli-webpack/handling-webpack
+    //   // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
 
-      chainWebpack (chain) {
-        chain.plugin('eslint-webpack-plugin')
-          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }]);
-      },
+    //   chainWebpack (chain) {
+    //     chain.plugin('eslint-webpack-plugin')
+    //       .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }]);
+    //   },
 
-    },
+    //   extendWebpack (cfg) {
+    //     cfg.module.rules.push(
+    //       {
+    //         enforce: 'pre',
+    //         test: /\.(js|vue)$/,
+    //         loader: 'eslint-loader',
+    //         exclude: /node_modules/,
+    //       },
+    //       {
+    //         test: /\.pug$/,
+    //         loader: 'pug-plain-loader',
+    //       },
+    //     );
+    //     cfg.resolve.alias = {
+    //       ...cfg.resolve.alias,
+    //       '@/': path.resolve(__dirname, './src'),
+    //       '@/assets': path.resolve(__dirname, './src/assets'),
+    //       '@/boot': path.resolve(__dirname, './src/boot'),
+    //       '@/components': path.resolve(__dirname, './src/components'),
+    //       '@/constants': path.resolve(__dirname, './src/constants'),
+    //       '@/layouts': path.resolve(__dirname, './src/layouts'),
+    //       '@/pages': path.resolve(__dirname, './src/pages'),
+    //       '@/router': path.resolve(__dirname, './src/router'),
+    //       '@/services': path.resolve(__dirname, './src/services'),
+    //       '@/store': path.resolve(__dirname, './src/store'),
+    //       '@/utils': path.resolve(__dirname, './src/utils'),
+    //     };
+    //   },
+
+    // },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
     devServer: {
@@ -103,20 +127,22 @@ module.exports = function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
     framework: {
-      config: {},
+      iconSet: 'material-icons', // Quasar icon set
+      config: {
+        ripple: {},
+      },
 
-      // iconSet: 'material-icons', // Quasar icon set
-      // lang: 'en-US', // Quasar language pack
-
-      // For special cases outside of where the auto-import strategy can have an impact
-      // (like functional components as one of the examples),
-      // you can manually specify Quasar components/directives to be available everywhere:
-      //
-      // components: [],
-      // directives: [],
+      // Possible values for "importStrategy":
+      // * 'auto' - (DEFAULT) Auto-import needed Quasar components & directives
+      // * 'all'  - Manually specify what to import
+      importStrategy: 'auto',
 
       // Quasar plugins
-      plugins: [],
+      plugins: [
+        'BottomSheet',
+        'Meta',
+        'Ripple',
+      ],
     },
 
     // animations: 'all', // --- includes all animations
@@ -246,5 +272,7 @@ module.exports = function (ctx) {
     },
   };
 
-  return lodashMerge(defaultQuasarConfig, customQuasarConfig);
+  const mergedConfig = lodashMerge(defaultQuasarConfig, customQuasarConfig);
+  console.log('🚀 ~ file: mycure.config.js ~ line 283 ~ mergedConfig', mergedConfig);
+  return mergedConfig;
 };
