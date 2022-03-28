@@ -1,9 +1,9 @@
-const APP_NAME = 'MYCURE CMS';
-const APP_SHORT_NAME = 'MYCURE';
-const APP_DESCRIPTION = 'The most complete clinic management system in the Philippines';
-const APP_PUBLIC_ICONS_FOLDER = 'icons';
+const APP_NAME = 'Parmazip PMS';
+const APP_SHORT_NAME = 'Parmazip';
+const APP_DESCRIPTION = 'Next Generation Pharmacy Solutions';
+const APP_PUBLIC_ICONS_FOLDER = 'parmazip-icons';
 const THEME = {
-  primary: '#0099cc',
+  primary: '#e43f3b',
   secondary: '#2196F3',
   accent: '#FFC107',
 
@@ -21,6 +21,7 @@ module.exports = (opts) => ({
     htmlVariables: {
       title: APP_NAME,
       description: APP_DESCRIPTION,
+      faviconFileName: 'favicon.ico',
       publicIconsPath: APP_PUBLIC_ICONS_FOLDER,
     },
     framework: {
