@@ -1,3 +1,4 @@
+const path = require('path');
 const lodashMerge = require('lodash').merge;
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { program } = require('commander');
@@ -8,8 +9,6 @@ module.exports = function (ctx) {
   program.parse(process.argv);
   const options = program.opts();
 
-  console.log('🚀 ~ file: mycure.config.js ~ line 9 ~ options', options);
-
   let config = {};
 
   if (!options.mergeConfig) {
@@ -17,8 +16,6 @@ module.exports = function (ctx) {
   } else {
     config = require('./config/' + options.mergeConfig)({ ESLintPlugin });
   }
-
-  console.log('🚀 ~ file: mycure.config.js ~ line 14 ~ config', config);
 
   const customQuasarConfig = config.quasarConfig;
 
@@ -57,64 +54,64 @@ module.exports = function (ctx) {
     ],
 
     // // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
-    // build: {
-    //   vueRouterMode: 'hash', // available values: 'hash', 'history'
+    build: {
+      vueRouterMode: 'hash', // available values: 'hash', 'history'
 
-    //   // transpile: false,
-    //   // publicPath: '/',
+      // transpile: false,
+      // publicPath: '/',
 
-    //   // Add dependencies for transpiling with Babel (Array of string/regex)
-    //   // (from node_modules, which are by default not transpiled).
-    //   // Applies only if "transpile" is set to true.
-    //   // transpileDependencies: [],
+      // Add dependencies for transpiling with Babel (Array of string/regex)
+      // (from node_modules, which are by default not transpiled).
+      // Applies only if "transpile" is set to true.
+      // transpileDependencies: [],
 
-    //   // rtl: true, // https://quasar.dev/options/rtl-support
-    //   // preloadChunks: true,
-    //   // showProgress: false,
-    //   // gzip: true,
-    //   // analyze: true,
+      // rtl: true, // https://quasar.dev/options/rtl-support
+      // preloadChunks: true,
+      // showProgress: false,
+      // gzip: true,
+      // analyze: true,
 
-    //   // Options below are automatically set depending on the env, set them if you want to override
-    //   // extractCSS: false,
+      // Options below are automatically set depending on the env, set them if you want to override
+      // extractCSS: false,
 
-    //   // https://v2.quasar.dev/quasar-cli-webpack/handling-webpack
-    //   // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
+      // https://v2.quasar.dev/quasar-cli-webpack/handling-webpack
+      // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
 
-    //   chainWebpack (chain) {
-    //     chain.plugin('eslint-webpack-plugin')
-    //       .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }]);
-    //   },
+      chainWebpack (chain) {
+        chain.plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }]);
+      },
 
-    //   extendWebpack (cfg) {
-    //     cfg.module.rules.push(
-    //       {
-    //         enforce: 'pre',
-    //         test: /\.(js|vue)$/,
-    //         loader: 'eslint-loader',
-    //         exclude: /node_modules/,
-    //       },
-    //       {
-    //         test: /\.pug$/,
-    //         loader: 'pug-plain-loader',
-    //       },
-    //     );
-    //     cfg.resolve.alias = {
-    //       ...cfg.resolve.alias,
-    //       '@/': path.resolve(__dirname, './src'),
-    //       '@/assets': path.resolve(__dirname, './src/assets'),
-    //       '@/boot': path.resolve(__dirname, './src/boot'),
-    //       '@/components': path.resolve(__dirname, './src/components'),
-    //       '@/constants': path.resolve(__dirname, './src/constants'),
-    //       '@/layouts': path.resolve(__dirname, './src/layouts'),
-    //       '@/pages': path.resolve(__dirname, './src/pages'),
-    //       '@/router': path.resolve(__dirname, './src/router'),
-    //       '@/services': path.resolve(__dirname, './src/services'),
-    //       '@/store': path.resolve(__dirname, './src/store'),
-    //       '@/utils': path.resolve(__dirname, './src/utils'),
-    //     };
-    //   },
+      extendWebpack (cfg) {
+        // cfg.module.rules.push(
+        //   {
+        //     enforce: 'pre',
+        //     test: /\.(js|vue)$/,
+        //     loader: 'eslint-loader',
+        //     exclude: /node_modules/,
+        //   },
+        //   {
+        //     test: /\.pug$/,
+        //     loader: 'pug-plain-loader',
+        //   },
+        // );
+        cfg.resolve.alias = {
+          ...cfg.resolve.alias,
+          '@/': path.resolve(__dirname, './src'),
+          '@/assets': path.resolve(__dirname, './src/assets'),
+          '@/boot': path.resolve(__dirname, './src/boot'),
+          '@/components': path.resolve(__dirname, './src/components'),
+          '@/constants': path.resolve(__dirname, './src/constants'),
+          '@/layouts': path.resolve(__dirname, './src/layouts'),
+          '@/pages': path.resolve(__dirname, './src/pages'),
+          '@/router': path.resolve(__dirname, './src/router'),
+          '@/services': path.resolve(__dirname, './src/services'),
+          '@/store': path.resolve(__dirname, './src/store'),
+          '@/utils': path.resolve(__dirname, './src/utils'),
+        };
+      },
 
-    // },
+    },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
     devServer: {
