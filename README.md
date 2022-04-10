@@ -1,5 +1,11 @@
 # MYCURE Dynamic Modules (mycure-dynamic-modules)
 
+# TODOs
+
+- [ ] Firebase hosting setup for multiple modules
+- [ ] Github action for each dynamic module
+- [ ] Build commands (Right now local quasar uses old cli version)
+
 ## Layouts
 
 **Main Layout**
