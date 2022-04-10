@@ -2,20 +2,19 @@ const path = require('path');
 const lodashMerge = require('lodash').merge;
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { program } = require('commander');
+const DEFAULT_APP = 'mycure';
 
 module.exports = function (ctx) {
   program
-    .option('-mc, --merge-config <path>', 'Custom dynamic config file name. A json file under ./config', false);
+    .option('-a, --app <app namespace>', 'Namesapce for the app, e.g. parmazip', false);
   program.parse(process.argv);
   const options = program.opts();
 
-  let config = {};
+  const config = {
+    ...require(`./.${options.app || DEFAULT_APP}/config.js`)({ ESLintPlugin }),
+  };
 
-  if (!options.mergeConfig) {
-    config = require('./config/default.js')({ ESLintPlugin });
-  } else {
-    config = require('./config/' + options.mergeConfig)({ ESLintPlugin });
-  }
+  console.log('🚀 RUNNING CONFIG FOR', (options.app ? options.app.toUpperCase() : null) || DEFAULT_APP.toUpperCase());
 
   const customQuasarConfig = config.quasarConfig;
 
@@ -36,25 +35,30 @@ module.exports = function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
     css: [
-      'app.css',
+      'app.scss',
     ],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      // 'mdi-v5',
+      'mdi-v6',
       // 'fontawesome-v6',
       // 'eva-icons',
       // 'themify',
       // 'line-awesome',
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
-      'roboto-font', // optional, you are not bound to it
-      'material-icons', // optional, you are not bound to it
+      // 'roboto-font', // optional, you are not bound to it
+      // 'material-icons', // optional, you are not bound to it
     ],
 
-    // // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
+    // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
+      env: {
+        APP: options.app || DEFAULT_APP,
+        ...require('dotenv').config({ path: `./.${options.app || DEFAULT_APP}/.env` }).parsed,
+      },
+
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       // transpile: false,
@@ -83,24 +87,25 @@ module.exports = function (ctx) {
       },
 
       extendWebpack (cfg) {
-        // cfg.module.rules.push(
-        //   {
-        //     enforce: 'pre',
-        //     test: /\.(js|vue)$/,
-        //     loader: 'eslint-loader',
-        //     exclude: /node_modules/,
-        //   },
-        //   {
-        //     test: /\.pug$/,
-        //     loader: 'pug-plain-loader',
-        //   },
-        // );
+        cfg.module.rules.push(
+          // {
+          //   enforce: 'pre',
+          //   test: /\.(js|vue)$/,
+          //   loader: 'eslint-loader',
+          //   exclude: /node_modules/,
+          // },
+          {
+            test: /\.pug$/,
+            loader: 'pug-plain-loader',
+          },
+        );
         cfg.resolve.alias = {
           ...cfg.resolve.alias,
           '@/': path.resolve(__dirname, './src'),
           '@/assets': path.resolve(__dirname, './src/assets'),
           '@/boot': path.resolve(__dirname, './src/boot'),
           '@/components': path.resolve(__dirname, './src/components'),
+          '@/composables': path.resolve(__dirname, './src/composables'),
           '@/constants': path.resolve(__dirname, './src/constants'),
           '@/layouts': path.resolve(__dirname, './src/layouts'),
           '@/pages': path.resolve(__dirname, './src/pages'),
@@ -124,7 +129,7 @@ module.exports = function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
     framework: {
-      iconSet: 'material-icons', // Quasar icon set
+      iconSet: 'mdi-v6', // Quasar icon set
       config: {
         ripple: {},
       },
@@ -138,6 +143,7 @@ module.exports = function (ctx) {
       plugins: [
         'BottomSheet',
         'Meta',
+        'Notify',
         'Ripple',
       ],
     },
@@ -250,12 +256,10 @@ module.exports = function (ctx) {
 
       builder: {
         // https://www.electron.build/configuration/configuration
-
         appId: 'mycure-dynamic-modules',
       },
 
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-
       chainWebpackMain (chain) {
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: ['js'] }]);
@@ -270,6 +274,6 @@ module.exports = function (ctx) {
   };
 
   const mergedConfig = lodashMerge(defaultQuasarConfig, customQuasarConfig);
-  console.log('🚀 ~ file: mycure.config.js ~ line 283 ~ mergedConfig', mergedConfig);
+
   return mergedConfig;
 };
