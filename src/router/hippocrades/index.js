@@ -2,12 +2,18 @@
 const routes = [
   {
     path: '/',
-    redirect: '/clinic/signup',
+    redirect: '/signup/clinic/details',
     component: () => import('layouts/BlankLayout.vue'),
     children: [
       {
-        path: 'clinic/signup',
-        component: () => import('pages/hippocrades/ClinicSignup.vue'),
+        name: 'clinic-details',
+        path: '/signup/clinic/details',
+        component: () => import('pages/hippocrades/signup/ClinicDetails.vue'),
+      },
+      {
+        name: 'clinic-plan',
+        path: '/signup/clinic/plan',
+        component: () => import('pages/hippocrades/signup/ClinicPlan.vue'),
       },
     ],
   },
