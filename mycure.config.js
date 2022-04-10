@@ -111,7 +111,7 @@ module.exports = function (ctx) {
           '@/pages': path.resolve(__dirname, './src/pages'),
           '@/router': path.resolve(__dirname, './src/router'),
           '@/services': path.resolve(__dirname, './src/services'),
-          '@/store': path.resolve(__dirname, './src/store'),
+          '@/stores': path.resolve(__dirname, './src/stores'),
           '@/utils': path.resolve(__dirname, './src/utils'),
         };
       },
