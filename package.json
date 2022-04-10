@@ -7,6 +7,8 @@
   "private": true,
   "scripts": {
     "dev": "quasar dev",
+    "dev:hippocrades": "quasar dev --app hippocrades",
+    "dev:parmazip": "quasar dev --app parmazip",
     "dev:android": "quasar dev -m capacitor -T android",
     "dev:ios": "quasar dev -m capacitor -T ios",
     "lint": "eslint --fix --ext .js,.vue ./",
@@ -36,13 +38,17 @@
     "@babel/eslint-parser": "^7.13.14",
     "@quasar/app-webpack": "^3.0.0",
     "commander": "^9.1.0",
+    "dotenv": "^16.0.0",
     "eslint": "^8.10.0",
     "eslint-config-standard": "^17.0.0-1",
+    "eslint-loader": "^4.0.2",
     "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-n": "^14.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-vue": "^8.5.0",
-    "eslint-webpack-plugin": "^3.1.1"
+    "eslint-webpack-plugin": "^3.1.1",
+    "pug": "^3.0.2",
+    "pug-plain-loader": "^1.1.0"
   },
   "browserslist": [
     "last 10 Chrome versions",
