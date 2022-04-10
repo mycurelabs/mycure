@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "hippocrades-blockchain"
+  },
+  "targets": {
+    "hippocrades-blockchain": {
+      "hosting": {
+        "staging": [
+          "hippocrades-signup"
+        ]
+      }
+    }
+  }
+}
