@@ -4,8 +4,6 @@ const { height, width } = dom;
 
 export function useQuasarMixins () {
   const $q = useQuasar();
-  console.warn($q.screen);
-  console.warn($q.platform);
   const appVersion = require('../../package.json').version;
   const backButtonIcon = computed(() => isIOS ? 'mdi-chevron-left' : 'mdi-arrow-left');
   const brand = process.env.APP;
