@@ -1,6 +1,6 @@
 import { route } from 'quasar/wrappers';
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router';
-import routes from './routes';
+const routes = require(`./${process.env.APP}/index`).default;
 
 /*
  * If not building with SSR mode, you can
