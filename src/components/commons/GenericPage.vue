@@ -15,16 +15,12 @@ q-page(:padding="padding")
 </template>
 
 <script>
-import { ref } from 'vue';
 export default {
+  props: {
+    padding: Boolean,
+    loading: Boolean,
+  },
   setup () {
-    const padding = ref(false);
-    const loading = ref(false);
-
-    return {
-      padding,
-      loading,
-    };
   },
 };
 </script>
