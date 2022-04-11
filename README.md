@@ -2,9 +2,10 @@
 
 # TODOs
 
-- [ ] Firebase hosting setup for multiple modules
-- [ ] Github action for each dynamic module
+- [ ] Firebase hosting setup for multiple apps
+- [ ] Github action for each dynamic app
 - [ ] Build commands (Right now local quasar uses old cli version)
+- [ ] Documentation for app creation
 
 ## Layouts
 
