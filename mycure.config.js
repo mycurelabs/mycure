@@ -59,7 +59,7 @@ module.exports = function (ctx) {
         ...require('dotenv').config({ path: `./.${options.app || DEFAULT_APP}/.env` }).parsed,
       },
 
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      vueRouterMode: 'history', // available values: 'hash', 'history'
 
       // transpile: false,
       // publicPath: '/',
