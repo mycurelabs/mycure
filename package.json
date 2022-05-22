@@ -24,7 +24,11 @@
     "cap:update:android": "cd src-capacitor && npx cap update android",
     "sync:ios": "cd src-capacitor && npx cap sync ios",
     "cap:update:ios": "cd src-capacitor && npx cap update ios",
-    "pod:install:repo-update": "cd src-capacitor/ios/App && pod install --repo-update"
+    "pod:install:repo-update": "cd src-capacitor/ios/App && pod install --repo-update",
+    "build:ssg": "quasar ssg generate",
+    "serve:ssg": "quasar ssg serve dist/ssg",
+    "build:ssg:hippocrades-dev-portal": "quasar ssg generate --app hippocrades-dev-portal",
+    "serve:ssg:hippocrades-dev-portal": "quasar ssg serve dist/ssg --app hippocrades-dev-portal"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
@@ -53,6 +57,7 @@
     "eslint-webpack-plugin": "^3.1.1",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
+    "quasar-app-extension-ssg": "^4.1.1",
     "workbox-webpack-plugin": "^6.0.0"
   },
   "browserslist": [

@@ -14,8 +14,18 @@ export function useQuasarMixins () {
   const isNativeMobile = $q.platform.is.nativeMobile;
   const isScreenDesktop = computed(() => $q.screen.gt.sm);
   const isScreenMobile = computed(() => $q.screen.lt.md);
-  const domHeight = computed(() => height(window));
-  const domWidth = computed(() => width(window));
+  const domHeight = computed(() => {
+    if (process.window) {
+      return height(window);
+    }
+    return null;
+  });
+  const domWidth = computed(() => {
+    if (process.window) {
+      return width(window);
+    }
+    return null;
+  });
 
   async function logout () {
     // await this.$store.dispatch('auth/signout');
