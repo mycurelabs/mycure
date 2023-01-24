@@ -4,7 +4,7 @@ generic-page(
   padding
   :loading="loading"
 )
-  span.text-h1 PME Worklist
+  span.text-h1 PME Walk-in Package
 </template>
 
 <script>

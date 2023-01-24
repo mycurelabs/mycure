@@ -4,7 +4,7 @@ generic-page(
 )
   div.row
     div.col-xs-12
-      h1 Worklist
+      h1 ERM Worklist
 </template>
 
 <script>

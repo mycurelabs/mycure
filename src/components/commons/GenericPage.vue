@@ -1,18 +1,32 @@
 <template lang="pug">
+q-linear-progress(
+  v-if="loading && !skeleton"
+  color="success"
+  indeterminate
+)
 q-page(:padding="padding")
-  slot(name="default")
+  div.row.justify-center.align-center
+    div.col-xs-12.col-md-10
+      component(v-if="loading && skeleton" :is="skeletonComponent[skeleton]")
+      slot(v-else name="default")
   q-page-sticky(position="bottom-right", :offset="[18, 18]")
     slot(name="fab")
-  q-dialog(v-model="loadingModel", full-screen, persistent)
-    q-spinner(size="50px", color="white")
 </template>
 
 <script>
-import { computed } from 'vue-demi';
+import { computed } from 'vue';
+import SkeletonTable from '@/components/commons/skeletons/SkeletonTable';
 export default {
+  components: {
+    SkeletonTable,
+  },
   props: {
     loading: Boolean,
     padding: Boolean,
+    skeleton: {
+      type: String,
+      default: undefined,
+    },
   },
   setup (props, { emit }) {
     const loadingModel = computed({
@@ -20,8 +34,13 @@ export default {
       set: (val) => emit('update:loading', val),
     });
 
+    const skeletonComponent = {
+      table: SkeletonTable,
+    };
+
     return {
       loadingModel,
+      skeletonComponent,
     };
   },
 };

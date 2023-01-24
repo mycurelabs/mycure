@@ -7,9 +7,11 @@
   "private": true,
   "scripts": {
     "dev": "quasar dev",
+    "dev:emr": "quasar dev --module emr",
     "dev:pme": "quasar dev --module pme",
-    "build": "quasar build -m pwa",
+    "build": "quasar build --mode pwa",
     "build:pwa": "quasar build --mode pwa",
+    "build:pwa:emr": "quasar build --mode pwa --module emr",
     "build:pwa:pme": "quasar build --mode pwa --module pme",
     "test": "echo \"No test specified\" && exit 0",
     "lint": "eslint --fix --ext .js,.vue ./",
@@ -29,7 +31,6 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
     "@quasar/app-webpack": "^3.0.0",
-    "commander": "^10.0.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.10.0",
     "eslint-config-standard": "^17.0.0",
@@ -39,7 +40,8 @@
     "eslint-plugin-vue": "^9.0.0",
     "eslint-webpack-plugin": "^3.1.1",
     "pug": "^3.0.2",
-    "pug-plain-loader": "^1.1.0"
+    "pug-plain-loader": "^1.1.0",
+    "workbox-webpack-plugin": "^6.0.0"
   },
   "browserslist": [
     "last 10 Chrome versions",

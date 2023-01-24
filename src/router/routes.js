@@ -40,6 +40,12 @@ if (appBuildType === 'full') {
     ],
   });
 } else {
+  routes.push({
+    path: '/',
+    name: 'landing',
+    redirect: `/${appBuildType}`,
+    component: () => import('pages/LandingPage'),
+  });
   routes.push(moduleRoutesMap[appBuildType]);
 }
 

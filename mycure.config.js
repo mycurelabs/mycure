@@ -1,19 +1,24 @@
 const path = require('path');
 const lodashMerge = require('lodash').merge;
 const ESLintPlugin = require('eslint-webpack-plugin');
-const { program } = require('commander');
 const DEFAULT_MODULE = 'full';
 
 module.exports = function (ctx) {
-  program
-    .option('-m, --module <module namespace>', 'Namesapce for the module, e.g. pme, emr, billing', false);
-  program.parse(process.argv);
-  const options = program.opts();
+  console.warn('process.argv', process.argv);
+
+  let moduleOptionValue = null;
+
+  const indexOfModuleOption = process.argv.indexOf('--module');
+  if (indexOfModuleOption > 0) {
+    moduleOptionValue = process.argv?.[indexOfModuleOption + 1];
+  }
+
+  console.warn('moduleOptionValue', moduleOptionValue);
 
   let moduleConfig;
 
-  if (options.module) {
-    moduleConfig = require(`./.module-${options.module || DEFAULT_MODULE}/config.js`)({ ESLintPlugin });
+  if (moduleOptionValue) {
+    moduleConfig = require(`./.module-${moduleOptionValue || DEFAULT_MODULE}/config.js`)({ ESLintPlugin });
   } else {
     moduleConfig = require('./.full/config.js')({ ESLintPlugin });
   }
@@ -22,7 +27,7 @@ module.exports = function (ctx) {
     ...moduleConfig,
   };
 
-  console.log('🚀 RUNNING CONFIG FOR', (options.module ? options.module.toUpperCase() : null) || DEFAULT_MODULE.toUpperCase());
+  console.log('🚀 RUNNING CONFIG FOR', (moduleOptionValue ? moduleOptionValue.toUpperCase() : null) || DEFAULT_MODULE.toUpperCase());
 
   const customQuasarConfig = config.quasarConfig;
 
@@ -50,9 +55,9 @@ module.exports = function (ctx) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
       env: {
-        APP: options.module || DEFAULT_MODULE,
+        APP: moduleOptionValue || DEFAULT_MODULE,
         ...require('dotenv').config({ path: './.full/.env' }).parsed,
-        ...require('dotenv').config({ path: `./.module-${options.module || DEFAULT_MODULE}/.env` }).parsed,
+        ...require('dotenv').config({ path: `./.module-${moduleOptionValue || DEFAULT_MODULE}/.env` }).parsed,
       },
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
