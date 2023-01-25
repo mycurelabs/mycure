@@ -1,12 +1,12 @@
 <template lang="pug">
-q-layout(view="hHh lpR lFr")
+q-layout(view="hHh lpR lFr" style="background: #fafafa")
   q-header.bg-primary.text-white
     q-toolbar(style="height: 60px")
       q-btn(
         flat,
         dense,
         round,
-        icon="fa fa-bars",
+        icon="las la-bars",
         aria-label="Menu",
         @click="toggleLeftDrawer"
       )
@@ -18,7 +18,7 @@ q-layout(view="hHh lpR lFr")
         template(v-if="nav.type === 'nav-header'")
           q-separator
           q-item
-            q-item-label(label).text-primary
+            q-item-label(label).text-grey
               small.text-bold {{nav.name}}
         template(v-else)
           q-item(
@@ -32,21 +32,25 @@ q-layout(view="hHh lpR lFr")
               q-item-label {{nav.name}}
   q-page-container
     router-view
+    pre {{$route.name}}
+    pre {{$route.meta}}
 </template>
 
 <script>
 import { ref } from 'vue';
 import { usePmeNavRoutes } from '@/composables/navigation';
+// import { useRoute } from 'vue-router';
 
 export default {
   setup () {
     const leftDrawerOpen = ref(true);
-
     const navs = usePmeNavRoutes(['a']);
+    // const route = useRoute();
 
     function toggleLeftDrawer () {
       leftDrawerOpen.value = !leftDrawerOpen.value;
     }
+
     return {
       leftDrawerOpen,
       navs,

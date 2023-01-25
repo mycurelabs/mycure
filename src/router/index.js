@@ -1,5 +1,6 @@
 import { route } from 'quasar/wrappers';
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router';
+import guard from './guard';
 import routes from './routes';
 
 /*
@@ -25,6 +26,8 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.MODE === 'ssr' ? null : process.env.VUE_ROUTER_BASE),
   });
+
+  Router.beforeEach(guard);
 
   return Router;
 });

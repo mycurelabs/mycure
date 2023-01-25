@@ -1,4 +1,4 @@
-import { getLayoutTypeQueryParam } from './utils';
+import { getLayoutTypeQueryParam } from '../utils';
 const layoutType = getLayoutTypeQueryParam();
 const appBuildType = process.env.APP_BUILD_TYPE;
 
@@ -8,14 +8,27 @@ const route = {
   redirect: {
     name: 'pme-worklist',
   },
-  component: () => import('src/layouts/FullStandaloneLayout.vue'),
+  meta: {
+    pageTitle: 'PME',
+    requiresAuth: true,
+    footprint: {
+      name: 'PME',
+      icon: 'la la-home',
+    },
+  },
+  component: () => import('src/layouts/pme/FullLayout.vue'),
   children: [
     {
       path: 'worklist',
       name: 'pme-worklist',
       component: () => import('pages/pme/WorklistPage'),
       meta: {
-        pageTitle: 'PME Worklist',
+        pageTitle: 'Worklist',
+        requiresAuth: true,
+        footprint: {
+          name: 'Worklist',
+          icon: 'la la-list',
+        },
       },
     },
     {
@@ -24,6 +37,11 @@ const route = {
       component: () => import('pages/pme/WalkInPackagePage'),
       meta: {
         pageTitle: 'Walk-in Package',
+        requiresAuth: true,
+        footprint: {
+          name: 'Walk-in Package',
+          icon: 'la la-walking',
+        },
       },
     },
     {
@@ -32,6 +50,11 @@ const route = {
       component: () => import('pages/pme/GroupPackagePage'),
       meta: {
         pageTitle: 'Group Package',
+        requiresAuth: true,
+        footprint: {
+          name: 'Group Package',
+          icon: 'la la-users',
+        },
       },
     },
     {
@@ -40,6 +63,11 @@ const route = {
       component: () => import('pages/pme/MonitoringReportPage'),
       meta: {
         pageTitle: 'Monitoring Report',
+        requiresAuth: true,
+        footprint: {
+          name: 'Monitoring Report',
+          icon: 'la la-chart-bar',
+        },
       },
     },
     {
@@ -48,6 +76,24 @@ const route = {
       component: () => import('pages/pme/SummaryReportPage'),
       meta: {
         pageTitle: 'Summary Report',
+        requiresAuth: true,
+        footprint: {
+          name: 'Summary Report',
+          icon: 'la la-chart-pie',
+        },
+      },
+    },
+    {
+      path: 'report-templates',
+      name: 'pme-report-templates',
+      component: () => import('pages/pme/ReportTemplatesPage'),
+      meta: {
+        pageTitle: 'Report Templates',
+        requiresAuth: true,
+        footprint: {
+          name: 'Report Templates',
+          icon: 'la la-file',
+        },
       },
     },
   ],

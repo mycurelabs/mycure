@@ -2,27 +2,42 @@
 generic-page(
   skeleton="table"
   padding
-  :loading="loading"
+  :loading="initializing"
 )
-  span.text-h1 PME Worklist
+  q-card.shadow-1
+    q-card-section
+      pre {{items.map(item => item.alpha2)}}
 </template>
 
 <script>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import GenericPage from '@/components/commons/GenericPage';
+import { usePmeStore } from 'src/stores/pme';
 export default {
   components: {
     GenericPage,
   },
   setup () {
-    const loading = ref(true);
+    const store = usePmeStore();
+    const initializing = ref(false);
+    const items = computed(() => store.$state.pmeEncounters);
 
-    setTimeout(() => {
-      loading.value = false;
-    }, 1000);
+    async function init (firstLoad) {
+      try {
+        if (firstLoad) initializing.value = true;
+        await store.getPmeEncounters();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        initializing.value = false;
+      }
+    }
 
+    if (!items.value.length) init(true);
+    else init();
     return {
-      loading,
+      items,
+      initializing,
     };
   },
 };

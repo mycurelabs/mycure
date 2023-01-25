@@ -34,8 +34,13 @@ module.exports = function (ctx) {
   const defaultQuasarConfig = {
     supportTS: false,
     boot: [
-      'i18n',
       'axios',
+      'i18n',
+      'footprints',
+      {
+        server: false,
+        path: 'mycure.js',
+      },
     ],
     css: [
       'app.scss',
@@ -46,7 +51,7 @@ module.exports = function (ctx) {
       // 'mdi-v6',
       // 'eva-icons',
       // 'themify',
-      // 'line-awesome',
+      'line-awesome',
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
       // 'roboto-font', // optional, you are not bound to it
       // 'material-icons', // optional, you are not bound to it
@@ -110,6 +115,7 @@ module.exports = function (ctx) {
           '@/constants': path.resolve(__dirname, './src/constants'),
           '@/layouts': path.resolve(__dirname, './src/layouts'),
           '@/pages': path.resolve(__dirname, './src/pages'),
+          '@/plugins': path.resolve(__dirname, './src/plugins'),
           '@/router': path.resolve(__dirname, './src/router'),
           '@/services': path.resolve(__dirname, './src/services'),
           '@/stores': path.resolve(__dirname, './src/stores'),

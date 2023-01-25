@@ -1,4 +1,4 @@
-import { getLayoutTypeQueryParam } from './utils';
+import { getLayoutTypeQueryParam } from '../utils';
 const layoutType = getLayoutTypeQueryParam();
 const appBuildType = process.env.APP_BUILD_TYPE;
 
@@ -8,7 +8,7 @@ const route = {
   redirect: {
     name: 'emr-worklist',
   },
-  component: () => import('src/layouts/FullStandaloneLayout.vue'),
+  component: () => import('src/layouts/emr/FullLayout.vue'),
   children: [
     {
       path: 'worklist',

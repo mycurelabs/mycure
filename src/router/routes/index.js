@@ -24,7 +24,6 @@ const routes = [];
 if (appBuildType === 'full') {
   routes.push({
     path: '/',
-    name: 'landing',
     redirect: '/cms',
     children: [
       {
@@ -43,8 +42,14 @@ if (appBuildType === 'full') {
   routes.push({
     path: '/',
     name: 'landing',
-    redirect: `/${appBuildType}`,
-    component: () => import('pages/LandingPage'),
+    component: () => import('layouts/BlankLayout'),
+    children: [
+      {
+        path: '',
+        name: 'landing-login',
+        component: () => import('pages/LandingPage'),
+      },
+    ],
   });
   routes.push(moduleRoutesMap[appBuildType]);
 }

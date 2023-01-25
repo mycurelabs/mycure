@@ -1,5 +1,5 @@
 <template lang="pug">
-q-layout.footer-bg(view="hHh lpR fFf")
+q-layout.footer-bg(view="hHh lpR fFf" style="background: #fafafa")
   q-header.bg-white.text-primary(v-if="showToolbar")
     q-toolbar(color="primary")
       q-btn(

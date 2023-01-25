@@ -8,7 +8,7 @@ export function usePmeNavRoutes (userRoles) {
       id: 'pme-nav-worklist',
       name: 'Worklist',
       route: 'pme-worklist',
-      icon: 'fa fa-list',
+      icon: 'la la-table',
       roles: [
         'a',
         'b',
@@ -23,7 +23,7 @@ export function usePmeNavRoutes (userRoles) {
       id: 'pme-nav-walk-in-package',
       name: 'Walk-in Package',
       route: 'pme-walk-in-package',
-      icon: 'fa fa-person-walking',
+      icon: 'la la-walking',
       roles: [
         'a',
         'b',
@@ -34,7 +34,7 @@ export function usePmeNavRoutes (userRoles) {
       id: 'pme-nav-group-package',
       name: 'Group Package',
       route: 'pme-group-package',
-      icon: 'fa fa-people-group',
+      icon: 'la la-users',
       roles: [
         'a',
         'b',
@@ -49,7 +49,7 @@ export function usePmeNavRoutes (userRoles) {
       id: 'pme-nav-monitoring-report',
       name: 'Monitoring Report',
       route: 'pme-monitoring-report',
-      icon: 'fa-regular fa-file',
+      icon: 'las la-chart-bar',
       roles: [
         'a',
         'b',
@@ -60,7 +60,22 @@ export function usePmeNavRoutes (userRoles) {
       id: 'pme-nav-summary-report',
       name: 'Summary Report',
       route: 'pme-summary-report',
-      icon: 'fa fa-file',
+      icon: 'la la-chart-pie',
+      roles: [
+        'a',
+        'b',
+        'c',
+      ],
+    },
+    {
+      type: 'nav-header',
+      name: 'Settings',
+    },
+    {
+      id: 'pme-nav-settings',
+      name: 'Report Templates',
+      route: 'pme-report-templates',
+      icon: 'la la-file',
       roles: [
         'a',
         'b',
