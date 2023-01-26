@@ -38,12 +38,18 @@ generic-page(padding :loading="loading")
 import GenericPage from '@/components/commons/GenericPage';
 import { sdk } from '@/boot/mycure';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/current-user';
+const appBuildType = process.env.APP_BUILD_TYPE;
+
 export default {
   components: {
     GenericPage,
   },
   setup () {
     const loading = ref(false);
+    const router = useRouter();
+    const userStore = useUserStore();
     const email = ref('superadmin@test.com');
     const password = ref('mycure');
     const loginFormRef = ref(null);
@@ -51,7 +57,7 @@ export default {
     async function init () {
       try {
         const user = await sdk.service('auth').currentUser();
-        console.warn('user', user);
+        if (user) gotoDashboard();
       } catch (e) {
         console.error(e);
       }
@@ -59,15 +65,23 @@ export default {
 
     async function login () {
       try {
+        loading.value = true;
         if (!await loginFormRef.value.validate()) return;
-        const currentUser = await sdk.service('auth').signin('local', {
+        await sdk.service('auth').signin('local', {
           email: email.value,
           password: password.value,
         }, true);
-        console.warn(currentUser);
+        await userStore.populateCurrentUser();
+        gotoDashboard();
       } catch (e) {
         console.error(e);
+      } finally {
+        loading.value = false;
       }
+    }
+
+    function gotoDashboard () {
+      router.push({ name: `${appBuildType}-landing` });
     }
 
     init();

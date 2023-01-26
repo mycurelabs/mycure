@@ -5151,6 +5151,14 @@ picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.2.2, picomatch@^2.2.3, picomatc
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
+pinia-persistedstate@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/pinia-persistedstate/-/pinia-persistedstate-0.1.2.tgz#e6cf181b3f5851c38fe756569fafe59394d8c138"
+  integrity sha512-2j3YWPAX8iPbDMgFM8Ip/RaX9wTx0K4C3ieH5zJWtvs9vSwA7ZduBFyy/fr82isYDpgvIXgT+BCJvdriY4Zrdg==
+  dependencies:
+    deepmerge "^4.2.2"
+    shvl "^2.0.3"
+
 pinia@^2.0.11:
   version "2.0.29"
   resolved "https://registry.yarnpkg.com/pinia/-/pinia-2.0.29.tgz#b7e672980fdb14e03839e8139ce55ca97843679d"
@@ -6032,6 +6040,11 @@ shell-quote@^1.7.3:
   version "1.7.4"
   resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.7.4.tgz#33fe15dee71ab2a81fcbd3a52106c5cfb9fb75d8"
   integrity sha512-8o/QEhSSRb1a5i7TFR0iM4G16Z0vYB2OQVs4G3aAFXjn3T6yEx8AZxy1PgDF7I00LZHYA3WxaSYIf5e5sAX8Rw==
+
+shvl@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/shvl/-/shvl-2.0.3.tgz#eb4bd37644f5684bba1fc52c3010c96fb5e6afd1"
+  integrity sha512-V7C6S9Hlol6SzOJPnQ7qzOVEWUQImt3BNmmzh40wObhla3XOYMe4gGiYzLrJd5TFa+cI2f9LKIRJTTKZSTbWgw==
 
 side-channel@^1.0.4:
   version "1.0.4"

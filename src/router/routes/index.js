@@ -42,12 +42,13 @@ if (appBuildType === 'full') {
   routes.push({
     path: '/',
     name: 'landing',
+    redirect: { name: 'login' },
     component: () => import('layouts/BlankLayout'),
     children: [
       {
         path: '',
-        name: 'landing-login',
-        component: () => import('pages/LandingPage'),
+        name: 'login',
+        component: () => import('pages/LoginPage'),
       },
     ],
   });

@@ -80,6 +80,6 @@ module.exports = {
     'comma-dangle': [2, 'always-multiline'],
     'no-console': 'off',
     'no-multi-str': 'off',
-    'curly': true,
+    'curly': 1,
   }
 }
