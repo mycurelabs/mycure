@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { sdk } from '@/boot/mycure';
+import { omit } from 'lodash';
 
 export const usePmeStore = defineStore('pme', {
   state: () => ({
@@ -7,15 +8,29 @@ export const usePmeStore = defineStore('pme', {
   }),
   getters: {},
   actions: {
-    async getPmeEncounters (facility) {
+    async getPmeEncounters (opts) {
       try {
         const query = {
-          type: 'ape-report',
-          facility,
+          pePerformed: true,
+          $sort: { createdAt: -1 },
+          $populate: {
+            patient: {
+              service: 'personal-details',
+              method: 'get',
+              localKey: 'patient',
+            },
+          },
+          ...opts,
         };
-        const { items } = await sdk.service('medical-records').find(query);
-        console.warn(items);
-        this.pmeEncounters = items.map(item => item.id);
+        console.warn('query', query);
+        const { items } = await sdk.service('medical-encounters').find(query);
+        this.pmeEncounters = items.map(item => {
+          return {
+            ...omit(item, ['$populated']),
+            patient: item?.$populated?.patient,
+          };
+        });
+        console.warn('this.pmeEncounters', this.pmeEncounters);
       } catch (e) {
         console.error(e);
       }

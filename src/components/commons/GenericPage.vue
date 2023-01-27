@@ -6,7 +6,7 @@ q-linear-progress(
 )
 q-page(:padding="padding")
   div.row.justify-center.align-center
-    div.col-xs-12.col-md-10
+    div.col-xs-12.col-md-11
       component(v-if="loading && skeleton" :is="skeletonComponent[skeleton]")
       slot(v-else name="default")
   q-page-sticky(position="bottom-right", :offset="[18, 18]")

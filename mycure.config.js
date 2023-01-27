@@ -46,7 +46,7 @@ module.exports = function (ctx) {
       'app.scss',
     ],
     extras: [
-      'fontawesome-v6',
+      // 'fontawesome-v6',
       // 'ionicons-v4',
       // 'mdi-v6',
       // 'eva-icons',

@@ -8,6 +8,7 @@ export const useUserStore = defineStore('user', {
     userMemberships: [],
     userOrganizations: [],
     userActiveOrganization: [],
+    userActiveOrganizationBranches: [],
   }),
   getters: {},
   actions: {
@@ -65,9 +66,11 @@ export const useUserStore = defineStore('user', {
         console.error(e);
       }
     },
-    setActiveOrganzation (id) {
+    async setActiveOrganzation (id) {
       this.userActiveOrganization = this.userOrganizations.find(item => item.id === id) || {};
       localStorage.setItem('active-organization', id);
+      const { items } = await sdk.service('organizations').find({ parent: id });
+      this.userActiveOrganizationBranches = items;
     },
   },
 });
