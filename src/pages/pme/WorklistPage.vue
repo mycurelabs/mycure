@@ -60,18 +60,18 @@ generic-page(
     q-table(
       icon-first-page="la la-angle-double-left"
       icon-last-page="la la-angle-double-right"
-      icon-prev-page="la la-angle-left"
       icon-next-page="la la-angle-right"
-      :dense="$q.screen.lt.md"
-      :rows="rows"
+      icon-prev-page="la la-angle-left"
       :columns="columns"
+      :dense="$q.screen.lt.md"
       :rows-per-page-options="[20, 50, 100]"
+      :rows="rows"
     ).shadow-0
       //- template(v-slot:body="props")
         q-tr(:key="props.row.index")
           template(v-for="col in props.cols")
             td(v-if="col.name === 'status'" style="max-width: 200px; background: red;") {{col.value}}
-      template(v-slot:no-data)
+      //- template(v-slot:no-data)
         div(style="height: 200px").row.full-width.justify-center.items-center
           div.col-xs-12.text-center
             q-icon(name="la la-meh" size="60px").text-grey
@@ -81,13 +81,13 @@ generic-page(
 
 <script>
 import { computed, ref, watch } from 'vue';
-import { usePmeStore } from '@/stores/pme';
-import { useUserStore } from '@/stores/current-user';
-import usePmeHelpers from '@/composables/pme-helpers';
-import GenericPage from '@/components/commons/GenericPage';
-import DateFilter from '@/components/commons/filters/DateFilter';
 import { format } from 'date-fns';
 import { useHelpers } from '@/composables/helpers';
+import { usePmeStore } from '@/stores/pme';
+import { useUserStore } from '@/stores/current-user';
+import DateFilter from '@/components/commons/filters/DateFilter';
+import GenericPage from '@/components/commons/GenericPage';
+import usePmeHelpers from '@/composables/pme-helpers';
 
 export default {
   components: {
@@ -125,6 +125,9 @@ export default {
         field: 'name',
         label: 'Name',
         align: 'left',
+        classes: 'wrap-content',
+        headerStyle: 'max-width: 200px; background: red;',
+        style: 'max-width: 200px; background: red;',
         format: (val) => {
           return formatName(val, 'lastName, firstName');
         },
@@ -143,6 +146,9 @@ export default {
         field: 'examType',
         label: 'Exam Type',
         align: 'left',
+        classes: 'wrap-content',
+        headerStyle: 'max-width: 200px; background: red;',
+        style: 'max-width: 200px; background: red;',
         format: (val) => {
           if (!val?.length) return '-';
           return val.join(', ');
@@ -249,3 +255,11 @@ export default {
   },
 };
 </script>
+
+<style lang="css" scoped>
+.wrap-content {
+  word-wrap: break-word;
+  white-space: normal !important;
+  font-weight: bold;
+}
+</style>
