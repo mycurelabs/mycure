@@ -65,6 +65,24 @@ export const useHelpers = () => {
     router.push({ name: redirect || 'onboarding', query });
   };
 
+  const tableColumnBuilder = (array = []) => {
+    return array.map(item => {
+      return {
+        style: 'max-width: 180px; white-space: normal;',
+        align: 'left',
+        ...item,
+      };
+    });
+  };
+
+  const paginationQueryBuilder = (query, page = 1, limit = 5) => {
+    return {
+      $skip: (page - 1) * limit,
+      $limit: limit,
+      ...query,
+    };
+  };
+
   return {
     cleanObject,
     formatAddress,
@@ -72,5 +90,7 @@ export const useHelpers = () => {
     formatDate,
     formatName,
     handleToken,
+    paginationQueryBuilder,
+    tableColumnBuilder,
   };
 };

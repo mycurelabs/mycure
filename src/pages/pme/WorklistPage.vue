@@ -7,15 +7,9 @@ generic-page(
   q-card
     q-toolbar.q-gutter-x-sm
       q-toolbar-title APE Reports
-      q-input(
-        label="Search by Patients"
-        style="min-width: 300px"
-        color="primary"
-        dense
-        outlined
-      )
+      search-patients
     q-separator
-    q-toolbar.q-gutter-x-sm
+    div.row.now-wrap.q-pa-sm.q-gutter-sm
       date-filter(
         v-model="filters.filterDate"
         label="Filter Exam Types"
@@ -56,22 +50,21 @@ generic-page(
         :options="activeOrganizationBranches"
       )
     q-separator
-    //- TODO: Try to use QMarkupTable https://quasar.dev/vue-components/markup-table
     q-table(
+      v-model:pagination="pagination"
+      ref="tableRef"
       icon-first-page="la la-angle-double-left"
       icon-last-page="la la-angle-double-right"
       icon-next-page="la la-angle-right"
       icon-prev-page="la la-angle-left"
       :columns="columns"
       :dense="$q.screen.lt.md"
-      :rows-per-page-options="[20, 50, 100]"
+      :rows-per-page-options="rowsPerPageOption"
       :rows="rows"
+      :loading="loading"
+      @request="paginate"
     ).shadow-0
-      //- template(v-slot:body="props")
-        q-tr(:key="props.row.index")
-          template(v-for="col in props.cols")
-            td(v-if="col.name === 'status'" style="max-width: 200px; background: red;") {{col.value}}
-      //- template(v-slot:no-data)
+      template(v-slot:no-data)
         div(style="height: 200px").row.full-width.justify-center.items-center
           div.col-xs-12.text-center
             q-icon(name="la la-meh" size="60px").text-grey
@@ -80,30 +73,35 @@ generic-page(
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { format } from 'date-fns';
+import { TABLE_ROWS_PER_PAGE_OPTION } from '@/constants/global';
 import { useHelpers } from '@/composables/helpers';
 import { usePmeStore } from '@/stores/pme';
 import { useUserStore } from '@/stores/current-user';
 import DateFilter from '@/components/commons/filters/DateFilter';
 import GenericPage from '@/components/commons/GenericPage';
+import SearchPatients from '@/components/commons/search/SearchPatients';
 import usePmeHelpers from '@/composables/pme-helpers';
 
 export default {
   components: {
     DateFilter,
     GenericPage,
+    SearchPatients,
   },
   setup () {
     const pmeStore = usePmeStore();
     const initializing = ref(false);
+    const loading = ref(false);
     const userStore = useUserStore();
-    const { formatName } = useHelpers();
+    const { formatName, tableColumnBuilder } = useHelpers();
     const pmeEncounters = computed(() => pmeStore.$state.pmeEncounters);
     const activeOrganization = computed(() => userStore.$state.userActiveOrganization);
-    const activeOrganizationBranches = computed(() => {
-      return userStore.$state.userActiveOrganizationBranches?.map(branch => ({ value: branch.id, label: branch.name }));
-    });
+    const totalItems = ref(0);
+    const rowsPerPageOption = ref(TABLE_ROWS_PER_PAGE_OPTION);
+    const tableRef = ref(null);
+    const activeOrganizationBranches = computed(() => userStore.$state.userActiveOrganizationBranches?.map(branch => ({ value: branch.id, label: branch.name })));
     const {
       PME_ENCOUNTER_EXAM_TYPES,
       PME_ENCOUNTER_STATUS_TYPES,
@@ -118,16 +116,14 @@ export default {
       filterStatus: null,
       filterExamType: null,
       filterBranch: null,
+      filterPagination: null,
     });
-    const columns = [
+
+    const columns = tableColumnBuilder([
       {
         name: 'name',
         field: 'name',
         label: 'Name',
-        align: 'left',
-        classes: 'wrap-content',
-        headerStyle: 'max-width: 200px; background: red;',
-        style: 'max-width: 200px; background: red;',
         format: (val) => {
           return formatName(val, 'lastName, firstName');
         },
@@ -136,7 +132,6 @@ export default {
         name: 'date',
         field: 'date',
         label: 'Date',
-        align: 'left',
         format: (val) => {
           return format(new Date(val), 'MM/dd/yy hh:mm a');
         },
@@ -145,10 +140,6 @@ export default {
         name: 'exam-type',
         field: 'examType',
         label: 'Exam Type',
-        align: 'left',
-        classes: 'wrap-content',
-        headerStyle: 'max-width: 200px; background: red;',
-        style: 'max-width: 200px; background: red;',
         format: (val) => {
           if (!val?.length) return '-';
           return val.join(', ');
@@ -158,7 +149,6 @@ export default {
         name: 'status',
         field: 'status',
         label: 'Status',
-        align: 'left',
         format: (val) => {
           return pmeEncounterStatusMapper(val);
         },
@@ -167,21 +157,19 @@ export default {
         name: 'package',
         field: 'package',
         label: 'Package',
-        align: 'left',
       },
       {
         name: 'hmo',
         field: 'hmo',
         label: 'HMO',
-        align: 'left',
       },
       {
         name: 'tags',
         field: 'tags',
         label: 'Tags',
-        align: 'left',
       },
-    ];
+    ]);
+
     const rows = computed(() => {
       if (!pmeEncounters.value?.length) return [];
       return pmeEncounters.value.map(item => {
@@ -199,16 +187,25 @@ export default {
       });
     });
 
-    async function init (firstLoad, filters) {
+    const pagination = ref({
+      page: 0,
+      rowsPerPage: rowsPerPageOption.value[0],
+      rowsNumber: 0,
+    });
+
+    async function init ({ page, rowsPerPage }) {
       try {
+        loading.value = true;
         let query = {
           facility: activeOrganization.value.id,
+          $limit: rowsPerPage,
+          $skip: (page - 1) * rowsPerPage,
         };
 
         // Date Filter
-        if (filters?.filterDate?.dates?.start) {
-          const start = filters?.filterDate?.dates?.start;
-          const end = filters?.filterDate?.dates?.end;
+        if (filters.value?.filterDate?.dates?.start) {
+          const start = filters.value?.filterDate?.dates?.start;
+          const end = filters.value?.filterDate?.dates?.end;
           query.createdAt = {
             $gte: start,
             $lte: end,
@@ -216,41 +213,56 @@ export default {
         }
 
         // Status Filter
-        if (filters?.filterStatus?.value) {
-          const status = filters?.filterStatus?.value;
+        if (filters.value?.filterStatus?.value) {
+          const status = filters.value?.filterStatus?.value;
           const q = pmeEncounterStatusQueryBuilder(status, query);
           console.warn('q', q);
           query = q;
         }
 
         // Exam Type Filter
-        if (filters?.filterExamType?.value) {
-          query.tags = filters?.filterExamType?.value;
+        if (filters.value?.filterExamType?.value) {
+          query.tags = filters.value?.filterExamType?.value;
         }
 
-        await pmeStore.getPmeEncounters(query);
+        const { total } = await pmeStore.getPmeEncounters(query);
+        totalItems.value = total;
+        pagination.value.page = page;
+        pagination.value.rowsPerPage = rowsPerPage;
+        pagination.value.rowsNumber = total;
       } catch (e) {
         console.error(e);
       } finally {
+        loading.value = false;
         initializing.value = false;
       }
     }
 
-    watch(filters, (val) => {
-      init(false, val);
-    }, { deep: true });
+    function paginate (props) {
+      const { page, rowsPerPage } = props.pagination;
+      init({ page, rowsPerPage });
+    }
 
-    // if (!apeReports.value.length) init(true);
-    // else init();
-    // init();
+    onMounted(() => {
+      tableRef.value.requestServerInteraction();
+    });
+
     return {
       activeOrganizationBranches,
       columns,
       filters,
       initializing,
+      loading,
+      tableRef,
+      pagination,
       pmeEncounterExamTypes,
+      rowsPerPageOption,
       pmeEncounterStatuses,
+      totalItems,
       rows,
+      // methods
+      init,
+      paginate,
     };
   },
 };

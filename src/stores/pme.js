@@ -5,6 +5,7 @@ import { omit } from 'lodash';
 export const usePmeStore = defineStore('pme', {
   state: () => ({
     pmeEncounters: [],
+    pmeEncountersTotal: [],
   }),
   getters: {},
   actions: {
@@ -22,15 +23,18 @@ export const usePmeStore = defineStore('pme', {
           },
           ...opts,
         };
-        console.warn('query', query);
-        const { items } = await sdk.service('medical-encounters').find(query);
+        const { items, total } = await sdk.service('medical-encounters').find(query);
+        this.pmeEncountersTotal = total;
         this.pmeEncounters = items.map(item => {
           return {
             ...omit(item, ['$populated']),
             patient: item?.$populated?.patient,
           };
         });
-        console.warn('this.pmeEncounters', this.pmeEncounters);
+        return {
+          items,
+          total,
+        };
       } catch (e) {
         console.error(e);
       }
