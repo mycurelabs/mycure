@@ -55,7 +55,6 @@ export const useHelpers = () => {
   };
 
   const handleToken = async (token, redirect) => {
-    console.warn('token, redirect', token, redirect);
     const router = useRouter();
     const route = useRoute();
     await sdk.service('auth').signout();
@@ -68,7 +67,7 @@ export const useHelpers = () => {
   const tableColumnBuilder = (array = []) => {
     return array.map(item => {
       return {
-        style: 'max-width: 180px; white-space: normal;',
+        style: 'min-width: 120px; max-width: 180px; white-space: normal;',
         align: 'left',
         ...item,
       };

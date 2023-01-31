@@ -4,47 +4,68 @@ generic-page(
   padding
   :loading="initializing"
 )
-  q-card
-    q-toolbar.q-gutter-x-sm
-      q-toolbar-title APE Reports
-      search-patients
-    q-separator
-    div.row.now-wrap.q-pa-sm.q-gutter-sm
+  q-card.shadow-1
+    //- q-toolbar.q-gutter-x-sm
+    q-toolbar.q-pa-sm
+      q-toolbar-title
+        q-icon(
+          size="25px"
+          name="las la-clipboard"
+          style="margin-bottom: 5px;"
+        ).text-primary.q-mr-sm
+        span APE Reports
+      search-patients.q-mr-sm
+      q-btn(
+        label="Filters"
+        color="primary"
+        icon="la la-filter"
+        no-caps
+        outline
+      )
+    //- q-separator
+    //- div.row.now-wrap.q-pa-sm
+      q-space
       date-filter(
         v-model="filters.filterDate"
         label="Filter Exam Types"
-        style="min-width: 200px"
+        style="min-width: 250px"
         color="primary"
         dropdown-icon="la la-angle-down"
         dense
         outlined
-      )
+      ).q-mr-sm
       q-select(
         v-model="filters.filterExamType"
         label="Filter Exam Types"
-        style="min-width: 200px"
+        style="min-width: 250px"
         color="primary"
         dropdown-icon="la la-angle-down"
+        clear-icon="la la-times"
+        clearable
         dense
         outlined
         :options="pmeEncounterExamTypes"
-      )
+      ).q-mr-sm
       q-select(
         v-model="filters.filterStatus"
         label="Filter Status"
-        style="min-width: 200px"
+        style="min-width: 250px"
         color="primary"
         dropdown-icon="la la-angle-down"
+        clear-icon="la la-times"
+        clearable
         dense
         outlined
         :options="pmeEncounterStatuses"
-      )
+      ).q-mr-sm
       q-select(
         v-model="filters.filterBranch"
         label="Filter Branch"
-        style="min-width: 200px"
+        style="min-width: 250px"
         color="primary"
         dropdown-icon="la la-angle-down"
+        clear-icon="la la-times"
+        clearable
         dense
         outlined
         :options="activeOrganizationBranches"
@@ -57,6 +78,7 @@ generic-page(
       icon-last-page="la la-angle-double-right"
       icon-next-page="la la-angle-right"
       icon-prev-page="la la-angle-left"
+      row-key="status"
       :columns="columns"
       :dense="$q.screen.lt.md"
       :rows-per-page-options="rowsPerPageOption"
@@ -64,16 +86,27 @@ generic-page(
       :loading="loading"
       @request="paginate"
     ).shadow-0
+      template(v-slot:body-cell-status="props")
+        q-td(key="status" :props="props")
+          template(v-for="status in props.row.status")
+            q-badge(:color="status.color").q-mr-sm {{status.label}}
+      template(v-slot:body-cell-exam-type="props")
+        q-td(key="exam-type" :props="props")
+          div.ellipsis-2-lines {{props.row.examType}}
+            q-tooltip {{props.row.examType}}
+      template(v-slot:body-cell-package="props")
+        q-td(key="package" :props="props")
+          div.ellipsis-2-lines {{props.row.package}}
+            q-tooltip {{props.row.package}}
       template(v-slot:no-data)
         div(style="height: 200px").row.full-width.justify-center.items-center
           div.col-xs-12.text-center
             q-icon(name="la la-meh" size="60px").text-grey
             h2.text-grey.text-h6 No APE reports found
-
 </template>
 
 <script>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { TABLE_ROWS_PER_PAGE_OPTION } from '@/constants/global';
 import { useHelpers } from '@/composables/helpers';
@@ -106,7 +139,7 @@ export default {
       PME_ENCOUNTER_EXAM_TYPES,
       PME_ENCOUNTER_STATUS_TYPES,
       pmeEncounterStatusQueryBuilder,
-      pmeEncounterStatusMapper,
+      pmeWorklistMapper,
     } = usePmeHelpers();
     const pmeEncounterStatuses = PME_ENCOUNTER_STATUS_TYPES;
     const pmeEncounterExamTypes = PME_ENCOUNTER_EXAM_TYPES;
@@ -116,18 +149,9 @@ export default {
       filterStatus: null,
       filterExamType: null,
       filterBranch: null,
-      filterPagination: null,
     });
 
     const columns = tableColumnBuilder([
-      {
-        name: 'name',
-        field: 'name',
-        label: 'Name',
-        format: (val) => {
-          return formatName(val, 'lastName, firstName');
-        },
-      },
       {
         name: 'date',
         field: 'date',
@@ -137,54 +161,59 @@ export default {
         },
       },
       {
+        name: 'name',
+        field: 'name',
+        label: 'Name',
+        format: (val) => {
+          return formatName(val, 'lastName, firstName');
+        },
+      },
+      {
         name: 'exam-type',
         field: 'examType',
         label: 'Exam Type',
+        // format: (val) => {
+        //   if (!val?.length) return '-';
+        //   return val.join(', ');
+        // },
+      },
+      {
+        name: 'package',
+        field: 'package',
+        label: 'Package',
+        // format: (val) => {
+        //   return val.map(item => item.name).join(', ');
+        // },
+      },
+      {
+        name: 'hmo',
+        field: 'hmo',
+        label: 'HMO',
         format: (val) => {
-          if (!val?.length) return '-';
-          return val.join(', ');
+          return val.map(company => company.name)?.join(', ') || '-';
+        },
+      },
+      {
+        name: 'tags',
+        field: 'tags',
+        label: 'Tags',
+        style: 'max-width: 150px; white-space: normal;',
+        format: (val) => {
+          return val?.join(', ') || '-';
         },
       },
       {
         name: 'status',
         field: 'status',
         label: 'Status',
-        format: (val) => {
-          return pmeEncounterStatusMapper(val);
-        },
-      },
-      {
-        name: 'package',
-        field: 'package',
-        label: 'Package',
-      },
-      {
-        name: 'hmo',
-        field: 'hmo',
-        label: 'HMO',
-      },
-      {
-        name: 'tags',
-        field: 'tags',
-        label: 'Tags',
+        align: 'right',
+        style: 'max-width: 190px; white-space: normal;',
       },
     ]);
 
     const rows = computed(() => {
       if (!pmeEncounters.value?.length) return [];
-      return pmeEncounters.value.map(item => {
-        // const name = formatName(item.patient?.name);
-        // const date = format(new Date(item.createdAt), 'MM/dd/yy hh:mm a');
-        return {
-          name: item.patient?.name,
-          date: item.createdAt,
-          examType: item.tags,
-          status: item,
-          package: 'package',
-          hmo: 'hml',
-          tags: 'asf',
-        };
-      });
+      return pmeEncounters.value.map(pmeWorklistMapper);
     });
 
     const pagination = ref({
@@ -193,9 +222,11 @@ export default {
       rowsNumber: 0,
     });
 
-    async function init ({ page, rowsPerPage }) {
+    async function init (paginationOpts) {
       try {
         loading.value = true;
+        const page = paginationOpts?.page || 1;
+        const rowsPerPage = paginationOpts?.rowsPerPage || rowsPerPageOption.value[0];
         let query = {
           facility: activeOrganization.value.id,
           $limit: rowsPerPage,
@@ -242,6 +273,10 @@ export default {
       const { page, rowsPerPage } = props.pagination;
       init({ page, rowsPerPage });
     }
+
+    watch(filters, () => {
+      init();
+    }, { deep: true, immediate: false });
 
     onMounted(() => {
       tableRef.value.requestServerInteraction();

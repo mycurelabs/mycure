@@ -1,16 +1,26 @@
 <template lang="pug">
 q-select(
   v-model="searchString"
-  input-debounce="500"
   label="Search Patients"
-  dense
+  input-debounce="500"
+  style="min-width: 400px"
+  clear-icon="la la-times"
+  clearable
   outlined
+  dense
   use-input
   :options="patients"
   :loading="loading"
   @filter="onSearch"
   @filter-abort="onAbortSearch"
 )
+  template(v-slot:loading)
+    q-spinner(
+      color="primary"
+      size="20"
+    )
+  template(v-slot:prepend)
+    q-icon(name="la la-search")
   template(v-slot:no-option)
     q-item
       q-item-section.text-grey No results

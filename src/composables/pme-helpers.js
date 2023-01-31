@@ -57,15 +57,31 @@ export default () => {
 
   const pmeEncounterStatusMapper = (encounter) => {
     if (!encounter?.finishedAt) return PME_ENCOUNTER_STATUS_TYPES.find(status => status.value === 'pending');
-    if (!encounter?.APEReportFinalizedAt) PME_ENCOUNTER_STATUS_TYPES.find(status => status.value === 'completed');
-    if (!encounter?.APEReportClassifiedAt) PME_ENCOUNTER_STATUS_TYPES.find(status => status.value === 'checking');
+    if (encounter?.APEReportFinalizedAt) return PME_ENCOUNTER_STATUS_TYPES.find(status => status.value === 'completed');
+    if (encounter?.APEReportClassifiedAt) return PME_ENCOUNTER_STATUS_TYPES.find(status => status.value === 'checking');
     return PME_ENCOUNTER_STATUS_TYPES.find(status => status.value === 'classifying');
+  };
+
+  const pmeWorklistMapper = (item = {}) => {
+    const statuses = [pmeEncounterStatusMapper(item)];
+    if (item.isFollowup) statuses.push({ label: 'For Followup', color: 'black', value: 'followup' });
+    const packageFormatted = item.invoiceItems?.map(item => item.name);
+    return {
+      name: item.patient?.name,
+      date: item.createdAt,
+      examType: item.tags?.join(', '),
+      status: statuses,
+      package: packageFormatted?.join(', '),
+      hmo: item.patient?.companies || [],
+      tags: item.patient?.tags || [],
+    };
   };
 
   return {
     PME_ENCOUNTER_EXAM_TYPES,
     PME_ENCOUNTER_STATUS_TYPES,
-    pmeEncounterStatusQueryBuilder,
     pmeEncounterStatusMapper,
+    pmeEncounterStatusQueryBuilder,
+    pmeWorklistMapper,
   };
 };

@@ -1,5 +1,5 @@
 <template lang="pug">
-q-layout(view="hHh lpR lFr" style="background: #fafafa")
+q-layout(view="hHh LpR lFr" style="background: #fafafa")
   q-header(bordered).text-black.bg-white
     q-toolbar(style="height: 60px")
       q-btn(
