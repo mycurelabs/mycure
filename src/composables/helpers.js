@@ -67,7 +67,7 @@ export const useHelpers = () => {
   const tableColumnBuilder = (array = []) => {
     return array.map(item => {
       return {
-        style: 'min-width: 120px; max-width: 180px; white-space: normal;',
+        style: 'min-width: 160px; max-width: 200px; white-space: normal;',
         align: 'left',
         ...item,
       };

@@ -13,7 +13,6 @@ export const usePmeStore = defineStore('pme', {
       try {
         const query = {
           pePerformed: true,
-          // id: '63bd1d72e7668c5f2040e178',
           $sort: { createdAt: -1 },
           $populate: {
             patient: {
@@ -53,6 +52,8 @@ export const usePmeStore = defineStore('pme', {
           },
           ...opts,
         };
+
+        if (opts?.patient) query.patient = opts.patient;
 
         const { items, total } = await sdk.service('medical-encounters').find(query);
         this.pmeEncountersTotal = total;

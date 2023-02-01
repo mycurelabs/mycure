@@ -46,7 +46,7 @@ module.exports = function (ctx) {
       'app.scss',
     ],
     extras: [
-      // 'fontawesome-v6',
+      'fontawesome-v6',
       // 'ionicons-v4',
       // 'mdi-v6',
       // 'eva-icons',
@@ -136,7 +136,7 @@ module.exports = function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
     framework: {
-      iconSet: 'fontawesome-v6', // Quasar icon set
+      iconSet: 'line-awesome', // Quasar icon set
       config: {
         ripple: {},
       },

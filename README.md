@@ -51,3 +51,32 @@ Should be based on config. There's a default, but it can be overriden by user co
 ## Theme
 
 Theme should have the capability to dynamically change up to module level. Meaning, module A can have a different them than module B in a single build.
+
+## Components
+
+**SFC structure**
+
+```vue
+<template>
+</template>
+
+<script>
+export default {
+  setup () {
+    // This must be the arrangement of elements
+    // inside the setup method
+
+    // 1. Helper custom scripts
+    // 2. Store declarations
+    // 3. Refs
+    // 4. Computed properties
+    // 5. init method
+    // 6. functions
+    // 7. Even functions - must start with `on` e.g. onClick, onHover, onSearch, etc
+    // 8. Watchers
+    // 9. Lifecycle hooks
+    // 10. return
+  }
+}
+</script>
+```

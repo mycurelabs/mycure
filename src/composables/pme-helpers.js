@@ -1,4 +1,8 @@
+import { useHelpers } from '@/composables/helpers';
+import { format } from 'date-fns';
+
 export default () => {
+  const { formatName } = useHelpers();
   const PME_ENCOUNTER_EXAM_TYPES = [
     { label: 'Annual Physical Exam', value: 'ANNUAL PHYSICAL EXAM' },
     { label: 'Pre-Employment', value: 'PRE-EMPLOYMENT' },
@@ -65,15 +69,22 @@ export default () => {
   const pmeWorklistMapper = (item = {}) => {
     const statuses = [pmeEncounterStatusMapper(item)];
     if (item.isFollowup) statuses.push({ label: 'For Followup', color: 'black', value: 'followup' });
-    const packageFormatted = item.invoiceItems?.map(item => item.name);
+    const packageFormatted = item.invoiceItems?.map(item => item.name).join(', ');
+    const name = formatName(item.patient?.name || {}, 'lastName, firstName');
+    const hmo = item.patient?.companies?.map(company => company.name).join(', ');
+    const tags = item.patient?.tags?.join(', ');
     return {
-      name: item.patient?.name,
-      date: item.createdAt,
+      name,
+      date: format(new Date(item.createdAt), 'MM/dd/yy hh:mm a'),
       examType: item.tags?.join(', '),
       status: statuses,
-      package: packageFormatted?.join(', '),
-      hmo: item.patient?.companies || [],
-      tags: item.patient?.tags || [],
+      package: packageFormatted,
+      hmo,
+      tags,
+      // Always use $data for the row data handling
+      $data: {
+        ...item,
+      },
     };
   };
 
