@@ -1,6 +1,7 @@
 // Import all routes.
 import emrRoutes from './emr';
 import pmeRoutes from './pme';
+import pmeEncounterRoutes from './pme-encounter';
 
 // Define build type see README > App Build Type.
 const appBuildType = process.env.APP_BUILD_TYPE;
@@ -53,6 +54,7 @@ if (appBuildType === 'full') {
     ],
   });
   routes.push(moduleRoutesMap[appBuildType]);
+  routes.push(pmeEncounterRoutes);
 }
 
 // Register 404 page.

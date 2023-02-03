@@ -4,73 +4,6 @@ generic-page(
   padding
   :loading="initializing"
 )
-  //- q-card.shadow-1
-  //- q-toolbar.q-gutter-x-sm
-  //- q-toolbar.q-pa-sm
-    q-toolbar-title
-      q-icon(
-        size="25px"
-        name="las la-clipboard"
-        style="margin-bottom: 5px;"
-      ).text-primary.q-mr-sm
-      span APE Reports
-    search-patients.q-mr-sm
-    q-btn(
-      label="Filters"
-      color="primary"
-      icon="la la-filter"
-      no-caps
-      outline
-    )
-  //- q-separator
-  //- div.row.now-wrap.q-pa-sm
-    q-space
-    date-filter(
-      v-model="filters.filterDate"
-      label="Filter Exam Types"
-      style="min-width: 250px"
-      color="primary"
-      dropdown-icon="la la-angle-down"
-      dense
-      outlined
-    ).q-mr-sm
-    q-select(
-      v-model="filters.filterExamType"
-      label="Filter Exam Types"
-      style="min-width: 250px"
-      color="primary"
-      dropdown-icon="la la-angle-down"
-      clear-icon="la la-times"
-      clearable
-      dense
-      outlined
-      :options="pmeEncounterExamTypes"
-    ).q-mr-sm
-    q-select(
-      v-model="filters.filterStatus"
-      label="Filter Status"
-      style="min-width: 250px"
-      color="primary"
-      dropdown-icon="la la-angle-down"
-      clear-icon="la la-times"
-      clearable
-      dense
-      outlined
-      :options="pmeEncounterStatuses"
-    ).q-mr-sm
-    q-select(
-      v-model="filters.filterBranch"
-      label="Filter Branch"
-      style="min-width: 250px"
-      color="primary"
-      dropdown-icon="la la-angle-down"
-      clear-icon="la la-times"
-      clearable
-      dense
-      outlined
-      :options="activeOrganizationBranches"
-    )
-  //- q-separator
   q-table(
     v-model:pagination="pagination"
     ref="tableRef"
@@ -102,7 +35,7 @@ generic-page(
     //- Search and filter
     template(v-slot:top-right)
       search-patients(@select="onPatientSelect").q-mr-sm
-      worklist-table-filter-dialog
+      worklist-table-filter-dialog(@filter="onFilter")
 
     //- Table body
     template(v-slot:body="props")
@@ -148,6 +81,7 @@ import GenericPage from '@/components/commons/GenericPage';
 import SearchPatients from '@/components/commons/search/SearchPatients';
 import usePmeHelpers from '@/composables/pme-helpers';
 import WorklistTableFilterDialog from '@/components/pme/WorklistTableFilterDialog';
+import { useRouter } from 'vue-router';
 
 export default {
   components: {
@@ -158,15 +92,12 @@ export default {
   },
   setup () {
     // Helpers
+    const router = useRouter();
     const { tableColumnBuilder } = useHelpers();
     const {
-      PME_ENCOUNTER_EXAM_TYPES,
-      PME_ENCOUNTER_STATUS_TYPES,
       pmeEncounterStatusQueryBuilder,
       pmeWorklistMapper,
     } = usePmeHelpers();
-    const pmeEncounterStatuses = PME_ENCOUNTER_STATUS_TYPES;
-    const pmeEncounterExamTypes = PME_ENCOUNTER_EXAM_TYPES;
     // Stores
     const pmeStore = usePmeStore();
     const userStore = useUserStore();
@@ -177,13 +108,7 @@ export default {
     const totalItems = ref(0);
     const selectedPatient = ref(null);
     const rowsPerPageOption = ref(TABLE_ROWS_PER_PAGE_OPTION);
-    const filters = ref({
-      filterPatient: null,
-      filterDate: null,
-      filterStatus: null,
-      filterExamType: null,
-      filterBranch: null,
-    });
+    const filters = ref({});
     const pagination = ref({
       page: 0,
       rowsPerPage: rowsPerPageOption.value[0],
@@ -191,7 +116,6 @@ export default {
     });
     // Computed
     const activeOrganization = computed(() => userStore.$state.userActiveOrganization);
-    const activeOrganizationBranches = computed(() => userStore.$state.userActiveOrganizationBranches?.map(branch => ({ value: branch.id, label: branch.name })));
     const pmeEncounters = computed(() => pmeStore.$state.pmeEncounters);
     const rows = computed(() => {
       if (!pmeEncounters.value?.length) return [];
@@ -257,6 +181,8 @@ export default {
           query.patient = selectedPatient.value.id; ;
         }
 
+        console.warn('filters', filters.value);
+
         // Date Filter
         if (filters.value?.filterDate?.dates?.start) {
           const start = filters.value?.filterDate?.dates?.start;
@@ -271,7 +197,6 @@ export default {
         if (filters.value?.filterStatus?.value) {
           const status = filters.value?.filterStatus?.value;
           const q = pmeEncounterStatusQueryBuilder(status, query);
-          console.warn('q', q);
           query = q;
         }
 
@@ -305,10 +230,24 @@ export default {
 
     function onRowSelect (row) {
       console.warn('row', row);
+      router.push({
+        name: 'pme-encounter',
+        params: {
+          encounter: row.$data.id,
+        },
+        query: {
+          patient: row.$data.patient.id,
+        },
+      });
     }
 
     function onPatientSelect (patient) {
       selectedPatient.value = patient;
+      init();
+    }
+
+    function onFilter (filters) {
+      filters.value = filters;
       init();
     }
 
@@ -321,14 +260,11 @@ export default {
     });
 
     return {
-      activeOrganizationBranches,
       columns,
       filters,
       initializing,
       loading,
       pagination,
-      pmeEncounterExamTypes,
-      pmeEncounterStatuses,
       rows,
       rowsPerPageOption,
       tableRef,
@@ -337,6 +273,7 @@ export default {
       // methods
       init,
       getPicURL,
+      onFilter,
       onPatientSelect,
       onPaginate,
       onRowSelect,

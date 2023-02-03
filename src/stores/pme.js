@@ -6,6 +6,7 @@ export const usePmeStore = defineStore('pme', {
   state: () => ({
     pmeEncounters: [],
     pmeEncountersTotal: [],
+    pmeEncounter: {},
   }),
   getters: {},
   actions: {
@@ -76,6 +77,55 @@ export const usePmeStore = defineStore('pme', {
       } catch (e) {
         console.error(e);
       }
+    },
+    async getPmeEncounter (opts) {
+      if (!opts?.id) throw new Error('Encounter id is required');
+      const encounterId = opts.id;
+      const encounter = await sdk.service('medical-encounters').get(encounterId);
+      const apeReport = await sdk.service('medical-records').findOne({
+        encounter: encounterId,
+        type: 'ape-report',
+        $populate: {
+          examinedByData: {
+            service: 'personal-details',
+            foreignKey: 'id',
+            method: 'findOne',
+            localKey: 'examinedBy',
+          },
+          reviewedByData: {
+            service: 'personal-details',
+            foreignKey: 'id',
+            method: 'findOne',
+            localKey: 'reviewedBy',
+          },
+          createdByDetails: {
+            service: 'personal-details',
+            foreignKey: 'id',
+            method: 'findOne',
+            localKey: 'createdBy',
+          },
+          finalizedByData: {
+            service: 'personal-details',
+            foreignKey: 'id',
+            method: 'findOne',
+            localKey: 'finalizedBy',
+          },
+          templateData: {
+            service: 'form-templates',
+            foreignKey: 'id',
+            method: 'findOne',
+            localKey: 'template',
+          },
+        },
+      });
+
+      console.warn('encounter', encounter);
+      console.warn('apeReport', apeReport);
+
+      return {
+        encounter,
+        apeReport,
+      };
     },
   },
 });

@@ -1,18 +1,24 @@
 <template lang="pug">
-q-layout.footer-bg(view="hHh LpR fFf" style="background: #fafafa")
-  q-header.bg-white.text-primary(v-if="showToolbar")
+q-layout(view="hHh LpR fFf" style="background: #fafafa").footer-bg
+  q-header(bordered).text-black.bg-white
     q-toolbar(color="primary")
       q-btn(
         v-if="!hideBackButton",
         flat,
         round,
         dense,
-        icon="arrow_back",
+        icon="la la-arrow-left",
         @click="goBack"
       )
       q-toolbar-title
         | {{ toolbarTitle }}
   q-page-container
+    div.bg-white.q-pa-sm
+      q-breadcrumbs(gutter="sm")
+        template(v-slot:separator)
+          q-icon(name="la la-angle-right" size="14px")
+        template(v-for="item in $footprints")
+          q-breadcrumbs-el(:label="item.footprint.name" :icon="item.footprint.icon")
     router-view
 </template>
 
@@ -35,7 +41,7 @@ export default {
   methods: {
     goBack () {
       if (this.backRoute) return this.$router.push({ name: this.backRoute });
-      return this.$router.go(-1);
+      return this.$router.push({ name: 'pme-worklist' });
     },
   },
 };

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { sdk } from '@/boot/mycure';
+import { omit } from 'lodash';
 
 export const usePatientsStore = defineStore('patients', {
   state: () => ({
@@ -7,6 +8,32 @@ export const usePatientsStore = defineStore('patients', {
   }),
   getters: {},
   actions: {
+    async getPatient (id) {
+      const query = {
+        $populate: {
+          personalDetails: {
+            service: 'personal-details',
+            localKey: 'id',
+            foreignKey: 'id',
+          },
+        },
+      };
+      const patient = await sdk.service('medical-patients').get(id, { query });
+      const insurances = patient?.$populated?.personalDetails?.insuranceCards;
+      if (insurances?.length) {
+        patient.insuranceCards = await Promise.all(
+          insurances.map(item => {
+            return sdk.service('organizations').get(item.insurance);
+          }),
+        );
+      }
+      return {
+        ...omit(patient, ['$populated']),
+        ...patient?.$populated?.personalDetails,
+        // overrides
+        insuranceCards: patient.insuranceCards,
+      };
+    },
     /**
      * @param {Object} opts
      * @param {String} opts.facility - Facility id

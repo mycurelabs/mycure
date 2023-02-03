@@ -87,7 +87,6 @@ export default {
 
     watch(model, (val) => {
       const patient = val?.value?.$populated?.patient;
-      console.warn('patient', patient);
       emit('select', patient);
     });
 
