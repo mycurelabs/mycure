@@ -18,15 +18,15 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
         unelevated
         outline
         no-caps
-        :label="`${leftDrawerOpen ? 'Hide' : 'Show'} Patient Records`"
-        @click="toggleLeftDrawer"
+        :label="`${rightDrawerOpen ? 'Hide' : 'Show'} Patient Records`"
+        @click="toggleRightDrawer"
       )
   q-drawer(
-    v-model="leftDrawerOpen"
+    v-model="rightDrawerOpen"
     side="right"
-    width="400"
     show-if-above
     bordered
+    :width="400"
   )
     patient-card(:patient="patient")
     q-separator
@@ -63,7 +63,7 @@ export default {
     const route = useRoute();
     const patientsStore = usePatientsStore();
     const pmeStore = usePmeStore();
-    const leftDrawerOpen = ref(false);
+    const rightDrawerOpen = ref(false);
     const patient = ref({});
     const encounterId = route.params.encounter;
     const encounter = ref({});
@@ -80,6 +80,10 @@ export default {
       }
     }
 
+    function toggleRightDrawer () {
+      rightDrawerOpen.value = !rightDrawerOpen.value;
+    }
+
     function goBack () {
       router.push({ name: 'pme-worklist' });
     }
@@ -87,12 +91,10 @@ export default {
     init();
 
     return {
-      leftDrawerOpen,
+      rightDrawerOpen,
       patient,
       goBack,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
-      },
+      toggleRightDrawer,
     };
   },
 };

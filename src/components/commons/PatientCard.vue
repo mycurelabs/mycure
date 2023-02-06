@@ -66,6 +66,7 @@ export default {
     },
   },
   setup (props) {
+    const { formatted } = usePatient(toRef(props, 'patient'));
     const {
       age,
       companies,
@@ -77,7 +78,7 @@ export default {
       name,
       sex,
       tags,
-    } = usePatient(toRef(props, 'patient'));
+    } = formatted;
 
     return {
       age,

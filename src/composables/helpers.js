@@ -21,7 +21,7 @@ export const useHelpers = () => {
       .trim();
   };
 
-  const formatName = (name, format = DEFAULT_NAME_FORMAT) => {
+  const formatName = (name = {}, format = DEFAULT_NAME_FORMAT) => {
     const { firstName, middleName, lastName, generationalSuffix } = name;
     return format.replace(/firstName/gi, firstName || '')
       .replace(/middleName/gi, middleName || '')

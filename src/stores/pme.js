@@ -80,8 +80,27 @@ export const usePmeStore = defineStore('pme', {
     },
     async getPmeEncounter (opts) {
       if (!opts?.id) throw new Error('Encounter id is required');
+      const personalDetailsSelectKeys = [
+        'doc_eSignatureURL',
+        'doc_PRCLicenseNo',
+        'doc_PTRNo',
+        'name',
+        'picURL',
+        'PRCLicenseNo',
+      ];
       const encounterId = opts.id;
-      const encounter = await sdk.service('medical-encounters').get(encounterId);
+      const encounter = await sdk.service('medical-encounters').get(encounterId, {
+        query: {
+          $populate: {
+            patient: {
+              service: 'personal-details',
+              method: 'findOne',
+              localKey: 'patient',
+            },
+          },
+        },
+      });
+
       const apeReport = await sdk.service('medical-records').findOne({
         encounter: encounterId,
         type: 'ape-report',
@@ -91,24 +110,28 @@ export const usePmeStore = defineStore('pme', {
             foreignKey: 'id',
             method: 'findOne',
             localKey: 'examinedBy',
+            $select: personalDetailsSelectKeys,
           },
           reviewedByData: {
             service: 'personal-details',
             foreignKey: 'id',
             method: 'findOne',
             localKey: 'reviewedBy',
+            $select: personalDetailsSelectKeys,
           },
           createdByDetails: {
             service: 'personal-details',
             foreignKey: 'id',
             method: 'findOne',
             localKey: 'createdBy',
+            $select: personalDetailsSelectKeys,
           },
           finalizedByData: {
             service: 'personal-details',
             foreignKey: 'id',
             method: 'findOne',
             localKey: 'finalizedBy',
+            $select: personalDetailsSelectKeys,
           },
           templateData: {
             service: 'form-templates',
@@ -119,12 +142,18 @@ export const usePmeStore = defineStore('pme', {
         },
       });
 
-      console.warn('encounter', encounter);
-      console.warn('apeReport', apeReport);
+      // console.warn('encounter', encounter);
+      // console.warn('apeReport', apeReport);
 
       return {
-        encounter,
-        apeReport,
+        encounter: {
+          ...omit(encounter, ['$populated']),
+          patient: encounter?.$populated.patient,
+        },
+        apeReport: {
+          ...omit(apeReport, ['$populated']),
+          ...apeReport?.$populated,
+        },
       };
     },
   },
