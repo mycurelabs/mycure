@@ -16,22 +16,41 @@ export const usePatientsStore = defineStore('patients', {
             localKey: 'id',
             foreignKey: 'id',
           },
+          medicalNote: {
+            service: 'medical-records',
+            method: 'findOne',
+            localKey: 'id',
+            foreignKey: 'patient',
+            type: 'medical-note',
+          },
         },
       };
+
+      // Map insurance ids from org equivalent
       const patient = await sdk.service('medical-patients').get(id, { query });
-      const insurances = patient?.$populated?.personalDetails?.insuranceCards;
+      let insurances = patient?.$populated?.personalDetails?.insuranceCards;
+      let insuranceCards;
       if (insurances?.length) {
-        patient.insuranceCards = await Promise.all(
+        insuranceCards = await Promise.all(
           insurances.map(item => {
             return sdk.service('organizations').get(item.insurance);
           }),
         );
       }
+      insurances = insurances.map(insurance => {
+        const matched = insuranceCards.find(card => card.id === insurance.insurance);
+        return {
+          ...insurance,
+          ...matched,
+        };
+      });
+
       return {
         ...omit(patient, ['$populated']),
         ...patient?.$populated?.personalDetails,
         // overrides
-        insuranceCards: patient.insuranceCards,
+        medicalNote: patient?.$populated?.medicalNote,
+        insuranceCards: insurances,
       };
     },
     /**

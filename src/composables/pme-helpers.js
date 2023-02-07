@@ -92,21 +92,18 @@ export default () => {
   const PME_APE_REPORT_PATIENT_KEYS_MAP = [
     {
       token: 'patient_name',
-      field: '',
       format: (data) => {
-        return formatName(data?.name, 'lastName, firstName middleInitial');
+        return formatName(data?.name, 'firstName middleInitial lastName');
       },
     },
     {
       token: 'patient_full_name_mid_name',
-      field: '',
       format: (data) => {
         return formatName(data?.name);
       },
     },
     {
       token: 'patient_sex',
-      field: '',
       format: (data) => {
         const sex = data?.sex || '';
         return `${sex.charAt(0).toUpperCase()}${sex.substring(1, sex.length)}`;
@@ -114,7 +111,6 @@ export default () => {
     },
     {
       token: 'patient_age',
-      field: '',
       format: (data) => {
         const dob = data?.dateOfBirth;
         if (!dob) return null;
@@ -125,112 +121,103 @@ export default () => {
     },
     {
       token: 'patient_first_name',
-      field: '',
       format: (data) => {
         return data?.name?.firstName;
       },
     },
     {
       token: 'patient_middle_name',
-      field: '',
       format: (data) => {
         return data?.name?.middleName;
       },
     },
     {
       token: 'patient_last_name',
-      field: '',
       format: (data) => {
         return data?.name?.lastName;
       },
     },
     {
       token: 'patient_dob',
-      field: '',
       format: (data) => {
-        format(data?.dateOfBirth || new Date(), 'MMM dd, yyyy');
+        return format(data?.dateOfBirth || new Date(), 'MMM dd, yyyy');
       },
     },
     {
       token: 'patient_blood_type',
-      field: '',
       format: (data) => {
-        return data?.bloodType;
+        return data?.bloodType?.toUpperCase();
       },
     },
     {
       token: 'patient_mobile_no',
-      field: '',
       format: (data) => {
         return data?.mobileNo;
       },
     },
     {
       token: 'patient_marital_status',
-      field: '',
       format: (data) => {
-        return data?.maritalStatus;
+        const maritalStatus = data?.maritalStatus || '';
+        return `${maritalStatus.charAt(0).toUpperCase()}${maritalStatus.substring(1, maritalStatus.length)}`;
       },
     },
     {
       token: 'patient_full_address',
-      field: '',
       format: (data) => {
         return formatAddress(data?.address);
       },
     },
     {
       token: 'patient_osca_id',
-      field: '',
       format: (data) => {
         return data?.OSCASeniorCitizenId;
       },
     },
     {
       token: 'patient_pwd_id',
-      field: '',
       format: (data) => {
         return data?.PWDId;
       },
     },
     {
       token: 'patient_hmos',
-      field: '',
       format: (data) => {
         return data?.insuranceCards?.map(card => card.name).join(', ');
       },
     },
     {
       token: 'patient_hmo_accountno',
-      field: '',
       format: (data) => {
-        return 'patient_hmo_accountno';
+        return data?.insuranceCards?.map(card => card.number).join(', ');
       },
     },
     {
       token: 'patient_hmo_validity',
-      field: '',
       format: (data) => {
-        return 'patient_hmo_validity';
+        return data?.insuranceCards?.map(card => {
+          if (!card.validAt) return '';
+          return format(card.validAt, 'MMMM dd, yyyy');
+        }).join(', ');
       },
     },
     {
       token: 'patient_hmo_expiry',
-      field: '',
       format: (data) => {
-        return 'patient_hmo_expiry';
+        return data?.insuranceCards?.map(card => {
+          if (!card.expiresAt) return '';
+          return format(card.expiresAt, 'MMMM dd, yyyy');
+        }).join(', ');
       },
     },
     {
       token: 'patient_hmo_status',
-      field: '',
       format: (data) => {
-        return 'patient_hmo_status';
+        return data?.insuranceCards?.map(card => card.status).join(', ');
       },
     },
     {
       token: 'patient_companies',
-      field: '',
       format: (data) => {
         const companies = data?.companies || [];
         const names = companies?.map(company => company?.name);
@@ -239,14 +226,14 @@ export default () => {
     },
     {
       token: 'patient_company_accountno',
-      field: '',
       format: (data) => {
-        return 'patient_company_accountno';
+        const companies = data?.companies || [];
+        const statuses = companies?.map(company => company?.status).filter(Boolean);
+        return statuses?.join(', ');
       },
     },
     {
       token: 'patient_dp',
-      field: '',
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100px;" />`;
@@ -254,7 +241,6 @@ export default () => {
     },
     {
       token: 'patient_lg_dp',
-      field: '',
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 200px;" />`;
@@ -262,7 +248,6 @@ export default () => {
     },
     {
       token: 'patient_xl_dp',
-      field: '',
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 300px;" />`;
@@ -270,7 +255,6 @@ export default () => {
     },
     {
       token: 'patient_full_width_dp',
-      field: '',
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100%;" />`;

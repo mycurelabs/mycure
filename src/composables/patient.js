@@ -4,6 +4,7 @@ import { format, differenceInYears } from 'date-fns';
 
 export const usePatient = (patient) => {
   const { formatName } = useHelpers();
+  const medicalNote = computed(() => patient?.value?.medicalNote?.text);
   const companies = computed(() => patient?.value?.companies || []);
   const firstCompany = computed(() => companies.value?.[0] || {});
   const insurances = computed(() => patient?.value?.insuranceCards);
@@ -23,17 +24,24 @@ export const usePatient = (patient) => {
   });
   const mobileNo = computed(() => patient?.value?.mobileNo);
   const tags = computed(() => patient?.value?.tags || []);
+  const OSCASeniorCitizenId = computed(() => patient?.value?.OSCASeniorCitizenId);
+  const PWDId = computed(() => patient?.value?.PWDId);
+  const bloodType = computed(() => patient?.value?.bloodType);
   return {
     formatted: {
       id: patient?.id,
       age,
+      bloodType,
       companies,
       dob,
       firstCompany,
       firstInsurance,
       insurances,
+      medicalNote,
       mobileNo,
       name,
+      OSCASeniorCitizenId,
+      PWDId,
       sex,
       tags,
     },

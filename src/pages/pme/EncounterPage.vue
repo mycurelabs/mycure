@@ -7,11 +7,61 @@ generic-page(
   div.row.items-center.justify-center
     div(style="width: 1100px;")
       q-card.shadow-1
+        q-toolbar(style="height: 80px; background: #f2f2f2")
+          q-toolbar-title.text-h6.text-primary PME Report {{apeReportCreatedAt}} #[q-chip(dense :color="apeReportStatus.color").text-white {{apeReportStatus.label}}]
+            br
+            span.text-body1 {{encounterFacility.name}}
+        q-toolbar
+          q-tabs(
+            v-model="tabModel"
+            indicator-color="primary"
+          )
+            q-tab(
+              name="live"
+              label="Live Edit Mode"
+              icon="la la-pen"
+              no-caps
+            )
+            q-tab(
+              name="focused"
+              label="Focused Mode"
+              icon="la la-bullseye"
+              no-caps
+            )
+        q-separator
         q-card-section
-          q-scroll-area(style="height: 100vh;")
-            div(v-html="apeReportTemplate" style="width: 1000px;")
-        //- pre {{apeReportValues}}
-
+          q-tab-panels(v-model="tabModel" animated)
+            q-tab-panel(name="live")
+              q-scroll-area(style="height: 100vh; margin-top: 0px; padding-top: 0px;")
+                div(v-html="apeReportTemplate" style="width: 1000px; padding-bottom: 100px;")
+            q-tab-panel(name="focused")
+              q-form(ref="focusedModeFormRef" @submit.prevent="onSaveReport")
+                div.row
+                    div.col-xs-12.col-md-6.q-pa-sm
+                      h2.text-h6 Custom Text
+                      template(v-for="value in apeReportValues")
+                        template(v-if="value.id.startsWith('custom_text')")
+                          q-input(
+                            v-model="focusedModeModel[value.id]"
+                            color="primary"
+                            outlined
+                            dense
+                            :label="value.id"
+                          ).q-mb-md
+                    div.col-xs-12.col-md-6.q-pa-sm
+                      h2.text-h6 Custom Choices
+                      template(v-for="value in apeReportValues")
+                        template(v-if="value.id.startsWith('custom_choices')")
+                          q-select(
+                            v-model="focusedModeModel[value.id]"
+                            color="primary"
+                            outlined
+                            dense
+                            :label="value.id"
+                            :options="getQuestionItem(value.id).choices"
+                          ).q-mb-md
+              pre focusedModeModel: {{focusedModeModel}}
+          pre {{apeReport}}
 q-footer(
   bordered
 ).bg-white
@@ -29,11 +79,13 @@ q-footer(
 <script>
 import { computed, ref } from 'vue';
 import { usePmeStore } from '@/stores/pme';
+import { usePatientsStore } from '@/stores/patients';
 import { useQuasar } from 'quasar';
 import { useRoute } from 'vue-router';
-// import { usePatient } from '@/composables/patient';
+import { format } from 'date-fns';
 import GenericPage from '@/components/commons/GenericPage';
 import pmeHelper from '@/composables/pme-helpers';
+import { sdk } from '@/boot/mycure';
 export default {
   components: {
     GenericPage,
@@ -41,18 +93,22 @@ export default {
   setup () {
     const loading = ref(false);
     const q = useQuasar();
-    const { PME_APE_REPORT_PATIENT_KEYS_MAP } = pmeHelper();
+    const { PME_APE_REPORT_PATIENT_KEYS_MAP, pmeEncounterStatusMapper } = pmeHelper();
     const primaryColor = q.config.brand.primary;
     const route = useRoute();
     const pmeStore = usePmeStore();
+    const patientStore = usePatientsStore();
     const encounterId = route.params.encounter;
+    const patientId = route.query.patient;
     const encounter = ref({});
-    const encounterPatient = computed(() => {
-      // const patient =
-      // usePatient(toRef(unref(encounter.value?.patient)));
-      return encounter.value?.patient;
-    });
+    const encounterPatient = ref({});
+    const encounterFacility = computed(() => encounter?.value.facility);
+    const tabModel = ref('live');
+    const focusedModeModel = ref({});
+    const focusedModeFormRef = ref(null);
     const apeReport = ref({});
+    const apeReportCreatedAt = computed(() => format(apeReport.value?.createdAt, 'MMM dd, yyyy'));
+    const apeReportStatus = computed(() => pmeEncounterStatusMapper(encounter));
     const apeReportFieldsModel = ref({});
     const apeReportValues = computed(() => apeReport.value?.values || []);
     const apeReportTemplateData = computed(() => apeReport.value?.templateData);
@@ -84,7 +140,7 @@ export default {
         }
 
         if (value.id.startsWith('custom_choices')) {
-          const questionItem = apeReportTemplateDataItems.value.find(item => value.id.startsWith(item.question));
+          const questionItem = getQuestionItem(value.id);
           const choices = questionItem?.choices || [];
           report = report.replace(`{${value.id}}`, `
             <select
@@ -123,12 +179,19 @@ export default {
       return report;
     });
 
+    function getQuestionItem (id) {
+      const item = apeReportTemplateDataItems.value.find(item => id.startsWith(item.question));
+      return item || { choices: [] };
+    }
+
     async function init () {
       try {
         loading.value = true;
         const result = await pmeStore.getPmeEncounter({ id: encounterId });
+        const patient = await patientStore.getPatient({ id: patientId });
         encounter.value = result.encounter;
         apeReport.value = result.apeReport;
+        encounterPatient.value = patient;
       } catch (e) {
         console.error(e);
       } finally {
@@ -136,25 +199,62 @@ export default {
       }
     }
 
-    function onSaveReport () {
-      apeReportValues.value.forEach((item, index) => {
-        const value = document.getElementById(item.id)?.value;
-        if (value) console.warn(`${item.id}: ${value}`);
-      });
+    async function onSaveReport () {
+      try {
+        loading.value = true;
+        const values = apeReport.value?.values || [];
+        const payload = {};
+
+        if (tabModel.value === 'focused') {
+          if (!await focusedModeFormRef.value.validate()) return;
+
+          payload.values = values.map(value => {
+            const id = value?.id;
+            const elem = focusedModeModel?.value?.[id];
+            if (elem) return { id, answer: elem };
+            return value;
+          });
+
+          const normalObject = Object.assign({}, payload);
+
+          console.warn('payload', normalObject);
+        }
+
+        if (tabModel.value === 'live') {
+          apeReportValues.value.forEach((item, index) => {
+            const value = document.getElementById(item.id)?.value;
+            if (value) console.warn(`${item.id}: ${value}`);
+          });
+        }
+
+        await sdk.service('medical-records').update(apeReport.value.id, Object.assign({}, payload));
+        init();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
     }
 
     init();
 
     return {
       apeReport,
+      apeReportCreatedAt,
       apeReportFieldsModel,
+      apeReportStatus,
       apeReportTemplate,
       apeReportTemplateData,
-      encounter,
-      loading,
-      encounterPatient,
-      onSaveReport,
       apeReportValues,
+      encounter,
+      encounterPatient,
+      encounterFacility,
+      focusedModeFormRef,
+      focusedModeModel,
+      loading,
+      tabModel,
+      onSaveReport,
+      getQuestionItem,
     };
   },
 };

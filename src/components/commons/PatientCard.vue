@@ -8,8 +8,7 @@ q-expansion-item(expand-icon="la la-angle-down")
     q-item-section
       q-item-label {{name}}
         template(v-for="tag in tags")
-          q-chip(dense)
-            small {{tag}}
+          q-badge.q-ml-sm {{tag}}
       q-item-label(caption)
         span {{sex}}
         q-icon(v-if="age" name="la la-angle-right" size="20")
@@ -24,9 +23,12 @@ q-expansion-item(expand-icon="la la-angle-down")
         q-item-section
           q-item-label {{name}}
             template(v-for="tag in tags")
-              q-chip(dense)
-                small {{tag}}
+              q-badge(dense).q-ml-sm {{tag}}
           q-item-label(caption) Patient Name
+      q-item(v-if="medicalNote")
+        q-item-section
+          q-item-label {{medicalNote}}
+          q-item-label(caption) Notes
       q-item
         q-item-section
           q-item-label {{dob}} - {{age}}
@@ -39,6 +41,18 @@ q-expansion-item(expand-icon="la la-angle-down")
         q-item-section
           q-item-label {{mobileNo}}
           q-item-label(caption) Mobile No.
+      q-item(v-if="OSCASeniorCitizenId")
+        q-item-section
+          q-item-label {{OSCASeniorCitizenId}}
+          q-item-label(caption) Senior Citizen Id
+      q-item(v-if="PWDId")
+        q-item-section
+          q-item-label {{PWDId}}
+          q-item-label(caption) PWD Id
+      q-item(v-if="bloodType")
+        q-item-section
+          q-item-label {{bloodType}}
+          q-item-label(caption) Blood Type
       q-separator(spaced)
       q-item-label(header) Insurances
       template(v-for="insurance in insurances")
@@ -58,6 +72,7 @@ q-expansion-item(expand-icon="la la-angle-down")
 <script>
 import { usePatient } from '@/composables/patient';
 import { toRef } from 'vue';
+
 export default {
   props: {
     patient: {
@@ -67,30 +82,9 @@ export default {
   },
   setup (props) {
     const { formatted } = usePatient(toRef(props, 'patient'));
-    const {
-      age,
-      companies,
-      dob,
-      firstCompany,
-      firstInsurance,
-      insurances,
-      mobileNo,
-      name,
-      sex,
-      tags,
-    } = formatted;
 
     return {
-      age,
-      companies,
-      dob,
-      firstCompany,
-      firstInsurance,
-      insurances,
-      mobileNo,
-      name,
-      sex,
-      tags,
+      ...formatted,
     };
   },
 };

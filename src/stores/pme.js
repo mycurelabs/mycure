@@ -97,6 +97,11 @@ export const usePmeStore = defineStore('pme', {
               method: 'findOne',
               localKey: 'patient',
             },
+            facility: {
+              service: 'organizations',
+              method: 'findOne',
+              localKey: 'facility',
+            },
           },
         },
       });
@@ -149,6 +154,7 @@ export const usePmeStore = defineStore('pme', {
         encounter: {
           ...omit(encounter, ['$populated']),
           patient: encounter?.$populated.patient,
+          facility: encounter?.$populated.facility,
         },
         apeReport: {
           ...omit(apeReport, ['$populated']),
