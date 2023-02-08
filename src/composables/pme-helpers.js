@@ -89,28 +89,277 @@ export default () => {
     };
   };
 
-  const PME_APE_REPORT_PATIENT_KEYS_MAP = [
+  const TEMPLATE_TOKENS_MAP = new Map([
     {
-      token: 'patient_name',
+      name: 'Clinic Name',
+      token: 'clinic_name',
+      dataSource: 'clinic',
+      readonly: true,
       format: (data) => {
+        return data?.name;
+      },
+    },
+    {
+      name: 'Clinic Address',
+      token: 'clinic_address',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        return formatAddress(data?.address);
+      },
+    },
+    {
+      name: 'Clinic Email',
+      token: 'clinic_email',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        const emails = data?.emails || [];
+        if (data?.email) emails.push(data.email);
+        return emails.filter(Boolean).join(', ');
+      },
+    },
+    {
+      name: 'Clinic Phone',
+      token: 'clinic_phone',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        const phones = data?.phones || [];
+        if (data?.phone) phones.push(data.phone);
+        return phones.filter(Boolean).join(', ');
+      },
+    },
+    {
+      name: 'Clinic Website',
+      token: 'clinic_website',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        if (data?.website) return `<a href="${data?.website}" target="_blank">${data?.website}</a>`;
+        return data?.website;
+      },
+    },
+    {
+      name: 'Clinic Logo',
+      token: 'clinic_logo',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        const src = data?.picURL;
+        return `<img src="${src}" style="width: 80px;" />`;
+      },
+    },
+    {
+      name: 'Clinic Logo - Large',
+      token: 'clinic_lg_logo',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        const src = data?.picURL;
+        return `<img src="${src}" style="width: 100px;" />`;
+      },
+    },
+    {
+      name: 'Clinic Logo - X-Large',
+      token: 'clinic_xl_logo',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        const src = data?.picURL;
+        return `<img src="${src}" style="width: 125px;" />`;
+      },
+    },
+    {
+      name: 'Clinic Logo - Full-Width',
+      token: 'clinic_full_width_logo',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        const src = data?.picURL;
+        return `<img src="${src}" style="width: 100%;" />`;
+      },
+    },
+    {
+      name: 'Clinic Banner',
+      token: 'clinic_banner',
+      dataSource: 'clinic',
+      readonly: true,
+      format: (data) => {
+        const src = data?.picURL;
+        return `<img src="${src}" style="width: 100%;" />`;
+      },
+    },
+    {
+      name: 'Logged In User - Name',
+      token: 'doctor_name',
+      dataSource: 'current-user',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Logged In User - PRC License No.',
+      token: 'doctor_doc_prc',
+      dataSource: 'current-user',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Logged In User - PTR No.',
+      token: 'doctor_doc_ptr',
+      dataSource: 'current-user',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Logged In User - E Signature',
+      token: 'doctor_doc_esig',
+      dataSource: 'current-user',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Attending Doctor',
+      token: 'attending_doc_name',
+      dataSource: 'attending-doctor',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Attending Doctor - PRC License No.',
+      token: 'attending_doc_prc',
+      dataSource: 'attending-doctor',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Attending Doctor - PTR No.',
+      token: 'attending_doc_ptr',
+      dataSource: 'attending-doctor',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Attending Doctor - E Signature.',
+      token: 'attending_doc_esig',
+      dataSource: 'attending-doctor',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Date Today',
+      token: 'today',
+      dataSource: 'encounter',
+      readonly: true,
+      format: (data) => {
+        return format(new Date(), 'MMMM dd, yyyyy');
+      },
+    },
+    {
+      name: 'Date Today Plus',
+      token: 'now_plus',
+      dataSource: 'encounter',
+      readonly: true,
+      format: (data) => {
+        return format(new Date(), 'MMMM dd, yyyyy');
+      },
+    },
+    {
+      name: 'Date',
+      token: 'date',
+      dataSource: 'encounter',
+      readonly: true,
+      format: (data) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Patient Full Name (First Name Middle Initial Last Name)',
+      token: 'patient_name',
+      dataSource: 'patient',
+      readonly: true,
+      format: (data) => {
+        console.warn('patient_name', data);
         return formatName(data?.name, 'firstName middleInitial lastName');
       },
     },
     {
+      name: 'Patient Full Name (First Name Middle Name Last Name)',
       token: 'patient_full_name_mid_name',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return formatName(data?.name);
       },
     },
     {
+      name: 'Patient First Name',
+      token: 'patient_first_name',
+      dataSource: 'patient',
+      readonly: true,
+      format: (data) => {
+        return data?.name?.firstName;
+      },
+    },
+    {
+      name: 'Patient Middle Name',
+      token: 'patient_middle_name',
+      dataSource: 'patient',
+      readonly: true,
+      format: (data) => {
+        return data?.name?.middleName;
+      },
+    },
+    {
+      name: 'Patient Last Name',
+      token: 'patient_last_name',
+      dataSource: 'patient',
+      readonly: true,
+      format: (data) => {
+        return data?.name?.lastName;
+      },
+    },
+    {
+      name: 'Patient Sex',
       token: 'patient_sex',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const sex = data?.sex || '';
         return `${sex.charAt(0).toUpperCase()}${sex.substring(1, sex.length)}`;
       },
     },
     {
+      name: 'Patient Date of Birth',
+      token: 'patient_dob',
+      dataSource: 'patient',
+      readonly: true,
+      format: (data) => {
+        if (!data?.dateOfBirth) return '-';
+        return format(data?.dateOfBirth, 'MMM dd, yyyy');
+      },
+    },
+    {
+      name: 'Patient Age',
       token: 'patient_age',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const dob = data?.dateOfBirth;
         if (!dob) return null;
@@ -120,104 +369,116 @@ export default () => {
       },
     },
     {
-      token: 'patient_first_name',
-      format: (data) => {
-        return data?.name?.firstName;
-      },
-    },
-    {
-      token: 'patient_middle_name',
-      format: (data) => {
-        return data?.name?.middleName;
-      },
-    },
-    {
-      token: 'patient_last_name',
-      format: (data) => {
-        return data?.name?.lastName;
-      },
-    },
-    {
-      token: 'patient_dob',
-      format: (data) => {
-        return format(data?.dateOfBirth || new Date(), 'MMM dd, yyyy');
-      },
-    },
-    {
+      name: 'Patient Blood Type',
       token: 'patient_blood_type',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.bloodType?.toUpperCase();
       },
     },
     {
+      name: 'Patient Mobile No.',
       token: 'patient_mobile_no',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.mobileNo;
       },
     },
     {
+      name: 'Patient Marital Status',
       token: 'patient_marital_status',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const maritalStatus = data?.maritalStatus || '';
         return `${maritalStatus.charAt(0).toUpperCase()}${maritalStatus.substring(1, maritalStatus.length)}`;
       },
     },
     {
+      name: 'Patient Address',
       token: 'patient_full_address',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return formatAddress(data?.address);
       },
     },
     {
+      name: 'Patient OSCA Id',
       token: 'patient_osca_id',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.OSCASeniorCitizenId;
       },
     },
     {
+      name: 'Patient PWD Id',
       token: 'patient_pwd_id',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.PWDId;
       },
     },
     {
+      name: 'Patient HMO',
       token: 'patient_hmos',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.insuranceCards?.map(card => card.name).join(', ');
       },
     },
     {
+      name: 'Patient HMO Account No.',
       token: 'patient_hmo_accountno',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.insuranceCards?.map(card => card.number).join(', ');
       },
     },
     {
+      name: 'Patient HMO Account Validity Date',
       token: 'patient_hmo_validity',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.insuranceCards?.map(card => {
-          if (!card.validAt) return '';
+          if (!card.validAt) return '-';
           return format(card.validAt, 'MMMM dd, yyyy');
         }).join(', ');
       },
     },
     {
+      name: 'Patient HMO Account Expiry Date',
       token: 'patient_hmo_expiry',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.insuranceCards?.map(card => {
-          if (!card.expiresAt) return '';
+          if (!card.expiresAt) return '-';
           return format(card.expiresAt, 'MMMM dd, yyyy');
         }).join(', ');
       },
     },
     {
+      name: 'Patient HMO Account Status',
       token: 'patient_hmo_status',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         return data?.insuranceCards?.map(card => card.status).join(', ');
       },
     },
     {
+      name: 'Patient Company',
       token: 'patient_companies',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const companies = data?.companies || [];
         const names = companies?.map(company => company?.name);
@@ -225,7 +486,10 @@ export default () => {
       },
     },
     {
+      name: 'Patient Company Account No.',
       token: 'patient_company_accountno',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const companies = data?.companies || [];
         const statuses = companies?.map(company => company?.status).filter(Boolean);
@@ -233,39 +497,1293 @@ export default () => {
       },
     },
     {
+      name: 'Patient Display Picture',
       token: 'patient_dp',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100px;" />`;
       },
     },
     {
+      name: 'Patient Display Picture - Large',
       token: 'patient_lg_dp',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 200px;" />`;
       },
     },
     {
+      name: 'Patient Display Picture - X-Large',
       token: 'patient_xl_dp',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 300px;" />`;
       },
     },
     {
+      name: 'Patient Display Picture - Full Width',
       token: 'patient_full_width_dp',
+      dataSource: 'patient',
+      readonly: true,
       format: (data) => {
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100%;" />`;
       },
     },
-  ];
+    {
+      name: 'Date of Visit',
+      token: 'patient_encounter_created_at',
+      dataSource: 'encounter',
+      readonly: true,
+      format: (encounter) => {
+        if (!encounter?.createdAt) return '-';
+        return format(encounter?.createdAt, 'MMMM dd, yyyy');
+      },
+    },
+    {
+      name: 'Chief Complaint',
+      token: 'patient_complaint',
+      dataSource: 'medical-records',
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'chief-complaint');
+        return records.map(record => record.text).filter(Boolean).join(', ');
+      },
+    },
+    {
+      name: 'HPI',
+      token: 'patient_hpi',
+      dataSource: 'medical-records',
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'hpi');
+        return records.map(record => record.text).filter(Boolean).join(', ');
+      },
+    },
+    {
+      name: 'Past Medical History',
+      token: 'patient_pmhx',
+      dataSource: 'medical-records',
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'medical-history');
+        return records.map(record => `${record.medicalCondition}: ${record.notes}`).filter(Boolean).join(', ');
+      },
+    },
+    {
+      name: 'Family History',
+      token: 'patient_fhx',
+      dataSource: 'medical-records',
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'medical-history');
+        return records.map(record => `${record.medicalCondition}: ${record.relationship}`).filter(Boolean).join(', ');
+      },
+    },
+    {
+      name: 'Social History',
+      token: 'patient_shx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Exercising?',
+      token: 'sh_is_exercising',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Smoking?',
+      token: 'sh_is_smoking',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Sticks per day',
+      token: 'sh_smoking_sticks_per_day',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Smoking pack-years',
+      token: 'sh_smoking_pack_years',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Drinking?',
+      token: 'sh_is_drinking',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Drinking Remarks',
+      token: 'sh_drinking_remarks',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Using prohibited drugs?',
+      token: 'sh_is_using_drugs',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Social History - Prohibited drugs',
+      token: 'sh_prohibited_drugs',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Allergies History',
+      token: 'patient_allergies_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Allergies History - Allergy',
+      token: 'patient_allergy_name',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Allergies History - Supplement',
+      token: 'patient_allergy_supplement',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Birth History',
+      token: 'patient_birth_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Gynecological History',
+      token: 'patient_gynecological_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Hospitalization History',
+      token: 'patient_hospitalization_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vaccination',
+      token: 'patient_vaccination_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Menstrual History',
+      token: 'patient_menstrual_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Menstrual History - LMP',
+      token: 'patient_menstrual_lmp',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Menstrual History - Interval',
+      token: 'patient_menstrual_interval',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Menstrual History - Duration',
+      token: 'patient_menstrual_duration',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Menstrual History - Cycle',
+      token: 'patient_menstrual_cycle',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Menstrual History - OB Score',
+      token: 'patient_menstrual_obscore',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Obstetric History',
+      token: 'patient_obstetric_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Surgical History',
+      token: 'patient_surgical_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Dental History',
+      token: 'patient_dental_hx',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems',
+      token: 'patient_ros',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - General Status',
+      token: 'ros_status_general',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - General Remarks',
+      token: 'ros_general',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Eyes Status',
+      token: 'ros_status_eyes',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Eyes Remarks',
+      token: 'ros_eyes',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Skin Status',
+      token: 'ros_status_skin',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Skin Remarks',
+      token: 'ros_skin',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - HEENT Status',
+      token: 'ros_status_ent',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - HEENT Remarks',
+      token: 'ros_ent',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Neck Status',
+      token: 'ros_status_neck',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Neck Remarks',
+      token: 'ros_neck',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Chest/Breast Status',
+      token: 'ros_status_breasts',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Chest/Breast Remarks',
+      token: 'ros_breasts',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Respiratory/Lungs Status',
+      token: 'ros_status_respiratory',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Respiratory/Lungs Remarks',
+      token: 'ros_respiratory',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Heart Status',
+      token: 'ros_status_cardiovascular',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Heart Remarks',
+      token: 'ros_cardiovascular',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Gastrointestinal/Abdomen Status',
+      token: 'ros_status_gastrointestinal',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Gastrointestinal/Abdomen Remarks',
+      token: 'ros_gastrointestinal',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Peripheral Vascular Status',
+      token: 'ros_status_peripheral_vascular',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Peripheral Vascular Remarks',
+      token: 'ros_peripheral_vascular',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Genitourinary Status',
+      token: 'ros_status_genitourinary',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Genitourinary Remarks',
+      token: 'ros_genitourinary',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Musculoskeletal Status',
+      token: 'ros_status_musculoskeletal',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Musculoskeletal Remarks',
+      token: 'ros_musculoskeletal',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Psychiatric Status',
+      token: 'ros_status_psychiatric',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Psychiatric Remarks',
+      token: 'ros_psychiatric',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Neurologic Status',
+      token: 'ros_status_neurologic',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Neurologic Remarks',
+      token: 'ros_neurologic',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Hematologic Status',
+      token: 'ros_status_hematologic_lymphatic',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Hematologic Remarks',
+      token: 'ros_hematologic_lymphatic',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Endocrine Status',
+      token: 'ros_status_endocrine',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Endocrine Remarks',
+      token: 'ros_endocrine',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Allergic Immunologic Status',
+      token: 'ros_status_allergic_immunologic',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Review of Systems - Allergic Immunologic Remarks',
+      token: 'ros_allergic_immunologic',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals',
+      token: 'patient_vitals',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Height (cm)',
+      token: 'vital_height',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Height (ft)',
+      token: 'vital_ht_ft',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Weight (kg)',
+      token: 'vital_weight',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Weight (lbs)',
+      token: 'vital_wt_lbs',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - BMI',
+      token: 'vital_bmi',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Pulse Rate',
+      token: 'vital_pulse_rate',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Respiration Rate',
+      token: 'vital_resp_rate',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Blood Pressure',
+      token: 'vital_blood_pressure',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Temperature',
+      token: 'vital_temperature',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Visual Acuity (R)',
+      token: 'vital_visual_acuity_right',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Visual Acuity (L)',
+      token: 'vital_visual_acuity_left',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Visual Remarks',
+      token: 'vital_visual_remarks',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Vitals - Color Vision',
+      token: 'vital_color_vision',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'ENT Specialty Feature',
+      token: 'patient_ent_note',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'OB-GYN Specialty Feature',
+      token: 'patient_ob_note',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam',
+      token: 'patient_physical_exam',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - General Status',
+      token: 'pe_general_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - General Remarks',
+      token: 'pe_general_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Head Status',
+      token: 'pe_head_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Head Remarks',
+      token: 'pe_head_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Eyes Status',
+      token: 'pe_eyes_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Eyes Remarks',
+      token: 'pe_eyes_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Ears Status',
+      token: 'pe_ears_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Ears Remarks',
+      token: 'pe_ears_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Nose Status',
+      token: 'pe_nose_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Nose Remarks',
+      token: 'pe_nose_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Ears, Eyes, Nose Status',
+      token: 'pe_earseyesnose_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Ears, Eyes, Nose Remarks',
+      token: 'pe_earseyesnose_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Head and Neck Status',
+      token: 'pe_headneck_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Head and Neck Remarks',
+      token: 'pe_headneck_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Chest and Breast Status',
+      token: 'pe_chestbreast_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Chest and Breast Remarks',
+      token: 'pe_chestbreast_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Neck Status',
+      token: 'pe_neck_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Neck Remarks',
+      token: 'pe_neck_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Throat Status',
+      token: 'pe_throat_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Throat Remarks',
+      token: 'pe_throat_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Breath sound Status',
+      token: 'pe_breath_sounds_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Breath sound Remarks',
+      token: 'pe_breath_sounds_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Respiratory Status',
+      token: 'pe_respiratory_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Respiratory Remarks',
+      token: 'pe_respiratory_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Cardiovascular Status',
+      token: 'pe_cardiovascular_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Cardiovascular Remarks',
+      token: 'pe_cardiovascular_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Breast Status',
+      token: 'pe_breasts_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Breast Remarks',
+      token: 'pe_breasts_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Chest Status',
+      token: 'pe_chest_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Chest Remarks',
+      token: 'pe_chest_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Back Remarks',
+      token: 'pe_back_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Back Status',
+      token: 'pe_back_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Abdomen Remarks',
+      token: 'pe_abdomen_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Abdomen Status',
+      token: 'pe_abdomen_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Gastrointestinal Remarks',
+      token: 'pe_gastrointestinal_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Gastrointestinal Status',
+      token: 'pe_gastrointestinal_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Genitourinary Remarks',
+      token: 'pe_genitourinary_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Genitourinary Status',
+      token: 'pe_genitourinary_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Musculoskeletal Remarks',
+      token: 'pe_musculoskeletal_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Musculoskeletal Status',
+      token: 'pe_musculoskeletal_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Skin Remarks',
+      token: 'pe_skin_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Skin Status',
+      token: 'pe_skin_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Endocrine Remarks',
+      token: 'pe_endocrine_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Endocrine Status',
+      token: 'pe_endocrine_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Psychiatric Remarks',
+      token: 'pe_psychiatric_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Psychiatric Status',
+      token: 'pe_psychiatric_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Hematologic Remarks',
+      token: 'pe_hematologic_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Hematologic Status',
+      token: 'pe_hematologic_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Allergic / Immunologic Remarks',
+      token: 'pe_allergicImmunologic_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Allergic / Immunologic Status',
+      token: 'pe_allergicImmunologic_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Extermities Remarks',
+      token: 'pe_extermities_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Extermities Status',
+      token: 'pe_extermities_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Neurologic Remarks',
+      token: 'pe_neurologic_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Neurologic Status',
+      token: 'pe_neurologic_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Rectal Remarks',
+      token: 'pe_rectal_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Rectal Status',
+      token: 'pe_rectal_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Genitalia Remarks',
+      token: 'pe_genitalia_text',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Physical Exam - Genitalia Status',
+      token: 'pe_genitalia_status',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Impression',
+      token: 'patient_impression',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Diagnosis',
+      token: 'patient_diagnosis',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Diagnosis - ICD 10 Code',
+      token: 'diagnosis_icd10',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Care Plan Notes',
+      token: 'patient_care_plan',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Prescriptions',
+      token: 'patient_medication_order',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Laboratory Order',
+      token: 'patient_lab_order',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Imaging Order',
+      token: 'patient_imaging_order',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Procedure Orders',
+      token: 'patient_medical_procedure_orders',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Procedure',
+      token: 'patient_medical_procedures',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Dental Baseline',
+      token: 'patient_dental_note_baseline',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Dental Work Proposed',
+      token: 'patient_dental_note_order',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Dental Work Done',
+      token: 'patient_dental_note_result',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Dental Work Done Table',
+      token: 'dental_note_result_table',
+      dataSource: 'medical-records',
+      format: (records) => {
+        return 'no-formatter-yet';
+      },
+    },
+    {
+      name: 'Custom Text',
+      token: 'custom_text',
+    },
+    {
+      name: 'Custom Dropdown',
+      token: 'custom_choices',
+    },
+  ].map(obj => [obj.token, obj]));
 
   return {
-    PME_APE_REPORT_PATIENT_KEYS_MAP,
     PME_ENCOUNTER_EXAM_TYPES,
     PME_ENCOUNTER_STATUS_TYPES,
+    TEMPLATE_TOKENS_MAP,
     pmeEncounterStatusMapper,
     pmeEncounterStatusQueryBuilder,
     pmeWorklistMapper,

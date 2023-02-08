@@ -21,13 +21,14 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
         :label="`${rightDrawerOpen ? 'Hide' : 'Show'} Patient Records`"
         @click="toggleRightDrawer"
       )
-  q-drawer(
-    v-model="rightDrawerOpen"
-    side="right"
-    show-if-above
-    bordered
-    :width="400"
-  )
+
+  //- q-drawer(
+  //-   v-model="rightDrawerOpen"
+  //-   side="right"
+  //-   show-if-above
+  //-   bordered
+  //-   :width="400"
+  //- )
     patient-card(:patient="patient")
     q-separator
     q-scroll-area(style="height: calc(100% - 80px);")
@@ -35,6 +36,7 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
         div.col-xs-12.text-center
           q-icon(name="la la-notes-medical" size="60px").text-grey
           h2.text-grey.text-h6 No past records
+
   q-page-container
     div.bg-white.q-pa-sm
       q-breadcrumbs(gutter="sm")

@@ -5,6 +5,11 @@ import { useRoute, useRouter } from 'vue-router';
 const DEFAULT_ADDRESS_FORMAT = 'street1 street2 village city municipality province state region country';
 const DEFAULT_NAME_FORMAT = 'firstName middleName lastName generationalSuffix';
 
+const capitalized = (str) => {
+  if (!str) return '';
+  return `${str.charAt(0).toUpperCase()}${str.substring(1, str.length)}`;
+};
+
 const formatAddress = (address, format = DEFAULT_ADDRESS_FORMAT) => {
   if (!address) return null;
   const { street1, street2, village, city, municipality, province, state, region, country } = address;
@@ -82,6 +87,7 @@ const paginationQueryBuilder = (query, page = 1, limit = 5) => {
 };
 
 export {
+  capitalized,
   cleanObject,
   formatAddress,
   formatCurrency,
