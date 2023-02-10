@@ -1,5 +1,26 @@
 import { useHelpers } from '@/composables/helpers';
 import { differenceInYears, format } from 'date-fns';
+import { isEmpty } from 'lodash';
+import {
+  calcBMI,
+  formatBirthHistory,
+  formatDentalHistory,
+  formatENTNote,
+  formatGynecologicHistory,
+  formatHospitalizationHistory,
+  formatMenstrualHistory,
+  formatOBNote,
+  formatObstestricHistory,
+  formatPE,
+  formatROS,
+  formatSocialHistory,
+  formatSocialHxPackYears,
+  formatVitals,
+  getFtUtil,
+  getLbUtil,
+  getRecords,
+  recordsFieldFormatter,
+} from '@/utils/medical-records-formatter';
 
 export default () => {
   const { formatName, formatAddress } = useHelpers();
@@ -87,6 +108,17 @@ export default () => {
         ...item,
       },
     };
+  };
+
+  const formatSurgicalHistory = (record) => {
+    const results = [];
+    if (!record) return null;
+    if (record.performedAt) results.push(`${format(record.performedAt, 'MM/DD/YY')}`);
+    if (record.hospitalName) results.push(`${record.hospitalName}`);
+    if (record.procedure) results.push(`${record.procedure}`);
+    if (record.notes) results.push(`${record.notes}`);
+
+    return results.join(' ');
   };
 
   const TEMPLATE_TOKENS_MAP = new Map([
@@ -561,8 +593,12 @@ export default () => {
       },
       format: (data) => {
         if (!data.length) return '';
-        const records = data?.filter(record => record.type === 'chief-complaint');
-        return records.map(record => record.text).filter(Boolean).join(', ');
+        const options = {
+          type: 'chief-complaint',
+          field: 'text',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
@@ -576,8 +612,12 @@ export default () => {
       },
       format: (data) => {
         if (!data.length) return '';
-        const records = data?.filter(record => record.type === 'hpi');
-        return records.map(record => record.text).filter(Boolean).join(', ');
+        const options = {
+          type: 'hpi',
+          field: 'text',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
@@ -586,7 +626,7 @@ export default () => {
       dataSource: 'medical-records',
       format: (data) => {
         if (!data.length) return '';
-        const records = data?.filter(record => record.type === 'medical-history');
+        const records = getRecords(data, 'medical-history');
         return records.map(record => `${record.medicalCondition}: ${record.notes}`).filter(Boolean).join(', ');
       },
     },
@@ -596,7 +636,7 @@ export default () => {
       dataSource: 'medical-records',
       format: (data) => {
         if (!data.length) return '';
-        const records = data?.filter(record => record.type === 'medical-history');
+        const records = getRecords(data, 'medical-history');
         return records.map(record => `${record.medicalCondition}: ${record.relationship}`).filter(Boolean).join(', ');
       },
     },
@@ -604,718 +644,1162 @@ export default () => {
       name: 'Social History',
       token: 'patient_shx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'social-history');
+        return records.map(formatSocialHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Social History - Exercising?',
       token: 'sh_is_exercising',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return record.exercises ? 'YES' : 'NO';
       },
     },
     {
       name: 'Social History - Smoking?',
       token: 'sh_is_smoking',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return record.smoking ? 'YES' : 'NO';
       },
     },
     {
       name: 'Social History - Sticks per day',
       token: 'sh_smoking_sticks_per_day',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return record.smokingSticksPerDay;
       },
     },
     {
       name: 'Social History - Smoking pack-years',
       token: 'sh_smoking_pack_years',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return formatSocialHxPackYears(record);
       },
     },
     {
       name: 'Social History - Drinking?',
       token: 'sh_is_drinking',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return record.drinksAlcohol ? 'YES' : 'NO';
       },
     },
     {
       name: 'Social History - Drinking Remarks',
       token: 'sh_drinking_remarks',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return record.drinksAlcoholRemarks;
       },
     },
     {
       name: 'Social History - Using prohibited drugs?',
       token: 'sh_is_using_drugs',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return record.usesProhibitedDrugs ? 'YES' : 'NO';
       },
     },
     {
       name: 'Social History - Prohibited drugs',
       token: 'sh_prohibited_drugs',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = data?.filter(record => record.type === 'social-history');
+        const record = records?.[0];
+        if (!record) return '';
+        return record.drugName;
       },
     },
     {
       name: 'Allergies History',
       token: 'patient_allergies_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'allergy',
+          field: 'name',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Allergies History - Allergy',
       token: 'patient_allergy_name',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'allergy',
+          field: 'name',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Allergies History - Supplement',
       token: 'patient_allergy_supplement',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'allergy',
+          field: 'supplement',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Birth History',
       token: 'patient_birth_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'birth-history');
+        return records.map(formatBirthHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Gynecological History',
       token: 'patient_gynecological_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'gynecological-history');
+        return records.map(formatGynecologicHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Hospitalization History',
       token: 'patient_hospitalization_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'hospitalization-history');
+        return records.map(formatHospitalizationHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Vaccination',
       token: 'patient_vaccination_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'vaccination',
+          field: 'vaccine',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Menstrual History',
       token: 'patient_menstrual_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'menstrual-history');
+        return records.map(formatMenstrualHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Menstrual History - LMP',
       token: 'patient_menstrual_lmp',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'menstrual-history',
+          field: 'LMP',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Menstrual History - Interval',
       token: 'patient_menstrual_interval',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'menstrual-history',
+          field: 'interval',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Menstrual History - Duration',
       token: 'patient_menstrual_duration',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'menstrual-history',
+          field: 'duration',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Menstrual History - Cycle',
       token: 'patient_menstrual_cycle',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'menstrual-history',
+          field: 'cycle',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Menstrual History - OB Score',
       token: 'patient_menstrual_obscore',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'menstrual-history',
+          field: 'OBScore',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Obstetric History',
       token: 'patient_obstetric_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'obstetric-history');
+        return records.map(formatObstestricHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Surgical History',
       token: 'patient_surgical_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'surgical-history');
+        return records.map(formatSurgicalHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Dental History',
       token: 'patient_dental_hx',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'dental-history');
+        return records.map(formatDentalHistory).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Review of Systems',
       token: 'patient_ros',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        if (!data.length) return '';
+        const records = getRecords(data, 'ros');
+        return records.map(formatROS).filter(Boolean).join('<br>');
       },
     },
     {
       name: 'Review of Systems - General Status',
       token: 'ros_status_general',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'ros',
+          field: 'generalStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - General Remarks',
       token: 'ros_general',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'ros',
+          field: 'general',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Eyes Status',
       token: 'ros_status_eyes',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'ros',
+          field: 'eyesStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Eyes Remarks',
       token: 'ros_eyes',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'ros',
+          field: 'eyes',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Skin Status',
       token: 'ros_status_skin',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        if (!data.length) return '';
+        const options = {
+          type: 'ros',
+          field: 'skinStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Skin Remarks',
       token: 'ros_skin',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'skin',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - HEENT Status',
       token: 'ros_status_ent',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'entStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - HEENT Remarks',
       token: 'ros_ent',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'ent',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Neck Status',
       token: 'ros_status_neck',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'neckStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Neck Remarks',
       token: 'ros_neck',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'neck',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Chest/Breast Status',
       token: 'ros_status_breasts',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'breastsStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Chest/Breast Remarks',
       token: 'ros_breasts',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'breasts',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Respiratory/Lungs Status',
       token: 'ros_status_respiratory',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'respiratoryStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Respiratory/Lungs Remarks',
       token: 'ros_respiratory',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'respiratory',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Heart Status',
       token: 'ros_status_cardiovascular',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'cardiovascularStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Heart Remarks',
       token: 'ros_cardiovascular',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'cardiovascular',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Gastrointestinal/Abdomen Status',
       token: 'ros_status_gastrointestinal',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'gastrointestinalStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Gastrointestinal/Abdomen Remarks',
       token: 'ros_gastrointestinal',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'gastrointestinal',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Peripheral Vascular Status',
       token: 'ros_status_peripheral_vascular',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'peripheralVascularStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Peripheral Vascular Remarks',
       token: 'ros_peripheral_vascular',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'peripheralVascular',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Genitourinary Status',
       token: 'ros_status_genitourinary',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'genitourinaryStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Genitourinary Remarks',
       token: 'ros_genitourinary',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'genitourinary',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Musculoskeletal Status',
       token: 'ros_status_musculoskeletal',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'musculoskeletalStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Musculoskeletal Remarks',
       token: 'ros_musculoskeletal',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'musculoskeletal',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Psychiatric Status',
       token: 'ros_status_psychiatric',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'psychiatricStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Psychiatric Remarks',
       token: 'ros_psychiatric',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'psychiatric',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Neurologic Status',
       token: 'ros_status_neurologic',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'neurologicStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Neurologic Remarks',
       token: 'ros_neurologic',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'neurologic',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Hematologic Status',
       token: 'ros_status_hematologic_lymphatic',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'hematologicLymphaticStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Hematologic Remarks',
       token: 'ros_hematologic_lymphatic',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'hematologicLymphatic',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Endocrine Status',
       token: 'ros_status_endocrine',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'endocrineStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Endocrine Remarks',
       token: 'ros_endocrine',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'endocrine',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Allergic Immunologic Status',
       token: 'ros_status_allergic_immunologic',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'allergicImmunologicStatus',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Review of Systems - Allergic Immunologic Remarks',
       token: 'ros_allergic_immunologic',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'ros',
+          field: 'allergicImmunologic',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals',
       token: 'patient_vitals',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'vitals');
+        return records.map(formatVitals).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Vitals - Height (cm)',
       token: 'vital_height',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'height',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Height (ft)',
       token: 'vital_ht_ft',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'vitals');
+        return records.map(record => record?.height ? getFtUtil(record.height) : '');
       },
     },
     {
       name: 'Vitals - Weight (kg)',
       token: 'vital_weight',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'weight',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Weight (lbs)',
       token: 'vital_wt_lbs',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'vitals');
+        return records.map(record => record?.weight ? getLbUtil(record.weight) : '');
       },
     },
     {
       name: 'Vitals - BMI',
       token: 'vital_bmi',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'vitals');
+        return records.map((record) => {
+          if (record.weight && record.height) {
+            return calcBMI(record.weight, record.height);
+          }
+          return '';
+        }).join(', ');
       },
     },
     {
       name: 'Vitals - Pulse Rate',
       token: 'vital_pulse_rate',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'pulse',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Respiration Rate',
       token: 'vital_resp_rate',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'respiration',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Blood Pressure',
       token: 'vital_blood_pressure',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'vitals');
+        return records
+          .map(record => record.bpSystolic && record.bpDiastolic ? `${record.bpSystolic}/${record.bpDiastolic}` : '')
+          .filter(Boolean)
+          .join(', ');
       },
     },
     {
       name: 'Vitals - Temperature',
       token: 'vital_temperature',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'temperature',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Visual Acuity (R)',
       token: 'vital_visual_acuity_right',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'visualAcuityRight',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Visual Acuity (L)',
       token: 'vital_visual_acuity_left',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'visualAcuityLeft',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Visual Remarks',
       token: 'vital_visual_remarks',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'visualRemarks',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Vitals - Color Vision',
       token: 'vital_color_vision',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const options = {
+          type: 'vitals',
+          field: 'colorVision',
+          joinerToken: ', ',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'ENT Specialty Feature',
       token: 'patient_ent_note',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'ent-note');
+        return records.map(formatENTNote).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'OB-GYN Specialty Feature',
       token: 'patient_ob_note',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'ob-note');
+        return records.map(formatOBNote).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Physical Exam',
       token: 'patient_physical_exam',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        return records.map(formatPE).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Physical Exam - General Status',
       token: 'pe_general_status',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        return records.map(record => record?.general?.status?.toUpperCase()).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Physical Exam - General Remarks',
       token: 'pe_general_text',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'physical-exam',
+          field: 'remarks',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Physical Exam - Head Status',
       token: 'pe_head_status',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        return records.map(record => record?.head?.status?.toUpperCase()).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Physical Exam - Head Remarks',
       token: 'pe_head_text',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'physical-exam',
+          field: 'head.text',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Physical Exam - Eyes Status',
       token: 'pe_eyes_status',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        return records.map(record => record?.eyes?.status?.toUpperCase()).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Physical Exam - Eyes Remarks',
       token: 'pe_eyes_text',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'physical-exam',
+          field: 'general.text',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Physical Exam - Ears Status',
       token: 'pe_ears_status',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        return records.map(record => record?.ears?.status?.toUpperCase()).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Physical Exam - Ears Remarks',
       token: 'pe_ears_text',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'physical-exam',
+          field: 'ears.text',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Physical Exam - Nose Status',
       token: 'pe_nose_status',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        return records.map(record => record?.nose?.status?.toUpperCase()).filter(Boolean).join('</br>');
       },
     },
     {
       name: 'Physical Exam - Nose Remarks',
       token: 'pe_nose_text',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const options = {
+          type: 'physical-exam',
+          field: 'nose.text',
+          joinerToken: '</br>',
+        };
+        return recordsFieldFormatter(data, options);
       },
     },
     {
       name: 'Physical Exam - Ears, Eyes, Nose Status',
       token: 'pe_earseyesnose_status',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        return records.map((record) => {
+          const statusDefaults = [
+            { value: 'normal', name: 'Normal' },
+            { value: 'positive', name: 'Positive', isPositive: true },
+          ];
+          const statuses = [
+            ...[(record?.nose?.status || '')],
+            ...[(record?.ears?.status || '')],
+            ...[(record?.eyes?.status || '')],
+          ].filter(Boolean);
+
+          const hasPositive = statuses.findIndex(s =>
+            statusDefaults.findIndex(sd => s === sd.value && sd.isPositive) > -1,
+          ) > -1;
+
+          if (hasPositive) {
+            return 'POSITIVE';
+          } else if (statuses.filter(s => !isEmpty(s)).length > 0) {
+            return 'NORMAL';
+          } else {
+            return '';
+          }
+        });
       },
     },
     {
       name: 'Physical Exam - Ears, Eyes, Nose Remarks',
       token: 'pe_earseyesnose_text',
       dataSource: 'medical-records',
-      format: (records) => {
-        return 'no-formatter-yet';
+      inputType: 'textarea',
+      format: (data) => {
+        const records = getRecords(data, 'physical-exam');
+        const formattedRecords = records.map((record) => {
+          const ears = record?.ears?.text;
+          const eyes = record?.eyes?.text;
+          const nose = record?.nose?.text;
+
+          return `${ears}; ${eyes}; ${nose}`;
+        });
+        return formattedRecords?.[0] || '';
       },
     },
     {
       name: 'Physical Exam - Head and Neck Status',
       token: 'pe_headneck_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1324,6 +1808,7 @@ export default () => {
       name: 'Physical Exam - Head and Neck Remarks',
       token: 'pe_headneck_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1332,6 +1817,7 @@ export default () => {
       name: 'Physical Exam - Chest and Breast Status',
       token: 'pe_chestbreast_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1340,6 +1826,7 @@ export default () => {
       name: 'Physical Exam - Chest and Breast Remarks',
       token: 'pe_chestbreast_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1348,6 +1835,7 @@ export default () => {
       name: 'Physical Exam - Neck Status',
       token: 'pe_neck_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1356,6 +1844,7 @@ export default () => {
       name: 'Physical Exam - Neck Remarks',
       token: 'pe_neck_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1364,6 +1853,7 @@ export default () => {
       name: 'Physical Exam - Throat Status',
       token: 'pe_throat_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1372,6 +1862,7 @@ export default () => {
       name: 'Physical Exam - Throat Remarks',
       token: 'pe_throat_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1380,6 +1871,7 @@ export default () => {
       name: 'Physical Exam - Breath sound Status',
       token: 'pe_breath_sounds_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1388,6 +1880,7 @@ export default () => {
       name: 'Physical Exam - Breath sound Remarks',
       token: 'pe_breath_sounds_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1396,6 +1889,7 @@ export default () => {
       name: 'Physical Exam - Respiratory Status',
       token: 'pe_respiratory_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1404,6 +1898,7 @@ export default () => {
       name: 'Physical Exam - Respiratory Remarks',
       token: 'pe_respiratory_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1412,6 +1907,7 @@ export default () => {
       name: 'Physical Exam - Cardiovascular Status',
       token: 'pe_cardiovascular_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1420,6 +1916,7 @@ export default () => {
       name: 'Physical Exam - Cardiovascular Remarks',
       token: 'pe_cardiovascular_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1428,6 +1925,7 @@ export default () => {
       name: 'Physical Exam - Breast Status',
       token: 'pe_breasts_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1436,6 +1934,7 @@ export default () => {
       name: 'Physical Exam - Breast Remarks',
       token: 'pe_breasts_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1444,6 +1943,7 @@ export default () => {
       name: 'Physical Exam - Chest Status',
       token: 'pe_chest_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1452,6 +1952,7 @@ export default () => {
       name: 'Physical Exam - Chest Remarks',
       token: 'pe_chest_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1460,6 +1961,7 @@ export default () => {
       name: 'Physical Exam - Back Remarks',
       token: 'pe_back_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1468,6 +1970,7 @@ export default () => {
       name: 'Physical Exam - Back Status',
       token: 'pe_back_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1476,6 +1979,7 @@ export default () => {
       name: 'Physical Exam - Abdomen Remarks',
       token: 'pe_abdomen_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1484,6 +1988,7 @@ export default () => {
       name: 'Physical Exam - Abdomen Status',
       token: 'pe_abdomen_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1492,6 +1997,7 @@ export default () => {
       name: 'Physical Exam - Gastrointestinal Remarks',
       token: 'pe_gastrointestinal_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1500,6 +2006,7 @@ export default () => {
       name: 'Physical Exam - Gastrointestinal Status',
       token: 'pe_gastrointestinal_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1508,6 +2015,7 @@ export default () => {
       name: 'Physical Exam - Genitourinary Remarks',
       token: 'pe_genitourinary_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1516,6 +2024,7 @@ export default () => {
       name: 'Physical Exam - Genitourinary Status',
       token: 'pe_genitourinary_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1524,6 +2033,7 @@ export default () => {
       name: 'Physical Exam - Musculoskeletal Remarks',
       token: 'pe_musculoskeletal_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1532,6 +2042,7 @@ export default () => {
       name: 'Physical Exam - Musculoskeletal Status',
       token: 'pe_musculoskeletal_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1540,6 +2051,7 @@ export default () => {
       name: 'Physical Exam - Skin Remarks',
       token: 'pe_skin_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1548,6 +2060,7 @@ export default () => {
       name: 'Physical Exam - Skin Status',
       token: 'pe_skin_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1556,6 +2069,7 @@ export default () => {
       name: 'Physical Exam - Endocrine Remarks',
       token: 'pe_endocrine_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1564,6 +2078,7 @@ export default () => {
       name: 'Physical Exam - Endocrine Status',
       token: 'pe_endocrine_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1572,6 +2087,7 @@ export default () => {
       name: 'Physical Exam - Psychiatric Remarks',
       token: 'pe_psychiatric_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1580,6 +2096,7 @@ export default () => {
       name: 'Physical Exam - Psychiatric Status',
       token: 'pe_psychiatric_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1588,6 +2105,7 @@ export default () => {
       name: 'Physical Exam - Hematologic Remarks',
       token: 'pe_hematologic_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1596,6 +2114,7 @@ export default () => {
       name: 'Physical Exam - Hematologic Status',
       token: 'pe_hematologic_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1604,6 +2123,7 @@ export default () => {
       name: 'Physical Exam - Allergic / Immunologic Remarks',
       token: 'pe_allergicImmunologic_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1612,6 +2132,7 @@ export default () => {
       name: 'Physical Exam - Allergic / Immunologic Status',
       token: 'pe_allergicImmunologic_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1620,6 +2141,7 @@ export default () => {
       name: 'Physical Exam - Extermities Remarks',
       token: 'pe_extermities_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1628,6 +2150,7 @@ export default () => {
       name: 'Physical Exam - Extermities Status',
       token: 'pe_extermities_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1636,6 +2159,7 @@ export default () => {
       name: 'Physical Exam - Neurologic Remarks',
       token: 'pe_neurologic_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1644,6 +2168,7 @@ export default () => {
       name: 'Physical Exam - Neurologic Status',
       token: 'pe_neurologic_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1652,6 +2177,7 @@ export default () => {
       name: 'Physical Exam - Rectal Remarks',
       token: 'pe_rectal_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1660,6 +2186,7 @@ export default () => {
       name: 'Physical Exam - Rectal Status',
       token: 'pe_rectal_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1668,6 +2195,7 @@ export default () => {
       name: 'Physical Exam - Genitalia Remarks',
       token: 'pe_genitalia_text',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },
@@ -1676,6 +2204,7 @@ export default () => {
       name: 'Physical Exam - Genitalia Status',
       token: 'pe_genitalia_status',
       dataSource: 'medical-records',
+      inputType: 'textarea',
       format: (records) => {
         return 'no-formatter-yet';
       },

@@ -5,12 +5,12 @@ import { useRoute, useRouter } from 'vue-router';
 const DEFAULT_ADDRESS_FORMAT = 'street1 street2 village city municipality province state region country';
 const DEFAULT_NAME_FORMAT = 'firstName middleName lastName generationalSuffix';
 
-const capitalized = (str) => {
+export const capitalized = (str) => {
   if (!str) return '';
   return `${str.charAt(0).toUpperCase()}${str.substring(1, str.length)}`;
 };
 
-const formatAddress = (address, format = DEFAULT_ADDRESS_FORMAT) => {
+export const formatAddress = (address, format = DEFAULT_ADDRESS_FORMAT) => {
   if (!address) return null;
   const { street1, street2, village, city, municipality, province, state, region, country } = address;
   return format.replace(/street1/gi, street1 ? `${street1},` : '')
@@ -25,7 +25,7 @@ const formatAddress = (address, format = DEFAULT_ADDRESS_FORMAT) => {
     .trim();
 };
 
-const formatName = (name = {}, format = DEFAULT_NAME_FORMAT) => {
+export const formatName = (name = {}, format = DEFAULT_NAME_FORMAT) => {
   const { firstName, middleName, lastName, generationalSuffix } = name;
   return format.replace(/firstName/gi, firstName || '')
     .replace(/middleName/gi, middleName || '')
@@ -35,18 +35,18 @@ const formatName = (name = {}, format = DEFAULT_NAME_FORMAT) => {
     .trim();
 };
 
-const formatDate = (d, format) => {
+export const formatDate = (d, format) => {
   return date.formatDate(d, format);
 };
 
-const formatCurrency = (num = 0, currency = 'USD') => {
+export const formatCurrency = (num = 0, currency = 'USD') => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
   }).format(num);
 };
 
-const cleanObject = (obj) => {
+export const cleanObject = (obj) => {
   const newObj = {};
   for (const key in obj) {
     if (Object.hasOwnProperty.call(obj, key)) {
@@ -58,7 +58,7 @@ const cleanObject = (obj) => {
   return newObj;
 };
 
-const handleToken = async (token, redirect) => {
+export const handleToken = async (token, redirect) => {
   const router = useRouter();
   const route = useRoute();
   await sdk.service('auth').signout();
@@ -68,7 +68,7 @@ const handleToken = async (token, redirect) => {
   router.push({ name: redirect || 'onboarding', query });
 };
 
-const tableColumnBuilder = (array = []) => {
+export const tableColumnBuilder = (array = []) => {
   return array.map(item => {
     return {
       style: 'min-width: 160px; max-width: 200px; white-space: normal;',
@@ -78,22 +78,10 @@ const tableColumnBuilder = (array = []) => {
   });
 };
 
-const paginationQueryBuilder = (query, page = 1, limit = 5) => {
+export const paginationQueryBuilder = (query, page = 1, limit = 5) => {
   return {
     $skip: (page - 1) * limit,
     $limit: limit,
     ...query,
   };
-};
-
-export {
-  capitalized,
-  cleanObject,
-  formatAddress,
-  formatCurrency,
-  formatDate,
-  formatName,
-  handleToken,
-  paginationQueryBuilder,
-  tableColumnBuilder,
 };

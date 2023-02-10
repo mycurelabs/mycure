@@ -136,6 +136,13 @@ export default {
           return;
         }
 
+        /** For Dental Note Result Table */
+        if (value.id.startsWith('dental_note_result_table')) {
+          // Answer is always an HTML table
+          report = report.replace(`{${value.id}}`, value.answer);
+          return;
+        }
+
         /**
          * ===================================
          * Other input types with
@@ -200,10 +207,10 @@ export default {
          */
         if (!matchedToken?.readonly) {
           const label = generateLabelFromId(value.id);
-          let element = `<input id="${value.id}" value="${value.answer}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -7px; width: 80px; max-width: 200px;" />`;
+          let element = `<input id="${value.id}" value="${value.answer}" placeholder="${label}" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -3px; width: 120px; max-width: 200px;" />`;
           switch (matchedToken?.inputType) {
             case 'textarea': {
-              element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -7px; height: 50px; max-height: 80px; width: 150px; max-width: 300px;">${value.answer}</textarea>`;
+              element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -3px; height: 35px; max-height: 35px; width: 120px; max-width: 300px;">${value.answer}</textarea>`;
             }
           }
           report = report.replace(`{${value.id}}`, element);
