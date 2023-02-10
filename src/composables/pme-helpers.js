@@ -116,7 +116,8 @@ export default () => {
       format: (data) => {
         const emails = data?.emails || [];
         if (data?.email) emails.push(data.email);
-        return emails.filter(Boolean).join(', ');
+        if (!emails.length) return '';
+        return emails.map(email => `<a href="mailto:${email}">${email}</a>`).filter(Boolean).join(', ');
       },
     },
     {
@@ -127,7 +128,8 @@ export default () => {
       format: (data) => {
         const phones = data?.phones || [];
         if (data?.phone) phones.push(data.phone);
-        return phones.filter(Boolean).join(', ');
+        if (!phones.length) return '';
+        return phones.map(phone => `<a href="tel:${phone}">${phone}</a>`).filter(Boolean).join(', ');
       },
     },
     {
@@ -196,7 +198,9 @@ export default () => {
       dataSource: 'current-user',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        console.warn('doctor_name', data);
+        const name = data?.name || {};
+        return formatName(name, 'firstName middleName lastName');
       },
     },
     {
@@ -205,7 +209,7 @@ export default () => {
       dataSource: 'current-user',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        return data?.doc_PRCLicenseNo || '';
       },
     },
     {
@@ -214,7 +218,7 @@ export default () => {
       dataSource: 'current-user',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        return data?.doc_PTRNumber || '';
       },
     },
     {
@@ -223,7 +227,8 @@ export default () => {
       dataSource: 'current-user',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        const src = data?.doc_eSignatureURL;
+        return `<img src="${src}" style="width: 120px;" />`;
       },
     },
     {
@@ -286,7 +291,7 @@ export default () => {
       dataSource: 'encounter',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        return format(new Date(), 'MMMM dd, yyyyy');
       },
     },
     {
@@ -295,7 +300,6 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        console.warn('patient_name', data);
         return formatName(data?.name, 'firstName middleInitial lastName');
       },
     },
@@ -351,7 +355,7 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        if (!data?.dateOfBirth) return '-';
+        if (!data?.dateOfBirth) return '';
         return format(data?.dateOfBirth, 'MMM dd, yyyy');
       },
     },
@@ -448,7 +452,7 @@ export default () => {
       readonly: true,
       format: (data) => {
         return data?.insuranceCards?.map(card => {
-          if (!card.validAt) return '-';
+          if (!card.validAt) return '';
           return format(card.validAt, 'MMMM dd, yyyy');
         }).join(', ');
       },
@@ -460,7 +464,7 @@ export default () => {
       readonly: true,
       format: (data) => {
         return data?.insuranceCards?.map(card => {
-          if (!card.expiresAt) return '-';
+          if (!card.expiresAt) return '';
           return format(card.expiresAt, 'MMMM dd, yyyy');
         }).join(', ');
       },
@@ -542,7 +546,7 @@ export default () => {
       dataSource: 'encounter',
       readonly: true,
       format: (encounter) => {
-        if (!encounter?.createdAt) return '-';
+        if (!encounter?.createdAt) return '';
         return format(encounter?.createdAt, 'MMMM dd, yyyy');
       },
     },
@@ -550,6 +554,11 @@ export default () => {
       name: 'Chief Complaint',
       token: 'patient_complaint',
       dataSource: 'medical-records',
+      inputType: 'textarea',
+      inputOptions: {
+        rows: 3,
+        cols: 5,
+      },
       format: (data) => {
         if (!data.length) return '';
         const records = data?.filter(record => record.type === 'chief-complaint');
@@ -560,6 +569,11 @@ export default () => {
       name: 'HPI',
       token: 'patient_hpi',
       dataSource: 'medical-records',
+      inputType: 'textarea',
+      inputOptions: {
+        rows: 3,
+        cols: 5,
+      },
       format: (data) => {
         if (!data.length) return '';
         const records = data?.filter(record => record.type === 'hpi');

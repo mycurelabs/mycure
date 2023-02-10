@@ -35,8 +35,10 @@ generic-page(
               div.row.justify-center
                 q-scroll-area(style="height: 100vh; width: 1100px; margin-top: 0px; padding-top: 0px; border: 1px solid lightgrey; border-radius: 5px;")
                   ape-report-viewer(
+                    ref="apeReportViewerLiveEditRef"
                     view="paper"
                     :ape-report="encounterApeReport"
+                    :current-user="currentUser"
                     :encounter="encounter"
                     :facility="encounterFacility"
                     :medical-records="encounterMedicalRecords"
@@ -71,6 +73,7 @@ import { format } from 'date-fns';
 import { getPmeEncounter } from '@/services/pme';
 import { sdk } from '@/boot/mycure';
 import { useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/current-user';
 
 import ApeReportViewer from '@/components/pme/ApeReportViewer';
 import GenericPage from '@/components/commons/GenericPage';
@@ -88,9 +91,14 @@ export default {
     const focusedModeModel = ref({});
     const focusedModeFormRef = ref(null);
     const apeReportFieldsModel = ref({});
+    const userStore = useUserStore();
+    const apeReportViewerLiveEditRef = ref(null);
     const { pmeEncounterStatusMapper } = usePmeHelper();
 
+    const currentUser = computed(() => userStore.$state.user);
+
     const encounter = ref({});
+    const encounterId = route.params.encounter;
     const encounterApeReport = ref({});
     const encounterFacility = ref({});
     const encounterMedicalRecords = ref([]);
@@ -99,13 +107,10 @@ export default {
     const apeReportCreatedAt = computed(() => format(encounterApeReport.value?.createdAt || new Date(), 'MMM dd, yyyy'));
     const apeReportStatus = computed(() => pmeEncounterStatusMapper(encounter));
 
-    const encounterId = route.params.encounter;
-
     async function init () {
       try {
         loading.value = true;
         const result = await getPmeEncounter({ id: encounterId });
-        console.warn('result', result);
         encounter.value = result.encounter;
         encounterApeReport.value = result.apeReport;
         encounterFacility.value = result.facility;
@@ -121,29 +126,19 @@ export default {
     async function onSaveReport () {
       try {
         loading.value = true;
-        // const values = encounterApeReport.value?.values || [];
         const payload = {};
 
-        if (tabModel.value === 'focused') {
-          // if (!await focusedModeFormRef.value.validate()) return;
-
-          // payload.values = values.map(value => {
-          //   const id = value?.id;
-          //   const elem = focusedModeModel?.value?.[id];
-          //   if (elem) return { id, answer: elem };
-          //   return value;
-          // });
-
-          // const normalObject = Object.assign({}, payload);
-
-          // console.warn('payload', normalObject);
+        if (tabModel.value === 'live') {
+          const data = apeReportViewerLiveEditRef.value?.onSaveReport();
+          payload.values = data;
+          console.warn('data', JSON.stringify(data, null, 2));
         }
 
-        if (tabModel.value === 'live') {
+        if (tabModel.value === 'focused') {
           //
         }
 
-        await sdk.service('medical-records').update(encounterApeReport.value.id, Object.assign({}, payload));
+        await sdk.service('medical-records').update(encounterApeReport.value.id, payload);
         init();
       } catch (e) {
         console.error(e);
@@ -158,6 +153,8 @@ export default {
       apeReportCreatedAt,
       apeReportFieldsModel,
       apeReportStatus,
+      apeReportViewerLiveEditRef,
+      currentUser,
       encounter,
       encounterApeReport,
       encounterFacility,
