@@ -32,6 +32,11 @@ generic-page(
         q-card-section
           q-tab-panels(v-model="tabModel" animated)
             q-tab-panel(name="live")
+              div.row.justify-center.q-mb-sm
+                q-input(
+                  style="width: 1100px;"
+                  outlined
+                )
               div.row.justify-center
                 q-scroll-area(style="height: 100vh; width: 1100px; margin-top: 0px; padding-top: 0px; border: 1px solid lightgrey; border-radius: 5px;")
                   ape-report-viewer(

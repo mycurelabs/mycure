@@ -4,6 +4,7 @@ import {
   addMonths,
   differenceInDays,
 } from 'date-fns';
+import { cloneDeep, isEmpty } from 'lodash';
 
 export const getRecords = (records, type, subtype) => {
   if (!records?.length) return [];
@@ -303,4 +304,186 @@ export const formatOBNote = (record) => {
   if (record.examFindings) restults.push(`Internal Exam Findings: ${record.examFindings}`);
 
   return restults.join(', ');
+};
+
+export const formatPrescription = (record) => {
+  const results = [];
+  if (!record) return null;
+  if (record.items && record.items.length) {
+    for (const item of record.items) {
+      let i = `${item.genericName} ${item.formulation} # ${item.dispense}`;
+      if (item.brandName) {
+        i = i + `<br>${item.brandName}`;
+      }
+      if (item.dosageSig || item.frequency) {
+        i = i + `<br>Sig: ${item.dosageSig} ${item.frequency}`;
+      }
+      if (item.note) {
+        i = i + `<br>${item.note}`;
+      }
+      results.push(i);
+    }
+  }
+  return results.join(', ');
+};
+
+export const formatDiagnosticOrder = (record) => {
+  if (!record) return null;
+  let results = '';
+  if (record.tests && record.tests.length) results = record.tests.map(t => t.name).join(', ');
+  if (record.reason) results = `${results}<br>Reason: ${record.reason}`;
+  if (record.requestingPhysician) results = `${results}<br>Requesting Physician: ${record.requestingPhysician}`;
+  return results;
+};
+
+export const formatDentalNote = (record) => {
+  if (!record) return null;
+  let results = '';
+  if (record.teeth && record.teeth.length) results = `Location: (${record.tests.join(', ')})`;
+  if (record.reason) results = `${results}<br>Reason: ${(record.status || {}).abbreviation || ''} - ${(record.status || {}).description || ''}`;
+  return results;
+};
+
+export const formatDentalNoteTable = (dentalNotes, diagnoses) => {
+  const records = cloneDeep(dentalNotes) || [];
+  if (records.length < 8) {
+    for (let i = 0; i < (8 - records.length); i++) {
+      records.push({});
+    }
+  }
+
+  const table = document.createElement('table');
+  table.style.borderCollapse = 'collapse';
+  table.style.width = '100%';
+  table.style['border-collapse'] = 'collapse';
+  const tbody = document.createElement('tbody');
+  const head = document.createElement('tr');
+
+  // tooth
+  const toothNoCol = document.createElement('td');
+  toothNoCol.style.border = '1px solid #ddd';
+  toothNoCol.style.fontWeight = '700';
+  toothNoCol.style.padding = '2px';
+  toothNoCol.style.width = '10%';
+  toothNoCol.appendChild(document.createTextNode('TOOTH NO.'));
+  head.appendChild(toothNoCol);
+
+  // dianosis
+  const diagnosisCol = document.createElement('td');
+  diagnosisCol.style.border = '1px solid #ddd';
+  diagnosisCol.style.fontWeight = '700';
+  diagnosisCol.style.width = '23%';
+  diagnosisCol.style.padding = '2px';
+  diagnosisCol.appendChild(document.createTextNode('DIAGNOSIS'));
+  head.appendChild(diagnosisCol);
+
+  // procedure
+  const procedureCol = document.createElement('td');
+  procedureCol.style.border = '1px solid #ddd';
+  procedureCol.style.fontWeight = '700';
+  procedureCol.style.width = '23%';
+  procedureCol.style.padding = '2px';
+  procedureCol.appendChild(document.createTextNode('PROCEDURE DONE'));
+  head.appendChild(procedureCol);
+
+  // surface count
+  const surfaceCol = document.createElement('td');
+  surfaceCol.style.border = '1px solid #ddd';
+  surfaceCol.style.fontWeight = '700';
+  surfaceCol.style.width = '10%';
+  surfaceCol.style.padding = '2px';
+  surfaceCol.appendChild(document.createTextNode('NUMBER OF\nSURFACES'));
+  head.appendChild(surfaceCol);
+
+  // px signature count
+  const pxSigCol = document.createElement('td');
+  pxSigCol.style.border = '1px solid #ddd';
+  pxSigCol.style.fontWeight = '700';
+  pxSigCol.style.width = '23%';
+  pxSigCol.style.padding = '2px';
+  pxSigCol.appendChild(document.createTextNode('PATIENT\'S SIGNATURE'));
+  head.appendChild(pxSigCol);
+
+  // amount count
+  const amountCol = document.createElement('td');
+  amountCol.style.border = '1px solid #ddd';
+  amountCol.style.fontWeight = '700';
+  amountCol.style.width = '10%';
+  amountCol.style.padding = '2px';
+  amountCol.appendChild(document.createTextNode('AMOUNT'));
+  head.appendChild(amountCol);
+
+  tbody.appendChild(head);
+
+  for (const r of records) {
+    const row = document.createElement('tr');
+    // tooth
+    const toothNoCol = document.createElement('td');
+    toothNoCol.style.border = '1px solid #ddd';
+    toothNoCol.style.padding = '2px';
+    toothNoCol.style.width = '10%';
+    toothNoCol.style.height = '40px';
+    const toothNo = document.createTextNode((r.teeth || []).join(', '));
+    toothNoCol.appendChild(toothNo);
+    row.appendChild(toothNoCol);
+
+    // dianosis
+    const diagnosisCol = document.createElement('td');
+    diagnosisCol.style.border = '1px solid #ddd';
+    diagnosisCol.style.width = '23%';
+    diagnosisCol.style.padding = '2px';
+    diagnosisCol.style.height = '40px';
+    if (!isEmpty(r)) {
+      const diagnosis = document.createTextNode((diagnoses || []).join(', ') || ' ');
+      diagnosisCol.appendChild(diagnosis);
+    }
+    row.appendChild(diagnosisCol);
+
+    // procedure
+    const procedureCol = document.createElement('td');
+    procedureCol.style.border = '1px solid #ddd';
+    procedureCol.style.width = '23%';
+    procedureCol.style.padding = '2px';
+    procedureCol.style.height = '40px';
+    let procedures = [
+      (r.service || {}).name || '',
+      ((r.$populated || {}).service || {}).name || '',
+    ];
+    procedures = procedures.filter(r => !isEmpty(r));
+    const procedure = document.createTextNode(procedures.join(', ') || ' ');
+    procedureCol.appendChild(procedure);
+    row.appendChild(procedureCol);
+
+    // surface count
+    const surfaceCol = document.createElement('td');
+    surfaceCol.style.border = '1px solid #ddd';
+    surfaceCol.style.width = '10%';
+    surfaceCol.style.padding = '2px';
+    surfaceCol.style.height = '40px';
+    const surface = document.createTextNode((r.surfaces || []).length || ' ');
+    surfaceCol.appendChild(surface);
+    row.appendChild(surfaceCol);
+
+    // px signature count
+    const pxSigCol = document.createElement('td');
+    pxSigCol.style.border = '1px solid #ddd';
+    pxSigCol.style.width = '23%';
+    pxSigCol.style.padding = '2px';
+    pxSigCol.style.height = '40px';
+    pxSigCol.appendChild(document.createTextNode(' '));
+    row.appendChild(pxSigCol);
+
+    // amount count
+    const amountCol = document.createElement('td');
+    amountCol.style.border = '1px solid #ddd';
+    amountCol.style.width = '10%';
+    amountCol.style.padding = '2px';
+    amountCol.style.height = '40px';
+    amountCol.appendChild(document.createTextNode(' '));
+    row.appendChild(amountCol);
+
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+  return table.outerHTML;
 };
