@@ -6,6 +6,8 @@ import {
 } from 'date-fns';
 import { cloneDeep, isEmpty } from 'lodash';
 
+const dentalExamFields = ['8', '7', '6', '5', '4', '3', '2', '1'];
+
 export const getRecords = (records, type, subtype) => {
   if (!records?.length) return [];
   const exp = r => r.type === type && (!subtype || r.subtype === subtype);
@@ -486,4 +488,78 @@ export const formatDentalNoteTable = (dentalNotes, diagnoses) => {
   }
   table.appendChild(tbody);
   return table.outerHTML;
+};
+
+export const dentalExamLocations = [
+  { key: 'dentalExamRightUpper', name: 'Dental Examination - Upper Right' },
+  { key: 'dentalExamRightLower', name: 'Dental Examination - Lower Right' },
+  { key: 'dentalExamLeftUpper', name: 'Dental Examination - Upper Right' },
+  { key: 'dentalExamLeftLower', name: 'Dental Examination - Lower Right' },
+];
+
+const isDentalExaminationVisible = (key, record) => {
+  if (record) {
+    for (const field of dentalExamFields) {
+      if (!isEmpty(record[`${key}${field}`])) { return true; }
+    }
+  }
+};
+
+export const levelOfConsciousness = (consciousnessLevel) => {
+  const type1Level = [
+    { title: 'Alert', image: 'alert.png', val: 1 },
+    { title: 'Verbal Stimuli', image: 'verbal.png', val: 2 },
+    { title: 'Painful Stimuli', image: 'painful.png', val: 3 },
+    { title: 'Unresponsive', image: 'unresponsive.png', val: 4 },
+  ];
+  if (consciousnessLevel) {
+    const index = (type1Level || []).findIndex(val => val.val === consciousnessLevel);
+    if (index > -1) {
+      return type1Level[index];
+    }
+  }
+
+  return undefined;
+};
+
+const painAssessment = (painAssessment) => {
+  const type1Level = [
+    { title: 'No Pain', image: 'pain-no.png', val: 1 },
+    { title: 'Mild', image: 'pain-mild.png', val: 2 },
+    { title: 'Moderate', image: 'pain-moderate.png', val: 3 },
+    { title: 'Severe', image: 'pain-severe.png', val: 4 },
+    { title: 'Very Severe', image: 'pain-very.png', val: 5 },
+    { title: 'Worst Pain Possible', image: 'pain-worst.png', val: 6 },
+  ];
+  if (painAssessment) {
+    const index = (type1Level || []).findIndex(val => val.val === painAssessment);
+    if (index > -1) {
+      return type1Level[index];
+    }
+  }
+
+  return undefined;
+};
+
+export const formatPE = (record) => {
+  const results = [];
+  if (!record) return null;
+  if (record.physicalExam) results.push(`Physical Exam: ${record.physicalExam}`);
+  if (record.consciousnessLevel) results.push(`Level of Consciousness: ${levelOfConsciousness(record.consciousnessLevel)?.title}`);
+  if (record.consciousnessLevelScale) results.push(`Level of Consciousness: ${record.consciousnessLevelScale}/7`);
+  if (record.painAssessment) results.push(`Pain Assessment: ${painAssessment(record.painAssessment)?.title}`);
+  if (record.painAssessmentScale) results.push(`Pain Assessment: ${record.painAssessmentScale}/10`);
+  for (const loc of dentalExamLocations) {
+    if (isDentalExaminationVisible(loc.key, record)) {
+      let item = loc.name;
+      for (const field of dentalExamFields) {
+        const data = record[loc.key + field];
+        if (data) item = item + ` (${data})`;
+      }
+      results.push(item);
+    }
+  }
+  if (record.dentalNote) results.push(`Dental Survey: ${record.dentalNote}`);
+
+  return results.join(', ');
 };

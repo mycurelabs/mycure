@@ -75,6 +75,9 @@ export default {
           icon: 'la la-check',
           timeout: 2000,
         });
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       }, 1500);
     }
 

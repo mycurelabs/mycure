@@ -64,6 +64,10 @@ export default {
       type: Array,
       default: () => ([]),
     },
+    formTemplate: {
+      type: Object,
+      default: undefined,
+    },
     view: {
       type: String,
       default: 'paper',
@@ -85,13 +89,15 @@ export default {
     const encounterPatient = toRef(props, 'patient');
     const encounterApeReport = toRef(props, 'apeReport');
     const encounterMedicalRecords = toRef(props, 'medicalRecords');
+    const apeFormTemplate = toRef(props, 'formTemplate');
 
     const apeReportCreatedAt = computed(() => format(encounterApeReport.value?.createdAt || new Date(), 'MMM dd, yyyy'));
     const apeReportStatus = computed(() => pmeEncounterStatusMapper(props.encounter));
     const apeReportValues = computed(() => encounterApeReport.value?.values || []);
     const apeReportTemplateData = computed(() => encounterApeReport.value?.templateData);
-    const apeReportTemplate = computed(() => apeReportTemplateData.value?.template);
     const apeReportTemplateDataItems = computed(() => encounterApeReport.value?.templateData?.items || []);
+
+    const selectedApeReportTemplate = computed(() => apeFormTemplate?.value?.template || apeReportTemplateData?.value?.template);
 
     const tokenDataSourceMap = {
       'current-user': toRef(props, 'currentUser'),
@@ -101,20 +107,20 @@ export default {
       patient: encounterPatient,
     };
 
-    console.warn('tokenDataSourceMap', tokenDataSourceMap['current-user'].value);
-
     const templatePrefilled = computed(() => {
-      let report = apeReportTemplate.value;
-      const values = encounterApeReport.value?.values || [];
+      let report = selectedApeReportTemplate.value;
+      const values = apeReportValues.value || [];
+
+      console.warn('values', values);
 
       if (!report) return '';
       values.forEach((value, index) => {
         /** For Custom Texts Only */
         if (value.id.startsWith('custom_text')) {
-          console.warn('Custom Text', value.answer);
+          // console.warn('Custom Text', value.answer);
           const label = generateLabelFromId(value.id);
-          // const element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -7px; max-height: 50px; width: 80px; max-width: 200px;">${value.answer}</textarea>`;
-          const element = `<input id="${value.id}" value="${value.answer}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -7px; max-height: 50px; width: 80px; max-width: 200px;" />`;
+          const element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -7px; max-height: 50px; width: 80px; max-width: 200px;">${value.answer}</textarea>`;
+          // const element = `<input id="${value.id}" value="${value.answer}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -7px; max-height: 50px; width: 80px; max-width: 200px;" />`;
           report = report.replace(`{${value.id}}`, element);
           return;
         }
@@ -261,7 +267,6 @@ export default {
       apeEncounter,
       apeReportCreatedAt,
       apeReportStatus,
-      apeReportTemplate,
       apeReportTemplateData,
       apeReportTemplateDataItems,
       apeReportValues,
@@ -270,6 +275,7 @@ export default {
       encounterMedicalRecords,
       encounterPatient,
       focusedModeModel,
+      selectedApeReportTemplate,
       templatePrefilled,
       // methods
       getQuestionItem,

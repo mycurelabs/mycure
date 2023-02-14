@@ -4,7 +4,7 @@ generic-page(
   padding
   :loading="loading"
 )
-  div.row.items-center.justify-center
+  div.row.items-center.justify-center.q-mb-lg
     div.col-xs-12.col-md-10
       q-card.shadow-1
         q-toolbar(style="height: 80px; background: #f2f2f2")
@@ -22,10 +22,16 @@ generic-page(
               icon="la la-pen"
               no-caps
             )
+            //- q-tab(
+            //-   name="focused"
+            //-   label="Focused Mode"
+            //-   icon="la la-bullseye"
+            //-   no-caps
+            //- )
             q-tab(
-              name="focused"
-              label="Focused Mode"
-              icon="la la-bullseye"
+              name="signatories"
+              label="Signatories"
+              icon="las la-signature"
               no-caps
             )
         q-separator
@@ -33,9 +39,11 @@ generic-page(
           q-tab-panels(v-model="tabModel" animated)
             q-tab-panel(name="live")
               div.row.justify-center.q-mb-sm
-                q-input(
+                search-form-templates(
                   style="width: 1100px;"
                   outlined
+                  :default-value="formTemplate"
+                  @select="onTemplateSelect"
                 )
               div.row.justify-center
                 q-scroll-area(style="height: 100vh; width: 1100px; margin-top: 0px; padding-top: 0px; border: 1px solid lightgrey; border-radius: 5px;")
@@ -46,10 +54,11 @@ generic-page(
                     :current-user="currentUser"
                     :encounter="encounter"
                     :facility="encounterFacility"
+                    :form-template="formTemplate"
                     :medical-records="encounterMedicalRecords"
                     :patient="encounterPatient"
                   )
-            q-tab-panel(name="focused")
+            //- q-tab-panel(name="focused")
               //- ape-report-viewer(
               //-   view="form"
               //-   :ape-report="encounterApeReport"
@@ -58,6 +67,35 @@ generic-page(
               //-   :medical-records="encounterMedicalRecords"
               //-   :facility="encounterFacility"
               //- )
+            q-tab-panel(name="signatories")
+              div.row
+                div.col-xs-12.col-md-6.q-pa-sm
+                  q-input(
+                    label="Medical Examiner"
+                    outlined
+                  )
+                div.col-xs-12.col-md-6.q-pa-sm
+                  q-input(
+                    label="Evaluated By"
+                    outlined
+                  )
+                div.col-xs-12.col-md-6.q-pa-sm
+                  q-input(
+                    label="Processed By"
+                    outlined
+                  )
+                div.col-xs-12.col-md-6.q-pa-sm
+                  q-input(
+                    label="Finalized By"
+                    outlined
+                  )
+
+  div.row.items-center.justify-center.q-mb-lg
+    div.col-xs-12.col-md-10.q-mb-md
+      span.text-h6.text-primary Past Encounters
+    div.col-xs-12.col-md-10
+      q-card.shadow-1
+        q-card-section
 q-footer(
   bordered
 ).bg-white
@@ -82,17 +120,19 @@ import { useUserStore } from '@/stores/current-user';
 
 import ApeReportViewer from '@/components/pme/ApeReportViewer';
 import GenericPage from '@/components/commons/GenericPage';
+import SearchFormTemplates from '@/components/commons/search/SearchFormTemplates';
 import usePmeHelper from '@/composables/pme-helpers';
 
 export default {
   components: {
     ApeReportViewer,
     GenericPage,
+    SearchFormTemplates,
   },
   setup () {
     const loading = ref(false);
     const route = useRoute();
-    const tabModel = ref('live');
+    const tabModel = ref('signatories');
     const focusedModeModel = ref({});
     const focusedModeFormRef = ref(null);
     const apeReportFieldsModel = ref({});
@@ -110,7 +150,16 @@ export default {
     const encounterPatient = ref({});
 
     const apeReportCreatedAt = computed(() => format(encounterApeReport.value?.createdAt || new Date(), 'MMM dd, yyyy'));
-    const apeReportStatus = computed(() => pmeEncounterStatusMapper(encounter));
+    const apeReportStatus = computed(() => pmeEncounterStatusMapper(encounter.value));
+    const formTemplate = computed({
+      get () {
+        const template = encounterApeReport.value?.templateData;
+        return template;
+      },
+      set (newValue) {
+        formTemplate.value = newValue;
+      },
+    });
 
     async function init () {
       try {
@@ -152,12 +201,18 @@ export default {
       }
     }
 
+    async function onTemplateSelect (template) {
+      console.warn('template', template);
+      encounterApeReport.value.templateData = template;
+    }
+
     init();
 
     return {
       apeReportCreatedAt,
       apeReportFieldsModel,
       apeReportStatus,
+      formTemplate,
       apeReportViewerLiveEditRef,
       currentUser,
       encounter,
@@ -170,6 +225,7 @@ export default {
       loading,
       tabModel,
       onSaveReport,
+      onTemplateSelect,
     };
   },
 };

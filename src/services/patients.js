@@ -59,7 +59,7 @@ export const getPatient = async (id) => {
  * @returns Array of patients
  */
 export const getPatients = async (opts) => {
-  if (!opts.facility) throw new Error('Facility id is required to search patients');
+  if (!opts?.facility) throw new Error('Facility id is required to search patients');
   const query = {
     type: 'medical-patients',
     facility: opts.facility,

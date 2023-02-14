@@ -957,7 +957,6 @@ export default () => {
       name: 'Review of Systems - General Status',
       token: 'ros_status_general',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         if (!data.length) return '';
         const options = {
@@ -972,7 +971,6 @@ export default () => {
       name: 'Review of Systems - General Remarks',
       token: 'ros_general',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         if (!data.length) return '';
         const options = {
@@ -987,7 +985,6 @@ export default () => {
       name: 'Review of Systems - Eyes Status',
       token: 'ros_status_eyes',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         if (!data.length) return '';
         const options = {
@@ -1002,7 +999,6 @@ export default () => {
       name: 'Review of Systems - Eyes Remarks',
       token: 'ros_eyes',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         if (!data.length) return '';
         const options = {
@@ -1017,7 +1013,6 @@ export default () => {
       name: 'Review of Systems - Skin Status',
       token: 'ros_status_skin',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         if (!data.length) return '';
         const options = {
@@ -1032,7 +1027,6 @@ export default () => {
       name: 'Review of Systems - Skin Remarks',
       token: 'ros_skin',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1046,7 +1040,6 @@ export default () => {
       name: 'Review of Systems - HEENT Status',
       token: 'ros_status_ent',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1060,7 +1053,6 @@ export default () => {
       name: 'Review of Systems - HEENT Remarks',
       token: 'ros_ent',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1074,7 +1066,6 @@ export default () => {
       name: 'Review of Systems - Neck Status',
       token: 'ros_status_neck',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1088,7 +1079,6 @@ export default () => {
       name: 'Review of Systems - Neck Remarks',
       token: 'ros_neck',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1102,7 +1092,6 @@ export default () => {
       name: 'Review of Systems - Chest/Breast Status',
       token: 'ros_status_breasts',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1116,7 +1105,6 @@ export default () => {
       name: 'Review of Systems - Chest/Breast Remarks',
       token: 'ros_breasts',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1130,7 +1118,6 @@ export default () => {
       name: 'Review of Systems - Respiratory/Lungs Status',
       token: 'ros_status_respiratory',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1144,7 +1131,6 @@ export default () => {
       name: 'Review of Systems - Respiratory/Lungs Remarks',
       token: 'ros_respiratory',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1158,7 +1144,6 @@ export default () => {
       name: 'Review of Systems - Heart Status',
       token: 'ros_status_cardiovascular',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1172,7 +1157,6 @@ export default () => {
       name: 'Review of Systems - Heart Remarks',
       token: 'ros_cardiovascular',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1186,7 +1170,6 @@ export default () => {
       name: 'Review of Systems - Gastrointestinal/Abdomen Status',
       token: 'ros_status_gastrointestinal',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1200,7 +1183,6 @@ export default () => {
       name: 'Review of Systems - Gastrointestinal/Abdomen Remarks',
       token: 'ros_gastrointestinal',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1214,7 +1196,6 @@ export default () => {
       name: 'Review of Systems - Peripheral Vascular Status',
       token: 'ros_status_peripheral_vascular',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1228,7 +1209,6 @@ export default () => {
       name: 'Review of Systems - Peripheral Vascular Remarks',
       token: 'ros_peripheral_vascular',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1242,7 +1222,6 @@ export default () => {
       name: 'Review of Systems - Genitourinary Status',
       token: 'ros_status_genitourinary',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1256,7 +1235,6 @@ export default () => {
       name: 'Review of Systems - Genitourinary Remarks',
       token: 'ros_genitourinary',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1270,7 +1248,6 @@ export default () => {
       name: 'Review of Systems - Musculoskeletal Status',
       token: 'ros_status_musculoskeletal',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1284,7 +1261,6 @@ export default () => {
       name: 'Review of Systems - Musculoskeletal Remarks',
       token: 'ros_musculoskeletal',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1298,7 +1274,6 @@ export default () => {
       name: 'Review of Systems - Psychiatric Status',
       token: 'ros_status_psychiatric',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1312,7 +1287,6 @@ export default () => {
       name: 'Review of Systems - Psychiatric Remarks',
       token: 'ros_psychiatric',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1326,7 +1300,6 @@ export default () => {
       name: 'Review of Systems - Neurologic Status',
       token: 'ros_status_neurologic',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1340,7 +1313,6 @@ export default () => {
       name: 'Review of Systems - Neurologic Remarks',
       token: 'ros_neurologic',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1354,7 +1326,6 @@ export default () => {
       name: 'Review of Systems - Hematologic Status',
       token: 'ros_status_hematologic_lymphatic',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1368,7 +1339,6 @@ export default () => {
       name: 'Review of Systems - Hematologic Remarks',
       token: 'ros_hematologic_lymphatic',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1382,7 +1352,6 @@ export default () => {
       name: 'Review of Systems - Endocrine Status',
       token: 'ros_status_endocrine',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1396,7 +1365,6 @@ export default () => {
       name: 'Review of Systems - Endocrine Remarks',
       token: 'ros_endocrine',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1410,7 +1378,6 @@ export default () => {
       name: 'Review of Systems - Allergic Immunologic Status',
       token: 'ros_status_allergic_immunologic',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1424,7 +1391,6 @@ export default () => {
       name: 'Review of Systems - Allergic Immunologic Remarks',
       token: 'ros_allergic_immunologic',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'ros',
@@ -1447,6 +1413,9 @@ export default () => {
       name: 'Vitals - Height (cm)',
       token: 'vital_height',
       dataSource: 'medical-records',
+      inputOptions: {
+        width: '50px',
+      },
       format: (data) => {
         const options = {
           type: 'vitals',
@@ -1635,7 +1604,6 @@ export default () => {
       name: 'Physical Exam - General Status',
       token: 'pe_general_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         return records.map(record => record?.general?.status?.toUpperCase()).filter(Boolean).join('</br>');
@@ -1645,7 +1613,6 @@ export default () => {
       name: 'Physical Exam - General Remarks',
       token: 'pe_general_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1683,7 +1650,6 @@ export default () => {
       name: 'Physical Exam - Eyes Status',
       token: 'pe_eyes_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         return records.map(record => record?.eyes?.status?.toUpperCase()).filter(Boolean).join('</br>');
@@ -1693,7 +1659,6 @@ export default () => {
       name: 'Physical Exam - Eyes Remarks',
       token: 'pe_eyes_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1707,7 +1672,6 @@ export default () => {
       name: 'Physical Exam - Ears Status',
       token: 'pe_ears_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         return records.map(record => record?.ears?.status?.toUpperCase()).filter(Boolean).join('</br>');
@@ -1717,7 +1681,6 @@ export default () => {
       name: 'Physical Exam - Ears Remarks',
       token: 'pe_ears_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1731,7 +1694,6 @@ export default () => {
       name: 'Physical Exam - Nose Status',
       token: 'pe_nose_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         return records.map(record => record?.nose?.status?.toUpperCase()).filter(Boolean).join('</br>');
@@ -1741,7 +1703,6 @@ export default () => {
       name: 'Physical Exam - Nose Remarks',
       token: 'pe_nose_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1755,7 +1716,6 @@ export default () => {
       name: 'Physical Exam - Ears, Eyes, Nose Status',
       token: 'pe_earseyesnose_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         return records.map((record) => {
@@ -1787,7 +1747,6 @@ export default () => {
       name: 'Physical Exam - Ears, Eyes, Nose Remarks',
       token: 'pe_earseyesnose_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         const formattedRecords = records.map((record) => {
@@ -1804,7 +1763,6 @@ export default () => {
       name: 'Physical Exam - Head and Neck Status',
       token: 'pe_headneck_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         const mapped = records.map((record) => {
@@ -1832,7 +1790,6 @@ export default () => {
       name: 'Physical Exam - Head and Neck Remarks',
       token: 'pe_headneck_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         const mapped = records.map((record) => {
@@ -1848,7 +1805,6 @@ export default () => {
       name: 'Physical Exam - Chest and Breast Status',
       token: 'pe_chestbreast_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         const mapped = records.map((record) => {
@@ -1876,7 +1832,6 @@ export default () => {
       name: 'Physical Exam - Chest and Breast Remarks',
       token: 'pe_chestbreast_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         const mapped = records.map((record) => {
@@ -1892,7 +1847,6 @@ export default () => {
       name: 'Physical Exam - Neck Status',
       token: 'pe_neck_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1906,7 +1860,6 @@ export default () => {
       name: 'Physical Exam - Neck Remarks',
       token: 'pe_neck_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1920,7 +1873,6 @@ export default () => {
       name: 'Physical Exam - Throat Status',
       token: 'pe_throat_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1934,7 +1886,6 @@ export default () => {
       name: 'Physical Exam - Throat Remarks',
       token: 'pe_throat_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1948,7 +1899,6 @@ export default () => {
       name: 'Physical Exam - Breath sound Status',
       token: 'pe_breath_sounds_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1962,7 +1912,6 @@ export default () => {
       name: 'Physical Exam - Breath sound Remarks',
       token: 'pe_breath_sounds_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1976,7 +1925,6 @@ export default () => {
       name: 'Physical Exam - Respiratory Status',
       token: 'pe_respiratory_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -1990,7 +1938,6 @@ export default () => {
       name: 'Physical Exam - Respiratory Remarks',
       token: 'pe_respiratory_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2004,7 +1951,6 @@ export default () => {
       name: 'Physical Exam - Cardiovascular Status',
       token: 'pe_cardiovascular_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2018,7 +1964,6 @@ export default () => {
       name: 'Physical Exam - Cardiovascular Remarks',
       token: 'pe_cardiovascular_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2032,7 +1977,6 @@ export default () => {
       name: 'Physical Exam - Breast Status',
       token: 'pe_breasts_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2046,7 +1990,6 @@ export default () => {
       name: 'Physical Exam - Breast Remarks',
       token: 'pe_breasts_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2060,7 +2003,6 @@ export default () => {
       name: 'Physical Exam - Chest Status',
       token: 'pe_chest_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2074,7 +2016,6 @@ export default () => {
       name: 'Physical Exam - Chest Remarks',
       token: 'pe_chest_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2088,7 +2029,6 @@ export default () => {
       name: 'Physical Exam - Back Remarks',
       token: 'pe_back_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2102,7 +2042,6 @@ export default () => {
       name: 'Physical Exam - Back Status',
       token: 'pe_back_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2116,7 +2055,6 @@ export default () => {
       name: 'Physical Exam - Abdomen Remarks',
       token: 'pe_abdomen_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2130,7 +2068,6 @@ export default () => {
       name: 'Physical Exam - Abdomen Status',
       token: 'pe_abdomen_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2144,7 +2081,6 @@ export default () => {
       name: 'Physical Exam - Gastrointestinal Remarks',
       token: 'pe_gastrointestinal_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2158,7 +2094,6 @@ export default () => {
       name: 'Physical Exam - Gastrointestinal Status',
       token: 'pe_gastrointestinal_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2172,7 +2107,6 @@ export default () => {
       name: 'Physical Exam - Genitourinary Remarks',
       token: 'pe_genitourinary_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2186,7 +2120,6 @@ export default () => {
       name: 'Physical Exam - Genitourinary Status',
       token: 'pe_genitourinary_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2200,7 +2133,6 @@ export default () => {
       name: 'Physical Exam - Musculoskeletal Remarks',
       token: 'pe_musculoskeletal_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2214,7 +2146,6 @@ export default () => {
       name: 'Physical Exam - Musculoskeletal Status',
       token: 'pe_musculoskeletal_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2228,7 +2159,6 @@ export default () => {
       name: 'Physical Exam - Skin Remarks',
       token: 'pe_skin_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2242,7 +2172,6 @@ export default () => {
       name: 'Physical Exam - Skin Status',
       token: 'pe_skin_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2256,7 +2185,6 @@ export default () => {
       name: 'Physical Exam - Endocrine Remarks',
       token: 'pe_endocrine_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2270,7 +2198,6 @@ export default () => {
       name: 'Physical Exam - Endocrine Status',
       token: 'pe_endocrine_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2284,7 +2211,6 @@ export default () => {
       name: 'Physical Exam - Psychiatric Remarks',
       token: 'pe_psychiatric_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2298,7 +2224,6 @@ export default () => {
       name: 'Physical Exam - Psychiatric Status',
       token: 'pe_psychiatric_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2312,7 +2237,6 @@ export default () => {
       name: 'Physical Exam - Hematologic Remarks',
       token: 'pe_hematologic_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2326,7 +2250,6 @@ export default () => {
       name: 'Physical Exam - Hematologic Status',
       token: 'pe_hematologic_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2340,7 +2263,6 @@ export default () => {
       name: 'Physical Exam - Allergic / Immunologic Remarks',
       token: 'pe_allergicImmunologic_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2354,7 +2276,6 @@ export default () => {
       name: 'Physical Exam - Allergic / Immunologic Status',
       token: 'pe_allergicImmunologic_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2368,7 +2289,6 @@ export default () => {
       name: 'Physical Exam - Extermities Remarks',
       token: 'pe_extermities_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2382,7 +2302,6 @@ export default () => {
       name: 'Physical Exam - Extermities Status',
       token: 'pe_extermities_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2396,7 +2315,6 @@ export default () => {
       name: 'Physical Exam - Neurologic Remarks',
       token: 'pe_neurologic_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2410,7 +2328,6 @@ export default () => {
       name: 'Physical Exam - Neurologic Status',
       token: 'pe_neurologic_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2424,7 +2341,6 @@ export default () => {
       name: 'Physical Exam - Rectal Remarks',
       token: 'pe_rectal_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2438,7 +2354,6 @@ export default () => {
       name: 'Physical Exam - Rectal Status',
       token: 'pe_rectal_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2452,7 +2367,6 @@ export default () => {
       name: 'Physical Exam - Genitalia Remarks',
       token: 'pe_genitalia_text',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
@@ -2466,7 +2380,6 @@ export default () => {
       name: 'Physical Exam - Genitalia Status',
       token: 'pe_genitalia_status',
       dataSource: 'medical-records',
-      inputType: 'textarea',
       format: (data) => {
         const options = {
           type: 'physical-exam',
