@@ -13,7 +13,7 @@ module.exports = function (ctx) {
     moduleOptionValue = process.argv?.[indexOfModuleOption + 1];
   }
 
-  console.warn('moduleOptionValue', moduleOptionValue);
+  console.log('moduleOptionValue', moduleOptionValue);
 
   let moduleConfig;
 
@@ -23,6 +23,8 @@ module.exports = function (ctx) {
     moduleConfig = require('./.full/config.js')({ ESLintPlugin });
   }
 
+  console.log('moduleConfig', moduleConfig);
+
   const config = {
     ...moduleConfig,
   };
@@ -30,6 +32,14 @@ module.exports = function (ctx) {
   console.log('🚀 RUNNING CONFIG FOR', (moduleOptionValue ? moduleOptionValue.toUpperCase() : null) || DEFAULT_MODULE.toUpperCase());
 
   const customQuasarConfig = config.quasarConfig;
+
+  const env = {
+    APP: moduleOptionValue || DEFAULT_MODULE,
+    ...require('dotenv').config({ path: './.full/.env' }).parsed,
+    ...require('dotenv').config({ path: `./.module-${moduleOptionValue || DEFAULT_MODULE}/.env` }).parsed,
+  };
+
+  console.log('env', env);
 
   const defaultQuasarConfig = {
     supportTS: false,
@@ -59,11 +69,7 @@ module.exports = function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
-      env: {
-        APP: moduleOptionValue || DEFAULT_MODULE,
-        ...require('dotenv').config({ path: './.full/.env' }).parsed,
-        ...require('dotenv').config({ path: `./.module-${moduleOptionValue || DEFAULT_MODULE}/.env` }).parsed,
-      },
+      env,
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
 
