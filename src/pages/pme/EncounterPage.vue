@@ -132,7 +132,7 @@ export default {
   setup () {
     const loading = ref(false);
     const route = useRoute();
-    const tabModel = ref('signatories');
+    const tabModel = ref('live');
     const focusedModeModel = ref({});
     const focusedModeFormRef = ref(null);
     const apeReportFieldsModel = ref({});
