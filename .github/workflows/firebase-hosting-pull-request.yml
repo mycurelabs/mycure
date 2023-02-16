@@ -26,19 +26,20 @@ jobs:
         run: yarn
         env:
           GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-      - name: Run Build
-        run: yarn build:spa:pme
-        env:
+      - name: Create env file
+        run: |
+          cat <<EOF > .module-pme/.env
           # Can be one of:
           # all - all modules included
           # pme - just the pme module as a standalone app
           # The value of this field can be overwritten
           # by module specific .env keys/values.
           APP_BUILD_TYPE: pme
-
           # https://api.staging.mycure.md
           API: https://api.staging.mycure.md
-
+          EOF
+      - name: Run Build
+        run: yarn build:spa:pme
       - uses: FirebaseExtended/action-hosting-deploy@v0
         env:
           GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
