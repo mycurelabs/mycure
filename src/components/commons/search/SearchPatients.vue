@@ -4,7 +4,7 @@ q-select(
   label="Search Patients"
   input-debounce="500"
   style="min-width: 300px"
-  clear-icon="la la-times"
+  clear-icon="las la-times"
   outlined
   dense
   use-input
