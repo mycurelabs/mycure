@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "mc-v4-prod"
+  },
+  "targets": {
+    "mc-v4-prod": {
+      "hosting": {
+        "production": [
+          "mycure"
+        ]
+      }
+    }
+  }
+}

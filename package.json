@@ -1,8 +1,8 @@
 {
-  "name": "module-pme",
+  "name": "mycure",
   "version": "0.0.1",
-  "description": "MYCURE's Physical Medical Exam (PME) Module",
-  "productName": "MYCURE PME",
+  "description": "MYCURE Dynamic Health Management Modules",
+  "productName": "MYCURE Health Management Suite",
   "author": "Joff Tiquez <jofftiquez@gmail.com>",
   "private": true,
   "scripts": {
@@ -62,8 +62,6 @@
     "last 5 Opera versions"
   ],
   "engines": {
-    "node": ">= 12.22.1",
-    "npm": ">= 6.13.4",
-    "yarn": ">= 1.21.1"
+    "node": ">= 16"
   }
 }
