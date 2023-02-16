@@ -9,7 +9,7 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
         round
         @click="goBack"
       )
-      q-toolbar-title Report Template
+      q-toolbar-title {{isUpdating ? 'Update' : 'Create'}} Report Template
       //- q-space
       //- q-btn(
       //-   icon="la la-prescription"
@@ -48,7 +48,7 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
 </template>
 
 <script>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import GenericPage from '@/components/commons/GenericPage';
 import PatientCard from '@/components/commons/PatientCard';
@@ -64,6 +64,9 @@ export default {
     const rightDrawerOpen = ref(false);
     const patient = ref({});
     const reportTemplateId = route.params.reportTemplate;
+    const isUpdating = computed(() => {
+      return !!reportTemplateId;
+    });
 
     async function init () {
       try {
@@ -86,6 +89,7 @@ export default {
     return {
       rightDrawerOpen,
       patient,
+      isUpdating,
       goBack,
       toggleRightDrawer,
     };

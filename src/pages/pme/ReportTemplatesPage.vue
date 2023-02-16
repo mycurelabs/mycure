@@ -59,7 +59,9 @@ generic-page(
         icon="la la-plus"
         outline
         no-caps
+        :to="{ name: 'report-template' }"
       ).q-mr-sm
+
       q-btn(
         label="Import/Export"
         color="primary"

@@ -7,10 +7,8 @@ generic-page(
   q-editor(
     ref="editorRef"
     v-model="templateHtml"
-    height="60vh"
+    height="80vh"
   )
-
-  pre {{templateHtml}}
 
   q-drawer(
     v-model="leftDrawer"
@@ -25,10 +23,12 @@ generic-page(
       div.col-xs-12.q-pa-md
         q-form
           q-input(
+            v-model="name"
             label="Template Name"
             outlined
           ).q-mb-md
           q-input(
+            v-model="description"
             type="textarea"
             label="Template Description"
             outlined
@@ -52,7 +52,7 @@ generic-page(
           color="primary"
           unelevated
         ).full-width.q-mb-md
-    div.row
+    //- div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Template Configurations
       div.col-xs-12.q-pa-md
@@ -67,7 +67,7 @@ generic-page(
         q-checkbox(
           label="Hide default name header"
         )
-    div.row
+    //- div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Signatories Configuration
       div.col-xs-12.q-pa-md
@@ -105,22 +105,33 @@ q-footer(
       color="primary"
       unelevated
       no-caps
-      @click="onSaveReport"
     )
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { getFormTemplate } from '@/services/form-templates';
+import { onMounted, ref, watch, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import GenericPage from '@/components/commons/GenericPage';
+
 export default {
   components: {
     GenericPage,
   },
   setup () {
+    const route = useRoute();
     const editorRef = ref(null);
     const leftDrawer = ref(false);
     const loading = ref(false);
     const templateHtml = ref('');
+    const reportTemplateId = route.params.reportTemplate;
+    const formTemplate = ref({});
+    const name = ref('');
+    const description = ref('');
+
+    const isUpdating = computed(() => {
+      return !!reportTemplateId;
+    });
 
     watch(templateHtml, (val) => {
       if (val.includes('::')) {
@@ -134,8 +145,28 @@ export default {
       }
     });
 
+    async function init () {
+      try {
+        formTemplate.value = await getFormTemplate(reportTemplateId);
+        console.warn('formTemplate.value', formTemplate.value);
+        name.value = formTemplate.value.name;
+        description.value = formTemplate.value.description;
+        templateHtml.value = formTemplate.value.template;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    onMounted(() => {
+      isUpdating.value && init();
+    });
+
     return {
       editorRef,
+      formTemplate,
+      isUpdating,
+      name,
+      description,
       leftDrawer,
       loading,
       templateHtml,

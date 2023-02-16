@@ -21,3 +21,8 @@ export const getFormTemplates = async (opts) => {
 
   return sdk.service('form-templates').find(query);
 };
+
+export const getFormTemplate = async (id) => {
+  if (!id) throw new Error('Report tepmplate id is required');
+  return sdk.service('form-templates').get(id);
+};
