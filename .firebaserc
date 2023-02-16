@@ -6,7 +6,7 @@
     "mc-v4-prod": {
       "hosting": {
         "production": [
-          "mycure"
+          "mycure-suite"
         ]
       }
     }

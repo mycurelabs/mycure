@@ -42,5 +42,5 @@ jobs:
         run: |
           firebase use mc-v4-prod
           firebase target:clear hosting production
-          firebase target:apply hosting production mycure
+          firebase target:apply hosting production mycure-suite
           firebase deploy --only hosting:production -P mc-v4-prod
