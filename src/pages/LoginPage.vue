@@ -4,6 +4,8 @@ generic-page(padding :loading="loading")
     div.col-xs-12.col-md-4
       q-card(style="border-radius: 10px;").shadow-1
         q-card-section.q-pa-xl
+          h1 CI rocks!
+        q-card-section.q-pa-xl
           q-form(ref="loginFormRef" @submit.prevent="login").q-gutter-md
             q-input(
               v-model="email"
