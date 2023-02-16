@@ -9,7 +9,7 @@ name: Deploy to Firebase Hosting on merge
     tags:
       - 'v*'
 jobs:
-  build_and_deploy_staging:
+  build_and_deploy_production:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
