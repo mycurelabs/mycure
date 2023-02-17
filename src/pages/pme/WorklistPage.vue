@@ -71,7 +71,7 @@ generic-page(
 </template>
 
 <script>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { TABLE_ROWS_PER_PAGE_OPTION } from '@/constants/global';
 import { useHelpers } from '@/composables/helpers';
 import { usePmeStore } from '@/stores/pme';
@@ -108,7 +108,6 @@ export default {
     const totalItems = ref(0);
     const selectedPatient = ref(null);
     const rowsPerPageOption = ref(TABLE_ROWS_PER_PAGE_OPTION);
-    const filters = ref({});
     const pagination = ref({
       page: 0,
       rowsPerPage: rowsPerPageOption.value[0],
@@ -165,7 +164,7 @@ export default {
 
     const visibleColumns = ref(columns.map(column => column.name));
 
-    async function init (paginationOpts) {
+    async function init (paginationOpts, selectedFilters) {
       try {
         loading.value = true;
         const page = paginationOpts?.page || 1;
@@ -181,12 +180,10 @@ export default {
           query.patient = selectedPatient.value.id; ;
         }
 
-        console.warn('filters', filters.value);
-
         // Date Filter
-        if (filters.value?.filterDate?.dates?.start) {
-          const start = filters.value?.filterDate?.dates?.start;
-          const end = filters.value?.filterDate?.dates?.end;
+        if (selectedFilters?.filterDate?.dates?.start) {
+          const start = selectedFilters?.filterDate?.dates?.start;
+          const end = selectedFilters?.filterDate?.dates?.end;
           query.createdAt = {
             $gte: start,
             $lte: end,
@@ -194,15 +191,15 @@ export default {
         }
 
         // Status Filter
-        if (filters.value?.filterStatus?.value) {
-          const status = filters.value?.filterStatus?.value;
+        if (selectedFilters?.filterStatus?.value) {
+          const status = selectedFilters?.filterStatus?.value;
           const q = pmeEncounterStatusQueryBuilder(status, query);
           query = q;
         }
 
         // Exam Type Filter
-        if (filters.value?.filterExamType?.value) {
-          query.tags = filters.value?.filterExamType?.value;
+        if (selectedFilters?.filterExamType?.value) {
+          query.tags = selectedFilters?.filterExamType?.value;
         }
 
         const { total } = await pmeStore.getPmeEncounters(query);
@@ -247,13 +244,8 @@ export default {
     }
 
     function onFilter (filters) {
-      filters.value = filters;
-      init();
+      init(null, filters);
     }
-
-    watch(filters, () => {
-      init();
-    }, { deep: true, immediate: false });
 
     onMounted(() => {
       tableRef.value.requestServerInteraction();
@@ -261,7 +253,6 @@ export default {
 
     return {
       columns,
-      filters,
       initializing,
       loading,
       pagination,

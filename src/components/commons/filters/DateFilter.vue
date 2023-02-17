@@ -130,6 +130,10 @@ export default {
       customRangeDialog.value = false;
     });
 
+    watch(selectedFilter, (val) => {
+      emit('selected', val);
+    });
+
     emit('update:modelValue', selectedFilter);
 
     return {

@@ -1,4 +1,54 @@
 <template lang="pug">
+q-header(bordered).text-black.bg-white
+  q-toolbar
+    q-btn(
+      icon="la la-arrow-left"
+      dense
+      flat
+      round
+      @click="goBack"
+    )
+    q-toolbar-title {{isUpdating ? 'Update' : 'Create'}} Report Template
+      q-chip(v-if="isArchived" color="warning") Archived
+    q-space
+    q-btn(
+      v-if="isUpdating"
+      icon="la la-cog"
+      color="primary"
+      label="More Options"
+      dense
+      unelevated
+      outline
+      no-caps
+    )
+      q-menu(anchor="bottom end" self="top right")
+        q-list(style="width: 200px")
+          template(v-if="isArchived")
+            q-item(clickable v-close-popup @click="onUnarchive")
+              q-item-section(avatar)
+                q-icon(name="las la-archive").text-positive
+              q-item-section Unarchive
+          template(v-else)
+            q-item(clickable v-close-popup @click="onArchive")
+              q-item-section(avatar)
+                q-icon(name="las la-archive").text-warning
+              q-item-section Archive
+          q-item(clickable v-close-popup @click="onDelete")
+            q-item-section(avatar)
+              q-icon(name="las la-trash").text-negative
+            q-item-section Delete
+
+q-banner(v-if="isArchived" inline-actions class="bg-warning text-white")
+  span.text-black This Form Template is archived
+  template(v-slot:action)
+    q-btn(
+      label="Unarchive"
+      color="black"
+      flat
+      no-caps
+      @click="onUnarchive"
+    )
+
 generic-page(
   skeleton="table"
   padding
@@ -109,9 +159,16 @@ q-footer(
 </template>
 
 <script>
-import { getFormTemplate } from '@/services/form-templates';
+import { fakeAwait } from '@/utils';
+import {
+  getFormTemplate,
+  archiveFormTemplate,
+  unarchiveFormTemplate,
+  removeFormTemplate,
+} from '@/services/form-templates';
 import { onMounted, ref, watch, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useQuasarMixins } from '@/composables/quasar-mixins';
+import { useRoute, useRouter } from 'vue-router';
 import GenericPage from '@/components/commons/GenericPage';
 
 export default {
@@ -119,7 +176,9 @@ export default {
     GenericPage,
   },
   setup () {
+    const { confirm } = useQuasarMixins();
     const route = useRoute();
+    const router = useRouter();
     const editorRef = ref(null);
     const leftDrawer = ref(false);
     const loading = ref(false);
@@ -128,33 +187,89 @@ export default {
     const formTemplate = ref({});
     const name = ref('');
     const description = ref('');
+    const isArchived = computed(() => formTemplate.value?.hiddenAt);
 
     const isUpdating = computed(() => {
       return !!reportTemplateId;
     });
 
-    watch(templateHtml, (val) => {
-      if (val.includes('::')) {
+    watch(templateHtml, async (val) => {
+      if (val?.includes('::')) {
+        await fakeAwait(100);
         const token = prompt('Type token');
         const edit = editorRef.value;
-        setTimeout(() => {
-          // edit.runCmd('insertHTML', `&nbsp;<div class="editor_token row inline items-center" contenteditable="false">&nbsp;<span>${token}</span>&nbsp;<i class="q-icon" onclick="this.parentNode.parentNode.removeChild(this.parentNode)">X</i></div>&nbsp;`);
-          templateHtml.value = templateHtml.value.replace('::', `&nbsp;<div class="editor_token row inline items-center" contenteditable="false">&nbsp;<span>${token}</span>&nbsp;<i class="q-icon" onclick="this.parentNode.parentNode.removeChild(this.parentNode)">X</i></div>&nbsp;`);
-          edit.focus();
-        }, 100);
+        await fakeAwait(100);
+        // edit.runCmd('insertHTML', `&nbsp;<div class="editor_token row inline items-center" contenteditable="false">&nbsp;<span>${token}</span>&nbsp;<i class="q-icon" onclick="this.parentNode.parentNode.removeChild(this.parentNode)">X</i></div>&nbsp;`);
+        templateHtml.value = templateHtml.value.replace('::', `&nbsp;<div class="editor_token row inline items-center" contenteditable="false">&nbsp;<span>${token}</span>&nbsp;<i class="q-icon" onclick="this.parentNode.parentNode.removeChild(this.parentNode)">X</i></div>&nbsp;`);
+        edit.focus();
       }
     });
 
     async function init () {
       try {
         formTemplate.value = await getFormTemplate(reportTemplateId);
-        console.warn('formTemplate.value', formTemplate.value);
+        console.warn('formTemplate.value', formTemplate.value?.hiddenAt);
         name.value = formTemplate.value.name;
         description.value = formTemplate.value.description;
-        templateHtml.value = formTemplate.value.template;
+        templateHtml.value = formTemplate.value.template || '';
       } catch (e) {
         console.error(e);
       }
+    }
+
+    async function onArchive () {
+      try {
+        const result = await confirm({
+          title: 'Archive this report?',
+          message: 'Are you sure you want to archive this report?',
+        });
+        if (!result) return;
+        loading.value = true;
+        await archiveFormTemplate(reportTemplateId);
+        init();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    async function onUnarchive () {
+      try {
+        const result = await confirm({
+          title: 'Unarchive this report?',
+          message: 'Are you sure you want to unarchive this report?',
+        });
+        if (!result) return;
+        loading.value = true;
+        await unarchiveFormTemplate(reportTemplateId);
+        init();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    async function onDelete () {
+      try {
+        const result = await confirm({
+          title: 'Delete this report?',
+          message: 'Are you sure you want to delete this report? This action is irreversible.',
+        });
+        if (!result) return;
+        loading.value = true;
+        await removeFormTemplate(reportTemplateId);
+        goBack();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    function goBack () {
+      router.push({ name: 'pme-report-templates' });
     }
 
     onMounted(() => {
@@ -167,9 +282,15 @@ export default {
       isUpdating,
       name,
       description,
+      isArchived,
       leftDrawer,
       loading,
       templateHtml,
+      //
+      goBack,
+      onArchive,
+      onDelete,
+      onUnarchive,
     };
   },
 };

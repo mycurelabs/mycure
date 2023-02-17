@@ -85,3 +85,11 @@ export const paginationQueryBuilder = (query, page = 1, limit = 5) => {
     ...query,
   };
 };
+
+export const fakeAwait = (wait = 1000) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, wait);
+  });
+};

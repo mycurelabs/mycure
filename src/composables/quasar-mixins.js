@@ -16,6 +16,25 @@ export function useQuasarMixins () {
   const domHeight = computed(() => height(window));
   const domWidth = computed(() => width(window));
 
+  function confirm ({ title = 'Confirm', message = 'Do you want to continue?' }) {
+    return new Promise((resolve, reject) => {
+      $q.dialog({
+        title,
+        message,
+        cancel: true,
+        persistent: true,
+      }).onOk(() => {
+        resolve(true);
+      }).onOk(() => {
+        resolve(true);
+      }).onCancel(() => {
+        resolve(false);
+      }).onDismiss(() => {
+        resolve(false);
+      });
+    });
+  }
+
   async function logout () {
     // await this.$store.dispatch('auth/signout');
     // this.$store.dispatch('personalDetails/clearPersonalDetails');
@@ -57,12 +76,13 @@ export function useQuasarMixins () {
     isNativeMobile,
     isScreenDesktop,
     isScreenMobile,
-    openURL,
+    confirm,
+    copyToClipboard,
     getPlatform,
     logout,
+    openURL,
     rippleAwait,
-    showSnack,
     setToDark,
-    copyToClipboard,
+    showSnack,
   };
 }

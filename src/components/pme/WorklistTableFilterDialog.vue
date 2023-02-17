@@ -27,13 +27,13 @@ q-dialog(v-model="dialog" persistent)
           span Filter by Date:
         div.col-xs-12.col-md-6
           date-filter(
-            v-model="filterDate"
             label="Filter Exam Types"
             color="primary"
             dropdown-icon="la la-angle-down"
             style="width: 100%"
             dense
             outlined
+            @selected="dateSelected"
           )
       div.row.items-center.justify-center.q-mb-md
         div.col-xs-12.col-md-6
@@ -81,15 +81,16 @@ q-dialog(v-model="dialog" persistent)
             outlined
             :options="activeOrganizationBranches"
           )
-      //- div.row.items-center.justify-center.q-mb-md
-        div.col-xs-12
-          pre filterBranch {{filterBranch}}
-          pre filterDate {{filterDate}}
-          pre filterExamType {{filterExamType}}
-          pre filterStatus {{filterStatus}}
     q-separator
     q-card-actions
       q-space
+      q-btn(
+        label="Clear Filters"
+        color="primary"
+        flat
+        no-caps
+        @click="clearFilters"
+      )
       q-btn(
         label="Submit Filters"
         color="primary"
@@ -120,6 +121,7 @@ export default {
     const filterDate = ref(null);
     const filterExamType = ref(null);
     const filterStatus = ref(null);
+    const filterCount = ref(0);
     const pmeEncounterStatuses = PME_ENCOUNTER_STATUS_TYPES;
     const pmeEncounterExamTypes = PME_ENCOUNTER_EXAM_TYPES;
     const activeOrganizationBranches = computed(() => userStore.$state.userActiveOrganizationBranches?.map(branch => ({ value: branch.id, label: branch.name })));
@@ -134,16 +136,30 @@ export default {
       dialog.value = false;
     }
 
+    function clearFilters () {
+      filterBranch.value = null;
+      filterDate.value = null;
+      filterExamType.value = null;
+      filterStatus.value = null;
+    }
+
+    function dateSelected (val) {
+      filterDate.value = val;
+    }
+
     return {
       activeOrganizationBranches,
       dialog,
       filterBranch,
+      filterCount,
       filterDate,
       filterExamType,
       filterStatus,
       pmeEncounterExamTypes,
       pmeEncounterStatuses,
       // methods
+      clearFilters,
+      dateSelected,
       onSubmitFilters,
     };
   },

@@ -74,6 +74,7 @@ generic-page(
       q-tr(:props="props" class="hover:bg-grey-3 cursor-pointer" @click="onRowSelect(props.row)")
         q-td(key="name" :props="props")
           span {{props.row.name || '-'}}
+          q-badge(v-if="props.row.hiddenAt" color="warning").q-ml-sm Archived
         q-td(key="description" :props="props")
           span {{props.row.description || '-'}}
 
@@ -129,6 +130,7 @@ export default {
         return {
           name: item.name,
           description: item.description,
+          hiddenAt: item.hiddenAt,
           $data: item,
         };
       });

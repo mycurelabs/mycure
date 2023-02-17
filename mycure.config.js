@@ -158,6 +158,7 @@ module.exports = function (ctx) {
         'Meta',
         'Notify',
         'Ripple',
+        'Dialog',
       ],
     },
 

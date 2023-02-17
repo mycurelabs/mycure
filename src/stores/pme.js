@@ -13,6 +13,7 @@ export const usePmeStore = defineStore('pme', {
       const { items, total } = await getPmeEncounters(opts);
       this.pmeEncounters = items;
       this.pmeEncountersTotal = total;
+      return { items, total };
     },
     async getPmeEncounter (opts) {
       return getPmeEncounter(opts);

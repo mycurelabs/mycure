@@ -6,9 +6,12 @@ export const getFormTemplates = async (opts) => {
   const query = {
     type: 'ape-report',
     facility,
-    hiddenAt: null,
     $sort: { name: 1 },
   };
+
+  if (opts.includeHidden) {
+    opts.hiddenAt = { $exists: true };
+  }
 
   if (opts.limit) query.$limit = opts.limit;
   if (opts.skip) query.$skip = opts.skip;
@@ -20,6 +23,21 @@ export const getFormTemplates = async (opts) => {
   console.warn('query', query);
 
   return sdk.service('form-templates').find(query);
+};
+
+export const archiveFormTemplate = async (id) => {
+  if (!id) throw new Error('Form template id is required');
+  return sdk.service('form-templates').update(id, { hide: true });
+};
+
+export const unarchiveFormTemplate = async (id) => {
+  if (!id) throw new Error('Form template id is required');
+  return sdk.service('form-templates').update(id, { hide: false });
+};
+
+export const removeFormTemplate = async (id) => {
+  if (!id) throw new Error('Form template id is required');
+  return sdk.service('form-templates').remove(id);
 };
 
 export const getFormTemplate = async (id) => {
