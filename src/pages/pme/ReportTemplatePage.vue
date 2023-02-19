@@ -102,7 +102,7 @@ generic-page(
           color="primary"
           unelevated
         ).full-width.q-mb-md
-    //- div.row
+    div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Template Configurations
       div.col-xs-12.q-pa-md
@@ -117,7 +117,7 @@ generic-page(
         q-checkbox(
           label="Hide default name header"
         )
-    //- div.row
+    div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Signatories Configuration
       div.col-xs-12.q-pa-md
