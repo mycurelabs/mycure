@@ -65,6 +65,7 @@ export function useQuasarMixins () {
   }
 
   return {
+    q: $q,
     appVersion,
     backButtonIcon,
     domHeight,

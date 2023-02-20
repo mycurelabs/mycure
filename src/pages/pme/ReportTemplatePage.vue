@@ -54,11 +54,23 @@ generic-page(
   padding
   :loading="loading"
 )
-  q-editor(
-    ref="editorRef"
-    v-model="templateHtml"
-    height="80vh"
-  )
+  q-card(flat)
+    //- q-card-section.q-pa-0
+      search-form-template-tokens(@select="onTokenSelect" style="width: 100%")
+    q-card-section.q-pa-0
+      q-editor(
+        ref="editorRef"
+        v-model="templateHtml"
+        height="60vh"
+        :dense="$q.screen.lt.md"
+        :toolbar="editorToolbarOptions"
+        :fonts="editorFontOptions"
+      )
+
+  q-dialog(v-model="tokensDialog" position="top")
+    q-card
+      q-card-section
+        search-form-template-tokens(@select="onTokenSelect")
 
   q-drawer(
     v-model="leftDrawer"
@@ -83,7 +95,7 @@ generic-page(
             label="Template Description"
             outlined
           )
-    div.row
+    //- div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Template Tokens
       div.col-xs-12.q-pa-md
@@ -102,7 +114,7 @@ generic-page(
           color="primary"
           unelevated
         ).full-width.q-mb-md
-    div.row
+    //- div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Template Configurations
       div.col-xs-12.q-pa-md
@@ -117,7 +129,7 @@ generic-page(
         q-checkbox(
           label="Hide default name header"
         )
-    div.row
+    //- div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Signatories Configuration
       div.col-xs-12.q-pa-md
@@ -159,7 +171,7 @@ q-footer(
 </template>
 
 <script>
-import { fakeAwait } from '@/utils';
+// import { fakeAwait } from '@/utils';
 import {
   getFormTemplate,
   archiveFormTemplate,
@@ -170,13 +182,15 @@ import { onMounted, ref, watch, computed } from 'vue';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { useRoute, useRouter } from 'vue-router';
 import GenericPage from '@/components/commons/GenericPage';
+import SearchFormTemplateTokens from '@/components/commons/search/SearchFormTemplateTokens';
 
 export default {
   components: {
     GenericPage,
+    SearchFormTemplateTokens,
   },
   setup () {
-    const { confirm } = useQuasarMixins();
+    const { confirm, q } = useQuasarMixins();
     const route = useRoute();
     const router = useRouter();
     const editorRef = ref(null);
@@ -185,25 +199,124 @@ export default {
     const templateHtml = ref('');
     const reportTemplateId = route.params.reportTemplate;
     const formTemplate = ref({});
+    const tokensDialog = ref(false);
     const name = ref('');
     const description = ref('');
     const isArchived = computed(() => formTemplate.value?.hiddenAt);
-
+    const editorFontOptions = {
+      arial: 'Arial',
+      arial_black: 'Arial Black',
+      comic_sans: 'Comic Sans MS',
+      courier_new: 'Courier New',
+      impact: 'Impact',
+      lucida_grande: 'Lucida Grande',
+      times_new_roman: 'Times New Roman',
+      verdana: 'Verdana',
+    };
+    const editorToolbarOptions = [
+      [
+        {
+          label: q.lang.editor.align,
+          icon: q.iconSet.editor.align,
+          fixedLabel: true,
+          list: 'only-icons',
+          options: ['left', 'center', 'right', 'justify'],
+        },
+        {
+          label: q.lang.editor.align,
+          icon: q.iconSet.editor.align,
+          fixedLabel: true,
+          options: ['left', 'center', 'right', 'justify'],
+        },
+      ],
+      ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
+      ['token', 'hr', 'link', 'custom_btn'],
+      ['print', 'fullscreen'],
+      [
+        {
+          label: q.lang.editor.formatting,
+          icon: q.iconSet.editor.formatting,
+          list: 'no-icons',
+          options: [
+            'p',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'code',
+          ],
+        },
+        {
+          label: q.lang.editor.fontSize,
+          icon: q.iconSet.editor.fontSize,
+          fixedLabel: true,
+          fixedIcon: true,
+          list: 'no-icons',
+          options: [
+            'size-1',
+            'size-2',
+            'size-3',
+            'size-4',
+            'size-5',
+            'size-6',
+            'size-7',
+          ],
+        },
+        {
+          label: q.lang.editor.defaultFont,
+          icon: q.iconSet.editor.font,
+          fixedIcon: true,
+          list: 'no-icons',
+          options: [
+            'default_font',
+            'arial',
+            'arial_black',
+            'comic_sans',
+            'courier_new',
+            'impact',
+            'lucida_grande',
+            'times_new_roman',
+            'verdana',
+          ],
+        },
+        'removeFormat',
+      ],
+      ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
+      ['undo', 'redo'],
+      ['viewsource'],
+    ];
     const isUpdating = computed(() => {
       return !!reportTemplateId;
     });
 
     watch(templateHtml, async (val) => {
       if (val?.includes('::')) {
-        await fakeAwait(100);
-        const token = prompt('Type token');
-        const edit = editorRef.value;
-        await fakeAwait(100);
-        // edit.runCmd('insertHTML', `&nbsp;<div class="editor_token row inline items-center" contenteditable="false">&nbsp;<span>${token}</span>&nbsp;<i class="q-icon" onclick="this.parentNode.parentNode.removeChild(this.parentNode)">X</i></div>&nbsp;`);
-        templateHtml.value = templateHtml.value.replace('::', `&nbsp;<div class="editor_token row inline items-center" contenteditable="false">&nbsp;<span>${token}</span>&nbsp;<i class="q-icon" onclick="this.parentNode.parentNode.removeChild(this.parentNode)">X</i></div>&nbsp;`);
-        edit.focus();
+        tokensDialog.value = true;
+      }
+      const elements = document.getElementsByClassName('editor-tokens');
+      if (elements.length) {
+        // console.warn(elements);
+        // console.warn(elements[0].id);
       }
     });
+
+    function onTokenSelect ({ label, value }) {
+      if (value === 'custom_text') {
+        return;
+      }
+
+      if (value === 'custom_choices') {
+        return;
+      }
+
+      const edit = editorRef.value;
+      const id = value;
+      templateHtml.value = templateHtml.value.replace('::', `<span class="editor-tokens row inline items-center" contenteditable="false" id="${id}">${label}</span>&nbsp;`);
+      edit.focus();
+      tokensDialog.value = false;
+    }
 
     async function init () {
       try {
@@ -277,19 +390,23 @@ export default {
     });
 
     return {
-      editorRef,
-      formTemplate,
-      isUpdating,
-      name,
       description,
+      editorFontOptions,
+      editorRef,
+      editorToolbarOptions,
+      formTemplate,
       isArchived,
+      isUpdating,
       leftDrawer,
       loading,
+      name,
       templateHtml,
+      tokensDialog,
       //
       goBack,
       onArchive,
       onDelete,
+      onTokenSelect,
       onUnarchive,
     };
   },
@@ -297,7 +414,7 @@ export default {
 </script>
 
 <style lang="sass">
-.editor_token
+.editor-tokens
   background: #0099cc
   color: white
   padding: 3px

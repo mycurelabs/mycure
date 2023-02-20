@@ -20,8 +20,6 @@ export const getFormTemplates = async (opts) => {
     query.name = { $regex: `^${opts.searchText}`, $options: 'i' };
   }
 
-  console.warn('query', query);
-
   return sdk.service('form-templates').find(query);
 };
 

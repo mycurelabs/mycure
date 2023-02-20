@@ -72,9 +72,9 @@ generic-page(
 
 <script>
 import { computed, onMounted, ref } from 'vue';
+import { getPmeEncounters } from '@/services/pme';
 import { TABLE_ROWS_PER_PAGE_OPTION } from '@/constants/global';
 import { useHelpers } from '@/composables/helpers';
-import { usePmeStore } from '@/stores/pme';
 import { useUserStore } from '@/stores/current-user';
 import DateFilter from '@/components/commons/filters/DateFilter';
 import GenericPage from '@/components/commons/GenericPage';
@@ -99,7 +99,6 @@ export default {
       pmeWorklistMapper,
     } = usePmeHelpers();
     // Stores
-    const pmeStore = usePmeStore();
     const userStore = useUserStore();
     // Refs
     const initializing = ref(false);
@@ -115,7 +114,7 @@ export default {
     });
     // Computed
     const activeOrganization = computed(() => userStore.$state.userActiveOrganization);
-    const pmeEncounters = computed(() => pmeStore.$state.pmeEncounters);
+    const pmeEncounters = ref([]);
     const rows = computed(() => {
       if (!pmeEncounters.value?.length) return [];
       return pmeEncounters.value.map(pmeWorklistMapper);
@@ -173,6 +172,9 @@ export default {
           facility: activeOrganization.value.id,
           $limit: rowsPerPage,
           $skip: (page - 1) * rowsPerPage,
+          $and: [
+            { tags: { $nin: ['group'] } },
+          ],
         };
 
         // Selected patient
@@ -199,10 +201,11 @@ export default {
 
         // Exam Type Filter
         if (selectedFilters?.filterExamType?.value) {
-          query.tags = selectedFilters?.filterExamType?.value;
+          query.$and.push({ tags: { $in: [selectedFilters?.filterExamType?.value] } });
         }
 
-        const { total } = await pmeStore.getPmeEncounters(query);
+        const { items, total } = await getPmeEncounters(query);
+        pmeEncounters.value = items;
         totalItems.value = total;
         pagination.value.page = page;
         pagination.value.rowsPerPage = rowsPerPage;
@@ -247,6 +250,10 @@ export default {
       init(null, filters);
     }
 
+    function colorThief (e) {
+      console.warn('e', e);
+    }
+
     onMounted(() => {
       tableRef.value.requestServerInteraction();
     });
@@ -268,6 +275,7 @@ export default {
       onPatientSelect,
       onPaginate,
       onRowSelect,
+      colorThief,
     };
   },
 };

@@ -1,6 +1,6 @@
 import { useHelpers } from '@/composables/helpers';
 import { differenceInYears, format } from 'date-fns';
-import { isEmpty } from 'lodash';
+import _, { isEmpty, get } from 'lodash';
 import {
   calcBMI,
   formatBirthHistory,
@@ -114,6 +114,27 @@ export default () => {
     };
   };
 
+  const groupPackageMapper = (insuranceContracts) => {
+    if (!insuranceContracts.length) return [];
+    const final = _(insuranceContracts).groupBy('label')
+      .map((contracts, label) => {
+        const contract = get(contracts, '[0]');
+        console.warn('contracts', contracts);
+        console.warn('contract', contract);
+        const item = {
+          ...contract,
+          name: contract?.insurerCorporate?.insurerName || contract?.insurerOrg?.name,
+          insurer: contract?.insurer,
+          label,
+          contracts,
+        };
+        console.warn('item', item);
+        return item;
+      })
+      .value();
+    return final;
+  };
+
   const formatSurgicalHistory = (record) => {
     const results = [];
     if (!record) return null;
@@ -125,7 +146,7 @@ export default () => {
     return results.join(' ');
   };
 
-  const TEMPLATE_TOKENS_MAP = new Map([
+  const FORM_TEMPLATE_TOKENS = [
     {
       name: 'Clinic Name',
       token: 'clinic_name',
@@ -2544,12 +2565,16 @@ export default () => {
       name: 'Custom Dropdown',
       token: 'custom_choices',
     },
-  ].map(obj => [obj.token, obj]));
+  ];
+
+  const TEMPLATE_TOKENS_MAP = new Map(FORM_TEMPLATE_TOKENS.map(obj => [obj.token, obj]));
 
   return {
+    FORM_TEMPLATE_TOKENS,
     PME_ENCOUNTER_EXAM_TYPES,
     PME_ENCOUNTER_STATUS_TYPES,
     TEMPLATE_TOKENS_MAP,
+    groupPackageMapper,
     pmeEncounterStatusMapper,
     pmeEncounterStatusQueryBuilder,
     pmeWorklistMapper,

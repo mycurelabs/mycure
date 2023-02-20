@@ -34,79 +34,92 @@ generic-page(
 
     //- Search and filter
     template(v-slot:top-right)
-      search-patients(@select="onPatientSelect").q-mr-sm
-      worklist-table-filter-dialog(@filter="onFilter")
+      q-input(
+        v-model="searchText"
+        label="Search Company Name"
+        style="min-width: 300px"
+        clear-icon="las la-times"
+        debounce="500"
+        outlined
+        dense
+        use-input
+        clearable
+      ).q-mr-sm
+        template(v-slot:loading)
+          q-spinner(
+            color="primary"
+            size="20"
+          )
+        template(v-slot:prepend)
+          q-icon(name="la la-search")
+
+      q-btn(
+        label="Add"
+        color="primary"
+        icon="la la-plus"
+        outline
+        no-caps
+      )
 
     //- Table body
     template(v-slot:body="props")
       q-tr(:props="props" class="hover:bg-grey-3 cursor-pointer" @click="onRowSelect(props.row)")
-        q-td(key="date" :props="props")
-          span {{props.row.date || '-'}}
-        q-td(key="name" :props="props")
-          div.row.no-wrap.items-center
-            q-avatar(size="22px" color="grey").q-mr-sm
-              q-img(v-if="getPicURL(props.row)" :src="getPicURL(props.row)")
-              q-icon(v-else name="la la-user-alt" size="22px").text-white
-            span {{props.row.name}}
-        q-td(key="exam-type" :props="props")
-          div.ellipsis-2-lines {{props.row.examType || '-'}}
-            q-tooltip(v-if="props.row.examType") {{props.row.examType}}
-        q-td(key="package" :props="props")
-          div.ellipsis-2-lines {{props.row.package || '-'}}
-            q-tooltip(v-if="props.row.package") {{props.row.package}}
-        q-td(key="hmo" :props="props")
-          span {{props.row.hmo || '-'}}
-        q-td(key="tags" :props="props")
-          span {{props.row.tags || '-'}}
+        q-td(key="company" :props="props")
+          span {{props.row.company || '-'}}
+        q-td(key="groups" :props="props")
+          span {{props.row.groups || '-'}}
         q-td(key="status" :props="props")
-          template(v-for="status in props.row.status")
-            q-badge(:color="status.color").q-mr-sm {{status.label}}
+          span {{props.row.completedTotal}}/{{props.row.statusTotal}}
+        q-td(key="start-date" :props="props")
+          span {{props.row.startDate || '-'}}
+        q-td(key="end-date" :props="props")
+          span {{props.row.endDate || '-'}}
 
     //- No data
     template(v-slot:no-data)
       div(style="height: 200px").row.full-width.justify-center.items-center
         div.col-xs-12.text-center
           q-icon(name="la la-meh" size="60px").text-grey
-          h2.text-grey.text-h6 No APE reports found
+          h2.text-grey.text-h6 No Group Packages
 </template>
 
 <script>
 import { computed, onMounted, ref } from 'vue';
+import { getInsuranceContracts } from '@/services/insurance-contracts';
 import { TABLE_ROWS_PER_PAGE_OPTION } from '@/constants/global';
 import { useHelpers } from '@/composables/helpers';
-import { usePmeStore } from '@/stores/pme';
 import { useUserStore } from '@/stores/current-user';
+import { format } from 'date-fns';
+import { size, get } from 'lodash';
 import DateFilter from '@/components/commons/filters/DateFilter';
 import GenericPage from '@/components/commons/GenericPage';
 import SearchPatients from '@/components/commons/search/SearchPatients';
+// import { usePmeStore } from '@/stores/pme';
 import usePmeHelpers from '@/composables/pme-helpers';
-import WorklistTableFilterDialog from '@/components/pme/WorklistTableFilterDialog';
-import { useRouter } from 'vue-router';
 
 export default {
   components: {
     DateFilter,
     GenericPage,
     SearchPatients,
-    WorklistTableFilterDialog,
   },
   setup () {
     // Helpers
-    const router = useRouter();
+    // const router = useRouter();
     const { tableColumnBuilder } = useHelpers();
     const {
-      pmeEncounterStatusQueryBuilder,
-      pmeWorklistMapper,
+      groupPackageMapper,
     } = usePmeHelpers();
     // Stores
-    const pmeStore = usePmeStore();
+    // const pmeStore = usePmeStore();
     const userStore = useUserStore();
     // Refs
     const initializing = ref(false);
     const loading = ref(false);
     const tableRef = ref(null);
     const totalItems = ref(0);
-    const selectedPatient = ref(null);
+    // const items = ref([]);
+    const searchText = ref('');
     const rowsPerPageOption = ref(TABLE_ROWS_PER_PAGE_OPTION);
     const pagination = ref({
       page: 0,
@@ -115,94 +128,73 @@ export default {
     });
     // Computed
     const activeOrganization = computed(() => userStore.$state.userActiveOrganization);
-    const pmeEncounters = computed(() => pmeStore.$state.pmeEncounters);
+    const groupPackages = ref([]);
     const rows = computed(() => {
-      if (!pmeEncounters.value?.length) return [];
-      return pmeEncounters.value.map(pmeWorklistMapper);
+      if (!groupPackages.value?.length) return [];
+      const packages = groupPackageMapper(groupPackages.value);
+      return packages.map(pkg => {
+        const contracts = pkg?.contracts || [];
+        const completedTotal = contracts.filter((contract) => {
+          const hasPendingQueues = size(get(contract?.latestEncounter, 'pendingQueueus'));
+          // TODO: determine logic from business
+          // const hasApeReportWithinRange = some(get(contract, 'apeReports'), (r) => isWithinRange(r.finalizedAt, contract.startAt, contract.expiresAt));
+          return hasPendingQueues;
+        });
+        return {
+          company: pkg.name,
+          groups: pkg.label,
+          startDate: format(pkg.startAt, 'MMM d, yyyy'),
+          endDate: format(pkg.expiresAt, 'MMM dd, yyyy'),
+          completedTotal: completedTotal || 0,
+          statusTotal: contracts.length || 0,
+          $data: pkg,
+        };
+      });
     });
 
     const columns = tableColumnBuilder([
       {
-        name: 'date',
-        field: 'date',
-        label: 'Date',
+        name: 'company',
+        field: 'company',
+        label: 'Company',
       },
       {
-        name: 'name',
-        field: 'name',
-        label: 'Name',
-      },
-      {
-        name: 'exam-type',
-        field: 'examType',
-        label: 'Exam Type',
-      },
-      {
-        name: 'package',
-        field: 'package',
-        label: 'Package',
-      },
-      {
-        name: 'hmo',
-        field: 'hmo',
-        label: 'HMO',
-      },
-      {
-        name: 'tags',
-        field: 'tags',
-        label: 'Tags',
-        style: 'max-width: 150px; white-space: normal;',
+        name: 'groups',
+        field: 'groups',
+        label: 'Groups',
       },
       {
         name: 'status',
         field: 'status',
         label: 'Status',
-        align: 'right',
-        style: 'max-width: 190px; white-space: normal;',
+      },
+      {
+        name: 'start-date',
+        field: 'startDate',
+        label: 'Start Date',
+      },
+      {
+        name: 'end-date',
+        field: 'endDate',
+        label: 'End Date',
       },
     ]);
 
     const visibleColumns = ref(columns.map(column => column.name));
 
-    async function init (paginationOpts, selectedFilters) {
+    async function init (paginationOpts) {
       try {
         loading.value = true;
         const page = paginationOpts?.page || 1;
         const rowsPerPage = paginationOpts?.rowsPerPage || rowsPerPageOption.value[0];
-        let query = {
+        const query = {
           facility: activeOrganization.value.id,
           $limit: rowsPerPage,
           $skip: (page - 1) * rowsPerPage,
         };
 
-        // Selected patient
-        if (selectedPatient.value) {
-          query.patient = selectedPatient.value.id; ;
-        }
-
-        // Date Filter
-        if (selectedFilters?.filterDate?.dates?.start) {
-          const start = selectedFilters?.filterDate?.dates?.start;
-          const end = selectedFilters?.filterDate?.dates?.end;
-          query.createdAt = {
-            $gte: start,
-            $lte: end,
-          };
-        }
-
-        // Status Filter
-        if (selectedFilters?.filterStatus?.value) {
-          const status = selectedFilters?.filterStatus?.value;
-          const q = pmeEncounterStatusQueryBuilder(status, query);
-          query = q;
-        }
-
-        // Exam Type Filter
-        if (selectedFilters?.filterExamType?.value) {
-          query.tags = selectedFilters?.filterExamType?.value;
-        }
-
-        const { total } = await pmeStore.getPmeEncounters(query);
+        const { total, items } = await getInsuranceContracts(query);
+        groupPackages.value = items;
         totalItems.value = total;
         pagination.value.page = page;
         pagination.value.rowsPerPage = rowsPerPage;
@@ -215,10 +207,6 @@ export default {
       }
     }
 
-    function getPicURL (row) {
-      return row.$data?.patient?.picURL;
-    }
-
     // Event functions
     function onPaginate (props) {
       const { page, rowsPerPage } = props.pagination;
@@ -227,24 +215,15 @@ export default {
 
     function onRowSelect (row) {
       console.warn('row', row);
-      router.push({
-        name: 'pme-encounter',
-        params: {
-          encounter: row.$data.id,
-        },
-        query: {
-          patient: row.$data.patient.id,
-        },
-      });
-    }
-
-    function onPatientSelect (patient) {
-      selectedPatient.value = patient;
-      init();
-    }
-
-    function onFilter (filters) {
-      init(null, filters);
+      // router.push({
+      //   name: 'pme-encounter',
+      //   params: {
+      //     encounter: row.$data.id,
+      //   },
+      //   query: {
+      //     patient: row.$data.patient.id,
+      //   },
+      // });
     }
 
     onMounted(() => {
@@ -258,14 +237,12 @@ export default {
       pagination,
       rows,
       rowsPerPageOption,
+      searchText,
       tableRef,
       totalItems,
       visibleColumns,
       // methods
       init,
-      getPicURL,
-      onFilter,
-      onPatientSelect,
       onPaginate,
       onRowSelect,
     };
