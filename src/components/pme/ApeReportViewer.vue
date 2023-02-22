@@ -88,6 +88,7 @@ export default {
     const encounterFacility = toRef(props, 'facility');
     const encounterPatient = toRef(props, 'patient');
     const encounterApeReport = toRef(props, 'apeReport');
+    console.warn('encounterApeReport.value', encounterApeReport.value);
     const encounterMedicalRecords = toRef(props, 'medicalRecords');
     const apeFormTemplate = toRef(props, 'formTemplate');
 
