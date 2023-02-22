@@ -1,5 +1,6 @@
 <template lang="pug">
 q-select(
+  ref="selectRef"
   v-model="model"
   label="Search Form Temlate Tokens"
   input-debounce="100"
@@ -39,7 +40,7 @@ q-select(
 </template>
 
 <script>
-import { ref, watch, toRef, computed } from 'vue';
+import { ref, watch, toRef, computed, onMounted } from 'vue';
 import usePmeHelpers from '@/composables/pme-helpers';
 
 export default {
@@ -53,6 +54,7 @@ export default {
     const { FORM_TEMPLATE_TOKENS } = usePmeHelpers();
     const loading = ref(false);
     const model = ref(null);
+    const selectRef = ref(null);
     const formTemplateTokens = ref([]);
     const formTemplateTokensDefault = computed(() => FORM_TEMPLATE_TOKENS.map(token => ({ label: token.name, value: token.token })));
 
@@ -65,7 +67,7 @@ export default {
     }
 
     watch(model, (val) => {
-      console.warn('model', val);
+      // console.warn('model', val);
     });
 
     async function onSearch (val, update, abort) {
@@ -99,12 +101,17 @@ export default {
       emit('select', { label: val?.label, value: val?.value });
     });
 
+    onMounted(() => {
+      selectRef.value.showPopup();
+    });
+
     return {
-      loading,
       formTemplateTokens,
+      loading,
       model,
       onAbortSearch,
       onSearch,
+      selectRef,
     };
   },
 };

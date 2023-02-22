@@ -60,12 +60,13 @@ generic-page(
     q-card-section.q-pa-0
       q-editor(
         ref="editorRef"
-        v-model="templateHtml"
+        v-model="editorTemplate"
         height="60vh"
         :dense="$q.screen.lt.md"
         :toolbar="editorToolbarOptions"
         :fonts="editorFontOptions"
       )
+      pre {{rawTemplate}}
 
   q-dialog(v-model="tokensDialog" position="top")
     q-card
@@ -172,6 +173,7 @@ q-footer(
 
 <script>
 // import { fakeAwait } from '@/utils';
+import { cloneDeep } from 'lodash';
 import {
   getFormTemplate,
   archiveFormTemplate,
@@ -191,18 +193,26 @@ export default {
   },
   setup () {
     const { confirm, q } = useQuasarMixins();
-    const route = useRoute();
-    const router = useRouter();
     const editorRef = ref(null);
     const leftDrawer = ref(false);
     const loading = ref(false);
-    const templateHtml = ref('');
-    const reportTemplateId = route.params.reportTemplate;
-    const formTemplate = ref({});
+    const route = useRoute();
+    const router = useRouter();
     const tokensDialog = ref(false);
-    const name = ref('');
+
+    // Report models
     const description = ref('');
+    const formTemplate = ref({});
+    const name = ref('');
+    const reportTemplateId = route.params.reportTemplate;
+    const editorTemplate = ref('');
+    const rawTemplate = ref('');
+
     const isArchived = computed(() => formTemplate.value?.hiddenAt);
+    const isUpdating = computed(() => {
+      return !!reportTemplateId;
+    });
+
     const editorFontOptions = {
       arial: 'Arial',
       arial_black: 'Arial Black',
@@ -213,6 +223,7 @@ export default {
       times_new_roman: 'Times New Roman',
       verdana: 'Verdana',
     };
+
     const editorToolbarOptions = [
       [
         {
@@ -287,19 +298,13 @@ export default {
       ['undo', 'redo'],
       ['viewsource'],
     ];
-    const isUpdating = computed(() => {
-      return !!reportTemplateId;
-    });
 
-    watch(templateHtml, async (val) => {
+    watch(editorTemplate, async (val) => {
       if (val?.includes('::')) {
         tokensDialog.value = true;
       }
-      const elements = document.getElementsByClassName('editor-tokens');
-      if (elements.length) {
-        // console.warn(elements);
-        // console.warn(elements[0].id);
-      }
+
+      updateRawTemplate();
     });
 
     function onTokenSelect ({ label, value }) {
@@ -312,22 +317,38 @@ export default {
       }
 
       const edit = editorRef.value;
-      const id = value;
-      templateHtml.value = templateHtml.value.replace('::', `<span class="editor-tokens row inline items-center" contenteditable="false" id="${id}">${label}</span>&nbsp;`);
+      editorTemplate.value = editorTemplate.value.replace('::', setHtmlToken({ label, value }));
       edit.focus();
       tokensDialog.value = false;
+    }
+
+    function updateRawTemplate () {
+      const elements = document.getElementsByClassName('ape-report-editor-tokens');
+      let template = cloneDeep(editorTemplate.value);
+      if (elements.length) {
+        for (let i = 0; i < elements.length; i++) {
+          const elem = elements.item(i);
+          const elementId = elem.id;
+          const stringElem = elem.outerHTML;
+          template = template.replace(stringElem, `{${elementId}}`);
+        };
+      }
+      rawTemplate.value = template;
     }
 
     async function init () {
       try {
         formTemplate.value = await getFormTemplate(reportTemplateId);
-        console.warn('formTemplate.value', formTemplate.value?.hiddenAt);
         name.value = formTemplate.value.name;
         description.value = formTemplate.value.description;
-        templateHtml.value = formTemplate.value.template || '';
+        editorTemplate.value = formTemplate.value.template || '';
       } catch (e) {
         console.error(e);
       }
+    }
+
+    function setHtmlToken ({ label, value }) {
+      return `<span class="ape-report-editor-tokens row inline items-center" contenteditable="false" id="${value}">${label}</span>&nbsp;`;
     }
 
     async function onArchive () {
@@ -393,6 +414,7 @@ export default {
       description,
       editorFontOptions,
       editorRef,
+      editorTemplate,
       editorToolbarOptions,
       formTemplate,
       isArchived,
@@ -400,7 +422,7 @@ export default {
       leftDrawer,
       loading,
       name,
-      templateHtml,
+      rawTemplate,
       tokensDialog,
       //
       goBack,
@@ -414,7 +436,7 @@ export default {
 </script>
 
 <style lang="sass">
-.editor-tokens
+.ape-report-editor-tokens
   background: #0099cc
   color: white
   padding: 3px
