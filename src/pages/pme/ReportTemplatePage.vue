@@ -10,6 +10,9 @@ q-header(bordered).text-black.bg-white
     )
     q-toolbar-title {{isUpdating ? 'Update' : 'Create'}} Report Template
       q-chip(v-if="isArchived" color="warning") Archived
+      q-chip(v-if="formTemplateAlreadyInUse" color="green").text-white In Use
+        q-icon(name="la la-question-circle" size="20px")
+          q-tooltip It indicates that a current encounter is already utilizing this template. Therefore, it's not possible to alter or remove the template.
     q-space
     q-btn(
       v-if="isUpdating"
@@ -20,6 +23,7 @@ q-header(bordered).text-black.bg-white
       unelevated
       outline
       no-caps
+      :disable="disableEditing"
     )
       q-menu(anchor="bottom end" self="top right")
         q-list(style="width: 200px")
@@ -66,6 +70,7 @@ generic-page(
           icon="las la-code"
           outline
           no-caps
+          :disable="disableEditing"
           @click="tokensDialog = true"
         )
         q-btn(
@@ -74,6 +79,7 @@ generic-page(
           icon="las la-keyboard"
           outline
           no-caps
+          :disable="disableEditing"
           @click="customTextDialog = true"
         )
         q-btn(
@@ -82,6 +88,7 @@ generic-page(
           icon="las la-caret-square-down"
           outline
           no-caps
+          :disable="disableEditing"
           @click="customDropdownDialog = true"
         )
     q-card-section.q-pa-0
@@ -89,11 +96,13 @@ generic-page(
         ref="editorRef"
         v-model="editorTemplate"
         height="60vh"
+        :disable="disableEditing"
         :dense="$q.screen.lt.md"
         :toolbar="editorToolbarOptions"
         :fonts="editorFontOptions"
       )
-      pre {{rawTemplate}}
+      //- pre {{editorTemplate}}
+      //- pre {{rawTemplate}}
 
   q-dialog(v-model="tokensDialog" position="top")
     q-card
@@ -111,69 +120,67 @@ generic-page(
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Template Information
       div.col-xs-12.q-pa-md
-        q-form
+        q-form(ref="mainFormRef")
           q-input(
             v-model="name"
             label="Template Name"
             outlined
+            :disable="disableEditing"
+            :rules="[v => !!v || 'Template name is required']"
           ).q-mb-md
           q-input(
             v-model="description"
             type="textarea"
             label="Template Description"
             outlined
+            :disable="disableEditing"
           )
-    //- div.row
-      div.col-xs-12.q-pa-md
-        span.text-subtitle1 Template Tokens
-      div.col-xs-12.q-pa-md
-        q-btn(
-          label="Tokens 1"
-          color="primary"
-          unelevated
-        ).full-width.q-mb-md
-        q-btn(
-          label="Tokens 2"
-          color="primary"
-          unelevated
-        ).full-width.q-mb-md
-        q-btn(
-          label="Tokens 3"
-          color="primary"
-          unelevated
-        ).full-width.q-mb-md
-    //- div.row
+    div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Template Configurations
       div.col-xs-12.q-pa-md
         q-checkbox(
+          v-model="disableClinicHeader"
+          :disable="disableEditing"
           label="Hide default clinic header"
         )
       div.col-xs-12.q-pa-md
         q-checkbox(
+          v-model="disablePatientHeader"
+          :disable="disableEditing"
           label="Hide default patient header"
         )
       div.col-xs-12.q-pa-md
         q-checkbox(
+          v-model="disableTemplateNameHeading"
+          :disable="disableEditing"
           label="Hide default name header"
         )
-    //- div.row
+    div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 Signatories Configuration
       div.col-xs-12.q-pa-md
         q-checkbox(
+          v-model="hideExaminedBy"
+          :disable="disableEditing"
           label="Hide Medical Examiner"
         )
       div.col-xs-12.q-pa-md
         q-checkbox(
+          v-model="hideReviewedBy"
+          :disable="disableEditing"
           label="Hide Evaluator"
         )
       div.col-xs-12.q-pa-md
         q-checkbox(
+          v-model="hideCreatedBy"
+          :disable="disableEditing"
           label="Hide Processor"
         )
       div.col-xs-12.q-pa-md
         q-checkbox(
+          v-model="hideFinalizedBy"
+          :disable="disableEditing"
           label="Hide Finalizer"
         )
     div.row
@@ -184,6 +191,7 @@ generic-page(
           label="Show more configurations"
           color="primary"
           unelevated
+          :disable="disableEditing"
         ).full-width.q-mb-md
 
 //- LOCAL DIALOGS
@@ -252,13 +260,15 @@ q-dialog(v-model="customDropdownDialog")
                 dense
                 :rules="[v => !!v || 'This is required']"
               )
-            q-btn(
-              icon="la la-times"
-              color="negative"
-              flat
-              round
-              @click="removeOption(index)"
-            )
+            div
+              q-btn(
+                icon="la la-times"
+                color="negative"
+                size="small"
+                flat
+                round
+                @click="removeOption(index)"
+              )
         div.column
           q-btn(
             label="Add a new option"
@@ -286,27 +296,36 @@ q-footer(
   q-toolbar
     q-space
     q-btn(
-      label="Save Report"
       color="primary"
       unelevated
       no-caps
+      :label="`${isUpdating ? 'Update' : 'Create'} Report`"
+      :disabled="formTemplateAlreadyInUse"
+      @click="submit"
     )
 </template>
 
 <script>
-// import { fakeAwait } from '@/utils';
+import { customAlphabet } from 'nanoid';
 import { cloneDeep } from 'lodash';
 import {
-  getFormTemplate,
   archiveFormTemplate,
-  unarchiveFormTemplate,
+  createFormTemplate,
+  getFormTemplate,
   removeFormTemplate,
+  unarchiveFormTemplate,
 } from '@/services/form-templates';
+import { capitalized, fakeAwait } from '@/utils';
+import { getApeReportsUsingTemplate } from '@/services/medical-records';
 import { onMounted, ref, watch, computed } from 'vue';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/current-user';
 import GenericPage from '@/components/commons/GenericPage';
+import pmeHelper from '@/composables/pme-helpers';
 import SearchFormTemplateTokens from '@/components/commons/search/SearchFormTemplateTokens';
+
+const nanoid = customAlphabet('1234567890abcdef', 10);
 
 export default {
   components: {
@@ -314,6 +333,9 @@ export default {
     SearchFormTemplateTokens,
   },
   setup () {
+    const {
+      TEMPLATE_TOKENS_MAP,
+    } = pmeHelper();
     const { q, confirm, showSnack } = useQuasarMixins();
     const editorRef = ref(null);
     const leftDrawer = ref(false);
@@ -325,22 +347,41 @@ export default {
     const customDropdownDialog = ref(false);
     const dropdownQuestion = ref('');
     const dropdownOptions = ref([{ option: '' }]);
+    const chosenCustomDropdown = ref([]);
     const customTextDialog = ref(false);
     const customText = ref('');
     const customTextFormRef = ref(null);
+    const formTemplateAlreadyInUse = ref(false);
+    const mainFormRef = ref(null);
 
     // Report models
     const description = ref('');
     const formTemplate = ref({});
     const name = ref('');
-    const reportTemplateId = route.params.reportTemplate;
+    const formTemplateId = route.params.reportTemplate;
     const editorTemplate = ref('');
     const rawTemplate = ref('');
 
-    const isArchived = computed(() => formTemplate.value?.hiddenAt);
+    const userStore = useUserStore();
+    const activeOrganization = computed(() => userStore.$state.userActiveOrganization);
+
+    // Config
+    const disableClinicHeader = ref(false);
+    const disablePatientHeader = ref(false);
+    const disableTemplateNameHeading = ref(false);
+    const hideExaminedBy = ref(false);
+    const hideReviewedBy = ref(false);
+    const hideCreatedBy = ref(false);
+    const hideFinalizedBy = ref(false);
+
+    const isArchived = computed(() => !!formTemplate.value?.hiddenAt);
     const isUpdating = computed(() => {
-      return !!reportTemplateId;
+      return !!formTemplateId;
     });
+    const disableEditing = computed(() => isArchived.value || formTemplateAlreadyInUse.value);
+    console.warn('isArchived.value', isArchived.value);
+    console.warn('formTemplateAlreadyInUse.value', formTemplateAlreadyInUse.value);
+    console.warn('disableEditing', disableEditing.value);
 
     const editorFontOptions = {
       arial: 'Arial',
@@ -432,13 +473,96 @@ export default {
       if (val?.includes('::')) {
         tokensDialog.value = true;
       }
-
       updateRawTemplate();
-    });
+    }, { immediate: true });
+
+    async function init () {
+      try {
+        formTemplate.value = await getFormTemplate(formTemplateId);
+        disableClinicHeader.value = !!formTemplate.value?.config?.disableClinicHeader || false;
+        disablePatientHeader.value = !!formTemplate.value?.config?.disablePatientHeader || false;
+        disableTemplateNameHeading.value = !!formTemplate.value?.config?.disableTemplateNameHeading || false;
+        hideExaminedBy.value = !!formTemplate.value?.config?.hideExaminedBy || false;
+        hideReviewedBy.value = !!formTemplate.value?.config?.hideReviewedBy || false;
+        hideCreatedBy.value = !!formTemplate.value?.config?.hideCreatedBy || false;
+        hideFinalizedBy.value = !!formTemplate.value?.config?.hideFinalizedBy || false;
+
+        const { items } = await getApeReportsUsingTemplate({ template: formTemplateId });
+        formTemplateAlreadyInUse.value = !!items?.length;
+        name.value = formTemplate.value.name;
+        description.value = formTemplate.value.description;
+        setTokenToChip(formTemplate.value);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function submit () {
+      try {
+        if (isUpdating.value) {
+          await removeFormTemplate(formTemplateId);
+          create();
+          return;
+        }
+        create();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function create () {
+      try {
+        updateRawTemplate();
+
+        if (!await mainFormRef.value.validate()) return;
+        if (!rawTemplate.value) {
+          showSnack({
+            message: 'The template is empty',
+            color: 'warning',
+          });
+          return;
+        }
+
+        const payload = {
+          type: 'ape-report',
+          facility: activeOrganization.value.id,
+          name: name.value,
+          description: description.value,
+          template: rawTemplate.value,
+          config: {
+            disableClinicHeader: disableClinicHeader.value,
+            disablePatientHeader: disablePatientHeader.value,
+            disableTemplateNameHeading: disableTemplateNameHeading.value,
+            hideExaminedBy: hideExaminedBy.value,
+            hideReviewedBy: hideReviewedBy.value,
+            hideCreatedBy: hideCreatedBy.value,
+            hideFinalizedBy: hideFinalizedBy.value,
+          },
+        };
+
+        if (chosenCustomDropdown.value?.length) {
+          payload.items = chosenCustomDropdown.value;
+        }
+
+        const newFormTemplate = await createFormTemplate(payload);
+        router.replace({ params: { reportTemplate: newFormTemplate?.id } });
+        showSnack({
+          message: 'Success!',
+          color: 'positive',
+        });
+        await fakeAwait();
+        window.location.reload();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
+    }
 
     function updateRawTemplate () {
       const elements = document.getElementsByClassName('ape-report-editor-tokens');
       let template = cloneDeep(editorTemplate.value);
+
       if (elements.length) {
         for (let i = 0; i < elements.length; i++) {
           const elem = elements.item(i);
@@ -450,19 +574,6 @@ export default {
       rawTemplate.value = template;
     }
 
-    async function init () {
-      try {
-        formTemplate.value = await getFormTemplate(reportTemplateId);
-        console.warn('formTemplate.value', formTemplate.value);
-        name.value = formTemplate.value.name;
-        description.value = formTemplate.value.description;
-        // TODO: Pass ApeReport as well
-        setTokenToChip(formTemplate.value.template || '');
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     function onTokenSelect ({ label, value }) {
       const edit = editorRef.value;
 
@@ -471,10 +582,11 @@ export default {
         return;
       }
 
+      const id = `${value}_${nanoid(5)}`;
       if (editorTemplate.value.includes('::')) {
-        editorTemplate.value = editorTemplate.value.replace('::', setChipToToken({ label, value }));
+        editorTemplate.value = editorTemplate.value.replace('::', setChipToToken({ label, value: id }));
       } else {
-        edit.runCmd('insertHTML', setChipToToken({ label, value }));
+        edit.runCmd('insertHTML', setChipToToken({ label, value: id }));
       }
 
       edit.focus();
@@ -483,7 +595,10 @@ export default {
 
     async function insertCustomText () {
       if (!await customTextFormRef.value.validate()) return;
-      onTokenSelect({ label: customText.value, value: 'custom_text' });
+      const label = `Custom Text ${customText.value}`;
+      const suffix = customText.value.trim().split(' ').join('_').toLowerCase();
+      const id = `custom_text_${suffix}_${nanoid(5)}`;
+      onTokenSelect({ label, value: id });
       customTextFormRef.value.resetValidation();
       customText.value = '';
       customTextDialog.value = false;
@@ -498,16 +613,45 @@ export default {
         });
         return;
       }
-      // TODO: save the options
-      onTokenSelect({ label: 'Custom Dropdown', value: 'custom_dropdown' });
+      const label = `Custom Dropdown ${dropdownQuestion.value}`;
+      const suffix = dropdownQuestion.value.trim().split(' ').join('_').toLowerCase();
+      const id = `custom_choices_${suffix}_${nanoid(5)}`;
+      chosenCustomDropdown.value.push({
+        type: 'multiplechoice',
+        question: id,
+        choices: dropdownOptions.value.map(item => item.option),
+      });
+      onTokenSelect({ label, value: id });
+      customDropdownFormRef.value.resetValidation();
+      dropdownQuestion.value = '';
+      dropdownOptions.value = [{ option: '' }];
       customDropdownDialog.value = false;
     }
 
-    function setTokenToChip (template) {
-      // TODO: Create separate logic for handling ApeReport#items (custom choices)
-      // TODO: Find where to get ApeReport#values (see old implementation)
-      // const tokens = template;
-      editorTemplate.value = template || '';
+    function setTokenToChip (formTemplate) {
+      let template = formTemplate.template || '';
+      const regex = /(?<=\{)\w+(?=\})/g;
+      const tokens = template.match(regex) || [];
+
+      for (const token of tokens) {
+        if (token.startsWith('custom_text') || token.startsWith('custom_choices')) {
+          const tokenArr = token.split('_');
+          tokenArr.shift(); // remove 'custom' word in front
+          tokenArr.shift(); // remove 'text' or 'choices' word in front
+          tokenArr.pop(); // remove number at the end of the array
+          const tokenArrCapitalized = tokenArr.map(capitalized);
+          const label = tokenArrCapitalized.join(' ');
+          template = template.replace(`{${token}}`, setChipToToken({ label, value: token }));
+        } else {
+          const tokenArr = token.split('_');
+          tokenArr.pop(); // remove number at the end of the array
+          const id = tokenArr.join('_');
+          const matchedToken = TEMPLATE_TOKENS_MAP.get(id);
+          template = template.replace(`{${token}}`, setChipToToken({ label: matchedToken.name, value: token }));
+        }
+      }
+
+      editorTemplate.value = template;
     }
 
     function setChipToToken ({ label, value }) {
@@ -530,7 +674,7 @@ export default {
         });
         if (!result) return;
         loading.value = true;
-        await archiveFormTemplate(reportTemplateId);
+        await archiveFormTemplate(formTemplateId);
         init();
       } catch (e) {
         console.error(e);
@@ -547,7 +691,7 @@ export default {
         });
         if (!result) return;
         loading.value = true;
-        await unarchiveFormTemplate(reportTemplateId);
+        await unarchiveFormTemplate(formTemplateId);
         init();
       } catch (e) {
         console.error(e);
@@ -564,7 +708,7 @@ export default {
         });
         if (!result) return;
         loading.value = true;
-        await removeFormTemplate(reportTemplateId);
+        await removeFormTemplate(formTemplateId);
         goBack();
       } catch (e) {
         console.error(e);
@@ -588,6 +732,10 @@ export default {
       customTextDialog,
       customTextFormRef,
       description,
+      disableClinicHeader,
+      disableEditing,
+      disablePatientHeader,
+      disableTemplateNameHeading,
       dropdownOptions,
       dropdownQuestion,
       editorFontOptions,
@@ -595,10 +743,16 @@ export default {
       editorTemplate,
       editorToolbarOptions,
       formTemplate,
+      formTemplateAlreadyInUse,
+      hideCreatedBy,
+      hideExaminedBy,
+      hideFinalizedBy,
+      hideReviewedBy,
       isArchived,
       isUpdating,
       leftDrawer,
       loading,
+      mainFormRef,
       name,
       rawTemplate,
       tokensDialog,
@@ -612,6 +766,8 @@ export default {
       onTokenSelect,
       onUnarchive,
       removeOption,
+      submit,
+      updateRawTemplate,
     };
   },
 };

@@ -23,6 +23,14 @@ export const getFormTemplates = async (opts) => {
   return sdk.service('form-templates').find(query);
 };
 
+export const createFormTemplate = async (opts) => {
+  const payload = {
+    ...opts,
+  };
+
+  return sdk.service('form-templates').create(payload);
+};
+
 export const archiveFormTemplate = async (id) => {
   if (!id) throw new Error('Form template id is required');
   return sdk.service('form-templates').update(id, { hide: true });
@@ -40,5 +48,6 @@ export const removeFormTemplate = async (id) => {
 
 export const getFormTemplate = async (id) => {
   if (!id) throw new Error('Report tepmplate id is required');
-  return sdk.service('form-templates').get(id);
+  const result = await sdk.service('form-templates').get(id);
+  return result || {};
 };
