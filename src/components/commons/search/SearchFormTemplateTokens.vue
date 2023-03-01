@@ -2,7 +2,7 @@
 q-select(
   ref="selectRef"
   v-model="model"
-  label="Search Form Temlate Tokens"
+  label="Search Form Template Tokens"
   input-debounce="100"
   style="width: 500px"
   clear-icon="la la-times"

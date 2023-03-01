@@ -88,7 +88,6 @@ export default {
     const encounterFacility = toRef(props, 'facility');
     const encounterPatient = toRef(props, 'patient');
     const encounterApeReport = toRef(props, 'apeReport');
-    console.warn('encounterApeReport.value', encounterApeReport.value);
     const encounterMedicalRecords = toRef(props, 'medicalRecords');
     const apeFormTemplate = toRef(props, 'formTemplate');
 
@@ -109,19 +108,34 @@ export default {
     };
 
     const templatePrefilled = computed(() => {
+      const regex = /(?<=\{)\w+(?=\})/g;
       let report = selectedApeReportTemplate.value;
+      const tokens = selectedApeReportTemplate.value.match(regex) || [];
       const values = apeReportValues.value || [];
 
-      console.warn('values', values);
+      const tokensWithAnswer = tokens.map(token => {
+        const id = token;
+        const found = values.find(value => value.id === token);
+        const answer = found?.answer || '';
+        return {
+          id,
+          answer,
+        };
+      });
 
       if (!report) return '';
-      values.forEach((value, index) => {
+
+      /**
+       * Iterate through all of the tokens
+       * and apply necessary logic for each
+       * to display value or display the
+       * appropriate input element.
+       */
+      tokensWithAnswer.forEach((value) => {
         /** For Custom Texts Only */
         if (value.id.startsWith('custom_text')) {
-          // console.warn('Custom Text', value.answer);
           const label = generateLabelFromId(value.id);
           const element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -7px; max-height: 50px; width: 80px; max-width: 200px;">${value.answer}</textarea>`;
-          // const element = `<input id="${value.id}" value="${value.answer}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -7px; max-height: 50px; width: 80px; max-width: 200px;" />`;
           report = report.replace(`{${value.id}}`, element);
           return;
         }
@@ -210,7 +224,7 @@ export default {
         }
 
         /**
-         * All writable Tokens
+         * All writable tokens
          */
         if (!matchedToken?.readonly) {
           const label = generateLabelFromId(value.id);
@@ -229,23 +243,38 @@ export default {
 
     function onSaveReport () {
       const values = encounterApeReport.value?.values || [];
-      const data = values.map(value => {
-        const element = document.getElementById(value.id);
-        const answer = element?.value || value.answer || '';
+
+      const regex = /(?<=\{)\w+(?=\})/g;
+      const tokens = selectedApeReportTemplate.value.match(regex) || [];
+
+      const data = tokens.map(token => {
+        const id = token;
+        const found = values.find(value => {
+          console.warn('token', token);
+          console.warn('value.id', value.id);
+          return value.id === token;
+        });
+        console.warn('found', found);
+        const element = document.getElementById(found?.id);
+        const answer = element?.value || found?.answer || '';
         return {
-          id: value.id,
+          id,
           answer,
         };
       });
-      return data;
+
+      return {
+        values: data,
+        template: apeFormTemplate?.value?.id,
+      };
     }
 
     function generateLabelFromId (id) {
       if (!id) return '';
       const idWords = id.split('_');
-      idWords.shift();
-      idWords.shift();
-      idWords.pop();
+      idWords.shift(); // remove the word 'custom'
+      idWords.shift(); // remove the word 'text' or 'choices'
+      idWords.pop(); // remove the id at the end of the token e.g. foo_bar_1kj63, remove the '1kj63'
       return idWords.map(word => capitalized(word)).join(' ');
     }
 

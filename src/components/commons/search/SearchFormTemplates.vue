@@ -1,7 +1,7 @@
 <template lang="pug">
 q-select(
   v-model="model"
-  label="Search Form Temlates"
+  label="Search Form Templates"
   input-debounce="500"
   style="min-width: 300px"
   clear-icon="la la-times"
@@ -63,10 +63,6 @@ export default {
         value: defaultVal?.value,
       };
     }
-
-    watch(model, (val) => {
-      console.warn('model', val);
-    });
 
     async function onSearch (val, update, abort) {
       try {

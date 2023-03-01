@@ -167,6 +167,7 @@ export default {
         const result = await getPmeEncounter({ id: encounterId });
         encounter.value = result.encounter;
         encounterApeReport.value = result.apeReport;
+        console.warn('encounterApeReport.value', encounterApeReport.value);
         encounterFacility.value = result.facility;
         encounterMedicalRecords.value = result.medicalRecords;
         encounterPatient.value = result.patient;
@@ -183,16 +184,17 @@ export default {
         const payload = {};
 
         if (tabModel.value === 'live') {
-          const data = apeReportViewerLiveEditRef.value?.onSaveReport();
-          payload.values = data;
-          console.warn('data', JSON.stringify(data, null, 2));
+          const { values, template } = apeReportViewerLiveEditRef.value?.onSaveReport();
+          payload.values = values;
+          payload.template = template;
+          console.warn('data', payload);
         }
 
         if (tabModel.value === 'focused') {
           //
         }
 
-        await sdk.service('medical-records').update(encounterApeReport.value.id, payload);
+        await sdk.service('medical-records').update(encounterApeReport.value?.id, payload);
         init();
       } catch (e) {
         console.error(e);
@@ -202,8 +204,9 @@ export default {
     }
 
     async function onTemplateSelect (template) {
-      console.warn('template', template);
+      if (!template) return;
       encounterApeReport.value.templateData = template;
+      console.warn('encounterApeReport.value.templateData', encounterApeReport.value.templateData);
     }
 
     init();

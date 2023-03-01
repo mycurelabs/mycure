@@ -93,3 +93,8 @@ export const fakeAwait = (wait = 1000) => {
     }, wait);
   });
 };
+
+export const superTrim = (str) => {
+  if (!str) return '';
+  return str.split(' ').filter(Boolean).join(' ');
+};

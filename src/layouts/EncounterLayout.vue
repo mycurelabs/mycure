@@ -22,13 +22,13 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
         @click="toggleRightDrawer"
       )
 
-  q-drawer(
-    v-model="rightDrawerOpen"
-    side="right"
-    show-if-above
-    bordered
-    :width="400"
-  )
+  //- q-drawer(
+  //-   v-model="rightDrawerOpen"
+  //-   side="right"
+  //-   show-if-above
+  //-   bordered
+  //-   :width="400"
+  //- )
     patient-card(:patient="patient")
     q-separator
     q-scroll-area(style="height: calc(100% - 80px);")

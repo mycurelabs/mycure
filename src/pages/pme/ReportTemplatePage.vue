@@ -101,8 +101,9 @@ generic-page(
         :toolbar="editorToolbarOptions"
         :fonts="editorFontOptions"
       )
-      //- pre {{editorTemplate}}
-      //- pre {{rawTemplate}}
+      pre {{chosenCustomDropdown}}
+      pre {{editorTemplate}}
+      pre {{rawTemplate}}
 
   q-dialog(v-model="tokensDialog" position="top")
     q-card
@@ -315,7 +316,7 @@ import {
   removeFormTemplate,
   unarchiveFormTemplate,
 } from '@/services/form-templates';
-import { capitalized, fakeAwait } from '@/utils';
+import { capitalized, fakeAwait, superTrim } from '@/utils';
 import { getApeReportsUsingTemplate } from '@/services/medical-records';
 import { onMounted, ref, watch, computed } from 'vue';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
@@ -354,6 +355,8 @@ export default {
     const formTemplateAlreadyInUse = ref(false);
     const mainFormRef = ref(null);
 
+    watch(dropdownOptions, (v) => console.warn('dropdownOptions', v), { deep: true });
+
     // Report models
     const description = ref('');
     const formTemplate = ref({});
@@ -379,9 +382,6 @@ export default {
       return !!formTemplateId;
     });
     const disableEditing = computed(() => isArchived.value || formTemplateAlreadyInUse.value);
-    console.warn('isArchived.value', isArchived.value);
-    console.warn('formTemplateAlreadyInUse.value', formTemplateAlreadyInUse.value);
-    console.warn('disableEditing', disableEditing.value);
 
     const editorFontOptions = {
       arial: 'Arial',
@@ -479,6 +479,7 @@ export default {
     async function init () {
       try {
         formTemplate.value = await getFormTemplate(formTemplateId);
+        console.warn('formTemplate.value', formTemplate.value);
         disableClinicHeader.value = !!formTemplate.value?.config?.disableClinicHeader || false;
         disablePatientHeader.value = !!formTemplate.value?.config?.disablePatientHeader || false;
         disableTemplateNameHeading.value = !!formTemplate.value?.config?.disableTemplateNameHeading || false;
@@ -577,7 +578,7 @@ export default {
     function onTokenSelect ({ label, value }) {
       const edit = editorRef.value;
 
-      if (value === 'custom_text' || value === 'custom_choices') {
+      if (value.startsWith('custom_text') || value.startsWith('custom_choices')) {
         edit.runCmd('insertHTML', setChipToToken({ label, value }));
         return;
       }
@@ -595,8 +596,10 @@ export default {
 
     async function insertCustomText () {
       if (!await customTextFormRef.value.validate()) return;
-      const label = `Custom Text ${customText.value}`;
-      const suffix = customText.value.trim().split(' ').join('_').toLowerCase();
+      const normalizedLabel = superTrim(customText.value.replace(/[\W_]/g, ' '));
+      const label = `Custom Text ${normalizedLabel}`;
+      console.warn('normalizedLabel', normalizedLabel);
+      const suffix = normalizedLabel.split(' ').join('_').toLowerCase();
       const id = `custom_text_${suffix}_${nanoid(5)}`;
       onTokenSelect({ label, value: id });
       customTextFormRef.value.resetValidation();
@@ -613,8 +616,9 @@ export default {
         });
         return;
       }
-      const label = `Custom Dropdown ${dropdownQuestion.value}`;
-      const suffix = dropdownQuestion.value.trim().split(' ').join('_').toLowerCase();
+      const normalizedLabel = superTrim(dropdownQuestion.value.replace(/[\W_]/g, ' '));
+      const label = `Custom Dropdown ${normalizedLabel}`;
+      const suffix = normalizedLabel.split(' ').join('_').toLowerCase();
       const id = `custom_choices_${suffix}_${nanoid(5)}`;
       chosenCustomDropdown.value.push({
         type: 'multiplechoice',
@@ -726,6 +730,7 @@ export default {
     });
 
     return {
+      chosenCustomDropdown,
       customDropdownDialog,
       customDropdownFormRef,
       customText,
