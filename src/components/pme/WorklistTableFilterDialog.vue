@@ -81,6 +81,14 @@ q-dialog(v-model="dialog" persistent)
             outlined
             :options="activeOrganizationBranches"
           )
+      div.row.items-center.justify-center.q-mb-md
+        div.col-xs-12.col-md-6
+          span Filter by Template:
+        div.col-xs-12.col-md-6
+          search-form-templates(
+            style="width: 100%"
+            @select="templateSelected"
+          )
     q-separator
     q-card-actions
       q-space
@@ -102,12 +110,14 @@ q-dialog(v-model="dialog" persistent)
 
 <script>
 import { computed, ref } from 'vue';
-import usePmeHelpers from '@/composables/pme-helpers';
-import DateFilter from '@/components/commons/filters/DateFilter';
 import { useUserStore } from '@/stores/current-user';
+import DateFilter from '@/components/commons/filters/DateFilter';
+import SearchFormTemplates from '@/components/commons/search/SearchFormTemplates.vue';
+import usePmeHelpers from '@/composables/pme-helpers';
 export default {
   components: {
     DateFilter,
+    SearchFormTemplates,
   },
   emits: ['filter'],
   setup (props, { emit }) {
@@ -120,6 +130,7 @@ export default {
     const filterBranch = ref(null);
     const filterDate = ref(null);
     const filterExamType = ref(null);
+    const filterTemplate = ref(null);
     const filterStatus = ref(null);
     const filterCount = ref(0);
     const pmeEncounterStatuses = PME_ENCOUNTER_STATUS_TYPES;
@@ -127,12 +138,13 @@ export default {
     const activeOrganizationBranches = computed(() => userStore.$state.userActiveOrganizationBranches?.map(branch => ({ value: branch.id, label: branch.name })));
 
     function onSubmitFilters () {
-      emit('filter', {
+      const filters = {
         filterBranch: filterBranch.value,
         filterDate: filterDate.value,
         filterExamType: filterExamType.value,
         filterStatus: filterStatus.value,
-      });
+      };
+      emit('filter', filters);
       dialog.value = false;
     }
 
@@ -147,11 +159,16 @@ export default {
       filterDate.value = val;
     }
 
+    function templateSelected (val) {
+      filterTemplate.value = val;
+    }
+
     return {
       activeOrganizationBranches,
       dialog,
       filterBranch,
       filterCount,
+      filterTemplate,
       filterDate,
       filterExamType,
       filterStatus,
@@ -160,6 +177,7 @@ export default {
       // methods
       clearFilters,
       dateSelected,
+      templateSelected,
       onSubmitFilters,
     };
   },

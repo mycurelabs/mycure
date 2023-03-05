@@ -3,7 +3,6 @@ q-select(
   v-model="model"
   label="Search Form Templates"
   input-debounce="500"
-  style="min-width: 300px"
   clear-icon="la la-times"
   outlined
   dense
