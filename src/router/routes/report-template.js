@@ -11,7 +11,7 @@ const route = {
     pageTitle: 'Report Template',
     requiresAuth: true,
     footprint: {
-      name: 'Report Template',
+      name: 'Report Templates',
       icon: 'la la-home',
     },
   },

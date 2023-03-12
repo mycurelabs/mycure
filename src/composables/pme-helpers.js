@@ -119,8 +119,6 @@ export default () => {
     const final = _(insuranceContracts).groupBy('label')
       .map((contracts, label) => {
         const contract = get(contracts, '[0]');
-        console.warn('contracts', contracts);
-        console.warn('contract', contract);
         const item = {
           ...contract,
           name: contract?.insurerCorporate?.insurerName || contract?.insurerOrg?.name,
@@ -128,7 +126,6 @@ export default () => {
           label,
           contracts,
         };
-        console.warn('item', item);
         return item;
       })
       .value();

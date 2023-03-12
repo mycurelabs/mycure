@@ -33,7 +33,7 @@ export function usePmeNavRoutes (userRoles) {
     {
       id: 'pme-nav-group-package',
       name: 'Group Package',
-      route: 'pme-group-package',
+      route: 'pme-group-packages',
       icon: 'la la-users',
       roles: [
         'a',

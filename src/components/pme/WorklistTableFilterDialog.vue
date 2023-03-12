@@ -27,7 +27,7 @@ q-dialog(v-model="dialog" persistent)
           span Filter by Date:
         div.col-xs-12.col-md-6
           date-filter(
-            label="Filter Exam Types"
+            label="Filter Dates"
             color="primary"
             dropdown-icon="la la-angle-down"
             style="width: 100%"
@@ -87,6 +87,7 @@ q-dialog(v-model="dialog" persistent)
         div.col-xs-12.col-md-6
           search-form-templates(
             style="width: 100%"
+            dropdown-icon="la la-angle-down"
             @select="templateSelected"
           )
     q-separator

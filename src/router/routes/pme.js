@@ -45,9 +45,9 @@ const route = {
       },
     },
     {
-      path: 'group-package',
-      name: 'pme-group-package',
-      component: () => import('pages/pme/GroupPackagePage'),
+      path: 'group-packages',
+      name: 'pme-group-packages',
+      component: () => import('pages/pme/GroupPackagesPage'),
       meta: {
         pageTitle: 'Group Package',
         requiresAuth: true,

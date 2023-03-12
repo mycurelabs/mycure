@@ -1,6 +1,7 @@
 import { date } from 'quasar';
 import { sdk } from '@/boot/mycure';
 import { useRoute, useRouter } from 'vue-router';
+import { format } from 'date-fns';
 
 const DEFAULT_ADDRESS_FORMAT = 'street1 street2 village city municipality province state region country';
 const DEFAULT_NAME_FORMAT = 'firstName middleName lastName generationalSuffix';
@@ -97,4 +98,14 @@ export const fakeAwait = (wait = 1000) => {
 export const superTrim = (str) => {
   if (!str) return '';
   return str.split(' ').filter(Boolean).join(' ');
+};
+
+export const generateId = () => {
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const datePrefix = format(Date.now(), 'yy-MMddhhss');
+  let randomSuffix = '';
+  for (let i = 0; i < 5; i++) {
+    randomSuffix += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return `${datePrefix}-${randomSuffix}`;
 };
