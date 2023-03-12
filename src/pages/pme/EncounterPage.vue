@@ -90,7 +90,7 @@ generic-page(
                     outlined
                   )
 
-  div.row.items-center.justify-center.q-mb-lg
+  //- div.row.items-center.justify-center.q-mb-lg
     div.col-xs-12.col-md-10.q-mb-md
       span.text-h6.text-primary Past Encounters
     div.col-xs-12.col-md-10

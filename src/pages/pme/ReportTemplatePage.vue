@@ -101,9 +101,9 @@ generic-page(
         :toolbar="editorToolbarOptions"
         :fonts="editorFontOptions"
       )
-      pre {{chosenCustomDropdown}}
-      pre {{editorTemplate}}
-      pre {{rawTemplate}}
+      //- pre {{chosenCustomDropdown}}
+      //- pre {{editorTemplate}}
+      //- pre {{rawTemplate}}
 
   q-dialog(v-model="tokensDialog" position="top")
     q-card
