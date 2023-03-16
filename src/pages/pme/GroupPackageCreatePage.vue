@@ -63,6 +63,7 @@ q-drawer(
           dropdown-icon="la la-angle-down"
           style="width: 100%"
           outlined
+          hide-default
           :rules="[v => !!v || 'This is required']"
           @selected="onDateSelect"
         ).q-mb-md
@@ -319,6 +320,7 @@ export default {
     }
 
     function onPatientSelect (patient) {
+      if (!patient) return;
       selectedPatients.value.push(patient);
     }
 

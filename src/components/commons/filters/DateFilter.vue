@@ -28,22 +28,24 @@ import endOfWeek from 'date-fns/fp/endOfWeek/index';
 export default {
   props: {
     modelValue: Object,
+    hideDefault: Boolean,
   },
   setup (props, { emit }) {
-    const defaultDateFilter = {
-      label: 'All',
-      value: 'all',
-      dates: {
-        start: null,
-        end: null,
-      },
-    };
+    const defaultDateFilter = props.hideDefault
+      ? null
+      : {
+          label: 'All',
+          value: 'all',
+          dates: {
+            start: null,
+            end: null,
+          },
+        };
     const selectedFilter = ref(defaultDateFilter);
     const customRange = ref(format(new Date(), 'yyyy/MM/dd'));
     const customRangeDialog = ref(false);
     const dateToday = new Date();
     const options = [
-      defaultDateFilter,
       {
         label: `Today (${format(dateToday, 'MMM dd, yyyy')})`,
         value: 'today',
@@ -93,6 +95,10 @@ export default {
         value: 'custom',
       },
     ];
+
+    if (!props.hideDefault) {
+      options.unshift(defaultDateFilter);
+    }
 
     function nDaysAgo (days) {
       return {
