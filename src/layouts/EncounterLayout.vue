@@ -30,8 +30,8 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
     :width="400"
   )
     patient-card(:patient="patient")
-    q-separator
-    q-scroll-area(style="height: calc(100% - 80px);")
+    //- q-separator
+    //- q-scroll-area(style="height: calc(100% - 80px);")
       div(style="height: 200px").row.full-width.justify-center.items-center
         div.col-xs-12.text-center
           q-icon(name="la la-notes-medical" size="60px").text-grey
