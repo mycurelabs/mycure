@@ -1,5 +1,5 @@
 <template lang="pug">
-q-expansion-item(expand-icon="la la-angle-down")
+q-expansion-item(expand-icon="la la-angle-down" default-opened)
   template(v-slot:header)
     q-item-section(avatar)
       q-avatar(size="50px" style="background: #f2f2f2")
