@@ -189,9 +189,10 @@ generic-page(
         span.text-subtitle1 More Advanced Configurations
       div.col-xs-12.q-pa-md
         q-btn(
-          label="Show more configurations"
+          label="Show More Configurations"
           color="primary"
           unelevated
+          no-caps
           :disable="disableEditing"
         ).full-width.q-mb-md
 

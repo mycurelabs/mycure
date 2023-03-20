@@ -2,9 +2,11 @@ import { date } from 'quasar';
 import { sdk } from '@/boot/mycure';
 import { useRoute, useRouter } from 'vue-router';
 import { format } from 'date-fns';
+import { uniqBy, join, isEmpty } from 'lodash';
 
 const DEFAULT_ADDRESS_FORMAT = 'street1 street2 village city municipality province state region country';
 const DEFAULT_NAME_FORMAT = 'firstName middleName lastName generationalSuffix';
+const DEFAULT_DOCTOR_NAME_FORMAT = '';
 
 export const capitalized = (str) => {
   if (!str) return '';
@@ -34,6 +36,25 @@ export const formatName = (name = {}, format = DEFAULT_NAME_FORMAT) => {
     .replace(/lastName/gi, lastName || '')
     .replace(/generationalSuffix/gi, generationalSuffix || '')
     .trim();
+};
+
+export const formatDoctorName = (personalDetails = {}, format = DEFAULT_DOCTOR_NAME_FORMAT) => {
+  const name = formatName(personalDetails?.name, 'firstName middleName lastName');
+  const academicSuffix = personalDetails?.name?.academicSuffix || '';
+  const professionalSuffix = personalDetails?.name?.professionalSuffix || '';
+  const professions = personalDetails?.doc_processions || [];
+  const suffixes = [
+    ...professions,
+    academicSuffix,
+    professionalSuffix,
+  ].filter(suffix => Boolean(suffix.trim()));
+
+  // - Remove suffix duplicates
+  const uniqSuffixes = uniqBy(suffixes, suffix => suffix.split('.').join('').toLowerCase());
+
+  const suffixString = isEmpty(uniqSuffixes) ? null : join(uniqSuffixes, ', ');
+
+  return suffixString ? `${name}${', ' + suffixString}` : name;
 };
 
 export const formatDate = (d, format) => {

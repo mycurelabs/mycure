@@ -109,8 +109,8 @@ export default {
 
     const templatePrefilled = computed(() => {
       const regex = /(?<=\{)\w+(?=\})/g;
-      let report = selectedApeReportTemplate.value;
-      const tokens = selectedApeReportTemplate.value.match(regex) || [];
+      let report = selectedApeReportTemplate.value || [];
+      const tokens = selectedApeReportTemplate.value?.match(regex) || [];
       const values = apeReportValues.value || [];
 
       const tokensWithAnswer = tokens.map(token => {

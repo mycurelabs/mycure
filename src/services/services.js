@@ -1,6 +1,8 @@
 import { sdk } from '@/boot/mycure';
 import { omit } from 'lodash';
 
+const SERVICE_NAME = 'services';
+
 export const getServices = async (opts) => {
   if (!opts?.facility) throw new Error('Facility id is required to search services');
   const query = {
@@ -43,7 +45,7 @@ export const getServices = async (opts) => {
     });
   }
 
-  const { items } = await sdk.service('services').find(query);
+  const { items } = await sdk.service(SERVICE_NAME).find(query);
   return {
     items: items.map(item => {
       return {

@@ -1,6 +1,8 @@
 import { sdk } from '@/boot/mycure';
 import { omit } from 'lodash';
 
+const SERVICE_NAME = 'medical-patients';
+
 export const getPatient = async (id) => {
   const query = {
     $populate: {
@@ -20,7 +22,7 @@ export const getPatient = async (id) => {
   };
 
   // Map insurance ids from org equivalent
-  const patient = await sdk.service('medical-patients').get(id, { query });
+  const patient = await sdk.service(SERVICE_NAME).get(id, { query });
   let insurances = patient?.$populated?.personalDetails?.insuranceCards;
   let insuranceCards;
   if (insurances?.length) {
@@ -67,6 +69,7 @@ export const getPatients = async (opts) => {
     archivedAt: { $exists: !!opts?.archived },
     removedAt: { $exists: false },
     $sort: { id: 1 },
+    $limit: 50,
     $populate: {
       patient: {
         service: 'medical-patients',
@@ -99,7 +102,7 @@ export const getPatients = async (opts) => {
   //   };
   // }
 
-  const { items, total } = await sdk.service('personal-details').find(query);
+  const { items, total } = await sdk.service(SERVICE_NAME).find(query);
 
   const mapped = items?.map(item => {
     return {

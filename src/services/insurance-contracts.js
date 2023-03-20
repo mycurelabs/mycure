@@ -1,8 +1,10 @@
 import { sdk } from '@/boot/mycure';
 import { omit } from 'lodash';
 
+const SERVICE_NAME = 'insurance-contracts';
+
 export const createInsuranceContracts = (payload) => {
-  return sdk.service('insurance-contracts').create(payload);
+  return sdk.service(SERVICE_NAME).create(payload);
 };
 
 export const getInsuranceContracts = async (opts) => {
@@ -95,7 +97,7 @@ export const getInsuranceContracts = async (opts) => {
     query.name = { $regex: `^${opts.searchText}`, $options: 'i' };
   }
 
-  const { items, total } = await sdk.service('insurance-contracts').find(query);
+  const { items, total } = await sdk.service(SERVICE_NAME).find(query);
   return {
     total,
     items: items.map((item) => {
@@ -142,7 +144,7 @@ export const getInsuranceFacilities = async (opts) => {
     query.insurerName = { $regex: `^${opts.searchString}`, $options: 'i' };
   }
 
-  const { items } = await sdk.service('insurance-contracts').find(query);
+  const { items } = await sdk.service(SERVICE_NAME).find(query);
   return {
     items: items.map(item => {
       return {

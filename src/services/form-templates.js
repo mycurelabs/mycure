@@ -1,5 +1,7 @@
 import { sdk } from '@/boot/mycure';
 
+const SERVICE_NAME = 'form-templates';
+
 export const getFormTemplates = async (opts) => {
   if (!opts?.facility) throw new Error('Facility id is required to search patients');
   const facility = opts.facility;
@@ -20,7 +22,7 @@ export const getFormTemplates = async (opts) => {
     query.name = { $regex: `^${opts.searchText}`, $options: 'i' };
   }
 
-  return sdk.service('form-templates').find(query);
+  return sdk.service(SERVICE_NAME).find(query);
 };
 
 export const createFormTemplate = async (opts) => {
@@ -28,26 +30,26 @@ export const createFormTemplate = async (opts) => {
     ...opts,
   };
 
-  return sdk.service('form-templates').create(payload);
+  return sdk.service(SERVICE_NAME).create(payload);
 };
 
 export const archiveFormTemplate = async (id) => {
   if (!id) throw new Error('Form template id is required');
-  return sdk.service('form-templates').update(id, { hide: true });
+  return sdk.service(SERVICE_NAME).update(id, { hide: true });
 };
 
 export const unarchiveFormTemplate = async (id) => {
   if (!id) throw new Error('Form template id is required');
-  return sdk.service('form-templates').update(id, { hide: false });
+  return sdk.service(SERVICE_NAME).update(id, { hide: false });
 };
 
 export const removeFormTemplate = async (id) => {
   if (!id) throw new Error('Form template id is required');
-  return sdk.service('form-templates').remove(id);
+  return sdk.service(SERVICE_NAME).remove(id);
 };
 
 export const getFormTemplate = async (id) => {
   if (!id) throw new Error('Report tepmplate id is required');
-  const result = await sdk.service('form-templates').get(id);
+  const result = await sdk.service(SERVICE_NAME).get(id);
   return result || {};
 };

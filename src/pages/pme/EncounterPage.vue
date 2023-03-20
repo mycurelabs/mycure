@@ -68,28 +68,68 @@ generic-page(
               //-   :facility="encounterFacility"
               //- )
             q-tab-panel(name="signatories")
-              div.row
+              div.row.items-top
                 div.col-xs-12.col-md-6.q-pa-sm
-                  q-input(
-                    label="Medical Examiner"
-                    outlined
-                  )
-                div.col-xs-12.col-md-6.q-pa-sm
-                  q-input(
-                    label="Evaluated By"
-                    outlined
-                  )
-                div.col-xs-12.col-md-6.q-pa-sm
-                  q-input(
-                    label="Processed By"
-                    outlined
-                  )
-                div.col-xs-12.col-md-6.q-pa-sm
-                  q-input(
-                    label="Finalized By"
-                    outlined
-                  )
+                  span.block Medical Examiner:
+                  div(v-if="isEditingExaminer").row.items-center
+                    div.col-grow
+                      search-members(
+                        label="Medical Examiner"
+                        autofocus
+                        :roles="medicalExaminerRoles"
+                        @select="v => selectedExaminer = v"
+                      )
+                    div
+                      q-btn(
+                        @click="isEditingExaminer = false"
+                        icon="las la-times"
+                        color="negative"
+                        round
+                        flat
+                      ).q-ml-sm
+                  div(v-else).row.items-center.justify-between
+                    span.text-weight-medium.block {{examinerNameFormatted || '-'}}
+                    q-btn(
+                      icon="las la-edit"
+                      color="primary"
+                      round
+                      flat
+                      @click="isEditingExaminer = true"
+                    )
 
+                div.col-xs-12.col-md-6.q-pa-sm
+                  span.block Evaluated By:
+                  div(v-if="isEditingEvaluator").row.items-center
+                    div.col-grow
+                      search-members(
+                        label="Evaluated By"
+                        autofocus
+                        :roles="evaluatorRoles"
+                        @select="v => selectedReviewer = v"
+                      )
+                    div
+                      q-btn(
+                        @click="isEditingEvaluator = false"
+                        icon="las la-times"
+                        color="negative"
+                        round
+                        flat
+                      ).q-ml-sm
+                  div(v-else).row.items-center.justify-between
+                    span.text-weight-medium.block {{reviewerNameFormatted || '-'}}
+                    q-btn(
+                      icon="las la-edit"
+                      color="primary"
+                      round
+                      flat
+                      @click="isEditingEvaluator = true"
+                    )
+                div.col-xs-12.col-md-6.q-pa-sm
+                  span.block Processed By:
+                  span.text-weight-medium.block {{createdByNameFormatted || '-'}}
+                div.col-xs-12.col-md-6.q-pa-sm
+                  span.block Finalized By:
+                  span.text-weight-medium.block {{finalizedByNameFormatted || '-'}}
   //- div.row.items-center.justify-center.q-mb-lg
     div.col-xs-12.col-md-10.q-mb-md
       span.text-h6.text-primary Past Encounters
@@ -102,6 +142,12 @@ q-footer(
   q-toolbar
     q-space
     q-btn(
+      label="Finalize Report"
+      color="positive"
+      unelevated
+      no-caps
+    ).q-mr-sm
+    q-btn(
       label="Save Report"
       color="primary"
       unelevated
@@ -111,16 +157,18 @@ q-footer(
 </template>
 
 <script>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { getPmeEncounter } from '@/services/pme';
 import { sdk } from '@/boot/mycure';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
+import { formatDoctorName as formatDoctorNameUtil } from '@/utils';
 
 import ApeReportViewer from '@/components/pme/ApeReportViewer';
 import GenericPage from '@/components/commons/GenericPage';
 import SearchFormTemplates from '@/components/commons/search/SearchFormTemplates';
+import SearchMembers from '@/components/commons/search/SearchMembers.vue';
 import usePmeHelper from '@/composables/pme-helpers';
 
 export default {
@@ -128,11 +176,12 @@ export default {
     ApeReportViewer,
     GenericPage,
     SearchFormTemplates,
+    SearchMembers,
   },
   setup () {
     const loading = ref(false);
     const route = useRoute();
-    const tabModel = ref('live');
+    const tabModel = ref('signatories');
     const focusedModeModel = ref({});
     const focusedModeFormRef = ref(null);
     const apeReportFieldsModel = ref({});
@@ -148,6 +197,49 @@ export default {
     const encounterFacility = ref({});
     const encounterMedicalRecords = ref([]);
     const encounterPatient = ref({});
+
+    const selectedExaminer = ref(null);
+    const selectedReviewer = ref(null);
+
+    const examinerDetails = computed(() => selectedExaminer.value || encounterApeReport.value?.examinedByData);
+    const examinerNameFormatted = computed(() => formatDoctorName(examinerDetails.value));
+
+    const reviwerDetails = computed(() => selectedReviewer.value || encounterApeReport.value?.reviewedByData);
+    const reviewerNameFormatted = computed(() => formatDoctorName(reviwerDetails.value));
+
+    const createdByDetails = computed(() => encounterApeReport.value?.createdByDetails);
+    const createdByNameFormatted = computed(() => formatDoctorName(createdByDetails.value));
+
+    const finalizedByDetails = computed(() => encounterApeReport.value?.finalizedByData);
+    const finalizedByNameFormatted = computed(() => formatDoctorName(finalizedByDetails.value));
+
+    const medicalExaminerRoles = ['doctor_pme'];
+    const evaluatorRoles = ['doctor_pme'];
+
+    const isEditingEvaluator = ref(true);
+    const isEditingExaminer = ref(true);
+
+    watch(selectedExaminer, (val) => {
+      console.warn('val', val);
+      isEditingExaminer.value = false;
+    });
+
+    watch(selectedReviewer, (val) => {
+      console.warn('val', val);
+      isEditingEvaluator.value = false;
+    });
+
+    watch(examinerNameFormatted, (val) => {
+      if (val) {
+        isEditingExaminer.value = false;
+      }
+    });
+
+    watch(reviewerNameFormatted, (val) => {
+      if (val) {
+        isEditingEvaluator.value = false;
+      }
+    });
 
     const apeReportCreatedAt = computed(() => format(encounterApeReport.value?.createdAt || new Date(), 'MMM dd, yyyy'));
     const apeReportStatus = computed(() => pmeEncounterStatusMapper(encounter.value));
@@ -207,24 +299,40 @@ export default {
       console.warn('encounterApeReport.value.templateData', encounterApeReport.value.templateData);
     }
 
+    function formatDoctorName (personalDetails) {
+      console.warn('personalDetails', personalDetails);
+      return formatDoctorNameUtil(personalDetails);
+    }
+
     init();
 
     return {
       apeReportCreatedAt,
       apeReportFieldsModel,
       apeReportStatus,
-      formTemplate,
       apeReportViewerLiveEditRef,
+      createdByNameFormatted,
       currentUser,
       encounter,
       encounterApeReport,
       encounterFacility,
       encounterMedicalRecords,
       encounterPatient,
+      evaluatorRoles,
+      examinerNameFormatted,
+      finalizedByNameFormatted,
       focusedModeFormRef,
       focusedModeModel,
+      formTemplate,
+      isEditingEvaluator,
+      isEditingExaminer,
       loading,
+      medicalExaminerRoles,
+      reviewerNameFormatted,
+      selectedExaminer,
+      selectedReviewer,
       tabModel,
+      //
       onSaveReport,
       onTemplateSelect,
     };

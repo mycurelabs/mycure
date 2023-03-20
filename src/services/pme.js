@@ -2,6 +2,9 @@ import { sdk } from '@/boot/mycure';
 import { omit, uniqBy } from 'lodash';
 import { getPatient } from '@/services/patients';
 
+const MEDICAL_ENCOUNTER_SERVICE_NAME = 'medical-encounters';
+const MEDICAL_RECORDS_SERVICE_NAME = 'medical-records';
+
 export const getPmeEncounter = async (opts) => {
   if (!opts?.id) throw new Error('Encounter id is required');
   const personalDetailsSelectKeys = [
@@ -14,7 +17,7 @@ export const getPmeEncounter = async (opts) => {
   ];
 
   const encounterId = opts.id;
-  const encounter = await sdk.service('medical-encounters').get(encounterId, {
+  const encounter = await sdk.service(MEDICAL_ENCOUNTER_SERVICE_NAME).get(encounterId, {
     query: {
       $populate: {
         facility: {
@@ -121,7 +124,7 @@ export const getPmeEncounter = async (opts) => {
 
   // });
 
-  const apeReport = await sdk.service('medical-records').findOne({
+  const apeReport = await sdk.service(MEDICAL_RECORDS_SERVICE_NAME).findOne({
     encounter: encounterId,
     type: 'ape-report',
     $populate: {
@@ -225,7 +228,7 @@ export const getPmeEncounters = async (opts) => {
 
   if (opts?.patient) query.patient = opts.patient;
 
-  const { items, total } = await sdk.service('medical-encounters').find(query);
+  const { items, total } = await sdk.service(MEDICAL_ENCOUNTER_SERVICE_NAME).find(query);
   const itemsMapped = items.map(item => {
     return {
       ...omit(item, ['$populated']),
