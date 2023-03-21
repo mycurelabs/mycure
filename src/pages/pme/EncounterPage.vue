@@ -41,6 +41,7 @@ generic-page(
             q-tab-panel(name="live")
               div.row.justify-center.q-mb-sm
                 search-form-templates(
+                  ref="searchFormTemplatesRef"
                   style="width: 1100px;"
                   outlined
                   :default-value="formTemplate"
@@ -209,6 +210,7 @@ export default {
     const tabModel = ref('live');
     // const router = useRouter();
     const focusedModeModel = ref({});
+    const searchFormTemplatesRef = ref(null);
     const focusedModeFormRef = ref(null);
     const apeReportFieldsModel = ref({});
     const userStore = useUserStore();
@@ -425,6 +427,7 @@ export default {
           color: 'positive',
           message: 'Report delete successfully',
         });
+        searchFormTemplatesRef.value?.onReset();
         init();
       } catch (e) {
         console.error(e);
@@ -491,6 +494,7 @@ export default {
       forCheckingAllowed,
       formTemplate,
       isEditingEvaluator,
+      searchFormTemplatesRef,
       isEditingExaminer,
       loading,
       medicalExaminerRoles,

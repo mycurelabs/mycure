@@ -92,6 +92,10 @@ export default {
       }
     }
 
+    function onReset () {
+      model.value = null;
+    }
+
     function onAbortSearch () {}
 
     watch(model, (val) => {
@@ -105,6 +109,7 @@ export default {
       model,
       onAbortSearch,
       onSearch,
+      onReset,
     };
   },
 };

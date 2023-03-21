@@ -1,5 +1,7 @@
 <template lang="pug">
 template(v-if="view === 'paper'")
+  //- pre {{formTemplate}}
+  //- pre {{encounterApeReport}}
   div(v-html="templatePrefilled" style="width: 990px; padding-bottom: 100px; padding: 10px;")
 template(v-if="view === 'form'")
   q-form(ref="focusedModeFormRef" @submit.prevent="onSaveReport")
@@ -242,10 +244,9 @@ export default {
     });
 
     function onSaveReport () {
-      const values = encounterApeReport.value?.values || [];
-
       const regex = /(?<=\{)\w+(?=\})/g;
       const tokens = selectedApeReportTemplate.value?.match(regex) || [];
+      const values = encounterApeReport.value?.values || tokens.map(token => ({ id: token, answer: '' }));
 
       const data = tokens.map(token => {
         const id = token;
