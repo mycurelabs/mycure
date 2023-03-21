@@ -245,7 +245,7 @@ export default {
       const values = encounterApeReport.value?.values || [];
 
       const regex = /(?<=\{)\w+(?=\})/g;
-      const tokens = selectedApeReportTemplate.value.match(regex) || [];
+      const tokens = selectedApeReportTemplate.value?.match(regex) || [];
 
       const data = tokens.map(token => {
         const id = token;

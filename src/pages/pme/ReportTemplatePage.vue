@@ -489,6 +489,15 @@ export default {
         hideCreatedBy.value = !!formTemplate.value?.config?.hideCreatedBy || false;
         hideFinalizedBy.value = !!formTemplate.value?.config?.hideFinalizedBy || false;
 
+        const formTemplateItems = formTemplate.value?.items || [];
+        chosenCustomDropdown.value = formTemplateItems.map(item => {
+          return {
+            choices: item.choices,
+            question: item.question,
+            type: item.type,
+          };
+        });
+
         const { items } = await getApeReportsUsingTemplate({ template: formTemplateId });
         formTemplateAlreadyInUse.value = !!items?.length;
         name.value = formTemplate.value.name;
@@ -545,6 +554,8 @@ export default {
         if (chosenCustomDropdown.value?.length) {
           payload.items = chosenCustomDropdown.value;
         }
+
+        console.warn('payload', payload);
 
         const newFormTemplate = await createFormTemplate(payload);
         router.replace({ params: { reportTemplate: newFormTemplate?.id } });
@@ -624,7 +635,9 @@ export default {
       chosenCustomDropdown.value.push({
         type: 'multiplechoice',
         question: id,
-        choices: dropdownOptions.value.map(item => item.option),
+        choices: [
+          ...dropdownOptions.value.map(item => item.option),
+        ],
       });
       onTokenSelect({ label, value: id });
       customDropdownFormRef.value.resetValidation();
@@ -641,8 +654,8 @@ export default {
       for (const token of tokens) {
         if (token.startsWith('custom_text') || token.startsWith('custom_choices')) {
           const tokenArr = token.split('_');
-          tokenArr.shift(); // remove 'custom' word in front
-          tokenArr.shift(); // remove 'text' or 'choices' word in front
+          // tokenArr.shift(); // remove 'custom' word in front
+          // tokenArr.shift(); // remove 'text' or 'choices' word in front
           tokenArr.pop(); // remove number at the end of the array
           const tokenArrCapitalized = tokenArr.map(capitalized);
           const label = tokenArrCapitalized.join(' ');

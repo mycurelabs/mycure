@@ -33,6 +33,7 @@ generic-page(
               label="Signatories"
               icon="las la-signature"
               no-caps
+              :disable="!hasEncounterApeReport"
             )
         q-separator
         q-card-section
@@ -140,15 +141,38 @@ q-footer(
   bordered
 ).bg-white
   q-toolbar
+    q-btn(
+      v-if="deleteAllowed"
+      label="Delete Report"
+      color="negative"
+      icon="las la-trash"
+      unelevated
+      outline
+      no-caps
+      @click="onDeleteReport"
+    ).q-mr-sm
     q-space
     q-btn(
-      label="Finalize Report"
-      color="positive"
+      v-if="forCheckingAllowed"
+      label="For Checking"
+      icon="las la-arrow-up"
+      color="warning"
       unelevated
       no-caps
+      @click="onForChecking"
+    ).q-mr-sm
+    q-btn(
+      v-if="finalizedAllowed"
+      label="Finalize"
+      color="positive"
+      icon="las la-check"
+      unelevated
+      no-caps
+      @click="onFinalize"
     ).q-mr-sm
     q-btn(
       label="Save Report"
+      icon="las la-save"
       color="primary"
       unelevated
       no-caps
@@ -163,6 +187,7 @@ import { getPmeEncounter } from '@/services/pme';
 import { sdk } from '@/boot/mycure';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
+import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { formatDoctorName as formatDoctorNameUtil } from '@/utils';
 
 import ApeReportViewer from '@/components/pme/ApeReportViewer';
@@ -181,15 +206,27 @@ export default {
   setup () {
     const loading = ref(false);
     const route = useRoute();
-    const tabModel = ref('signatories');
+    const tabModel = ref('live');
+    // const router = useRouter();
     const focusedModeModel = ref({});
     const focusedModeFormRef = ref(null);
     const apeReportFieldsModel = ref({});
     const userStore = useUserStore();
     const apeReportViewerLiveEditRef = ref(null);
     const { pmeEncounterStatusMapper } = usePmeHelper();
+    const { confirm, showSnack } = useQuasarMixins();
 
     const currentUser = computed(() => userStore.$state.user);
+    const currentUserMembership = computed(() => userStore.$state.userActiveMembership);
+    const currentUserRoles = computed(() => {
+      const roles = currentUserMembership.value?.roles || [];
+      return {
+        isSuperAdmin: currentUserMembership.value?.superadmin,
+        isPMEStaff: roles.filter(s => s === 'pme_staff').length !== 0,
+        isPMESHead: roles.filter(s => s === 'pme_head').length !== 0,
+        isPMEDoctor: roles.filter(s => s === 'doctor_pme').length !== 0,
+      };
+    });
 
     const encounter = ref({});
     const encounterId = route.params.encounter;
@@ -197,6 +234,10 @@ export default {
     const encounterFacility = ref({});
     const encounterMedicalRecords = ref([]);
     const encounterPatient = ref({});
+
+    const hasEncounterApeReport = computed(() => {
+      return encounterApeReport.value?.id;
+    });
 
     const selectedExaminer = ref(null);
     const selectedReviewer = ref(null);
@@ -219,13 +260,71 @@ export default {
     const isEditingEvaluator = ref(true);
     const isEditingExaminer = ref(true);
 
-    watch(selectedExaminer, (val) => {
+    const apeReportCreatedAt = computed(() => format(encounterApeReport.value?.createdAt || new Date(), 'MMM dd, yyyy'));
+    const apeReportStatus = computed(() => pmeEncounterStatusMapper(encounter.value));
+    const formTemplate = computed({
+      get () {
+        const template = encounterApeReport.value?.templateData;
+        return template;
+      },
+      set (newValue) {
+        formTemplate.value = newValue;
+      },
+    });
+
+    const deleteAllowed = computed(() => {
+      const isRoleAllowed = currentUserRoles.value?.isPMESHead ||
+        currentUserRoles.value?.isPMEDoctor ||
+        currentUserRoles.value?.isSuperAdmin;
+      return encounterApeReport.value?.id && isRoleAllowed;
+    });
+
+    const forCheckingAllowed = computed(() => {
+      return ['classifying'].includes(apeReportStatus.value?.value) &&
+        (currentUserRoles.value?.isPMEStaff || currentUserRoles.value?.isPMESHead ||
+        currentUserRoles.value?.isPMEDoctor || currentUserRoles.value?.isSuperAdmin);
+    });
+
+    const finalizedAllowed = computed(() => {
+      return ['classifying', 'checking'].includes(apeReportStatus.value?.value) &&
+        (currentUserRoles.value?.isPMEStaff || currentUserRoles.value?.isPMESHead ||
+        currentUserRoles.value?.isPMEDoctor || currentUserRoles.value?.isSuperAdmin);
+    });
+
+    const amendEnabled = computed(() => {
+      return apeReportStatus.value?.value === 'completed' &&
+        (currentUserRoles.value?.isPMESHead || currentUserRoles.value?.isSuperAdmin);
+    });
+
+    const readOnly = computed(() => {
+      return apeReportStatus.value?.value?.type === 'pending' ||
+        (apeReportStatus.value?.value?.type === 'completed' && !amendEnabled.value) ||
+        (!currentUserRoles.value?.isPMEStaff && !currentUserRoles.value?.isPMESHead &&
+        !currentUserRoles.value?.isPMEDoctor && !currentUserRoles.value?.isSuperAdmin);
+    });
+
+    // WATCHERS
+    watch(selectedExaminer, async (val) => {
       console.warn('val', val);
+      if (!val?.uid) return;
+      if (!encounterApeReport.value?.id) return;
+      await sdk.service('medical-records').update(encounterApeReport.value?.id, { examinedBy: val?.uid });
+      showSnack({
+        color: 'positive',
+        message: 'Examiner saved',
+      });
       isEditingExaminer.value = false;
     });
 
-    watch(selectedReviewer, (val) => {
+    watch(selectedReviewer, async (val) => {
       console.warn('val', val);
+      if (!val?.uid) return;
+      if (!encounterApeReport.value?.id) return;
+      await sdk.service('medical-records').update(encounterApeReport.value?.id, { reviewedBy: val?.uid });
+      showSnack({
+        color: 'positive',
+        message: 'Reviewer saved',
+      });
       isEditingEvaluator.value = false;
     });
 
@@ -241,25 +340,13 @@ export default {
       }
     });
 
-    const apeReportCreatedAt = computed(() => format(encounterApeReport.value?.createdAt || new Date(), 'MMM dd, yyyy'));
-    const apeReportStatus = computed(() => pmeEncounterStatusMapper(encounter.value));
-    const formTemplate = computed({
-      get () {
-        const template = encounterApeReport.value?.templateData;
-        return template;
-      },
-      set (newValue) {
-        formTemplate.value = newValue;
-      },
-    });
-
+    // METHODS
     async function init () {
       try {
         loading.value = true;
         const result = await getPmeEncounter({ id: encounterId });
         encounter.value = result.encounter;
         encounterApeReport.value = result.apeReport;
-        console.warn('encounterApeReport.value', encounterApeReport.value);
         encounterFacility.value = result.facility;
         encounterMedicalRecords.value = result.medicalRecords;
         encounterPatient.value = result.patient;
@@ -270,26 +357,52 @@ export default {
       }
     }
 
-    async function onSaveReport () {
+    async function onSaveReport (status) {
       try {
         loading.value = true;
         const payload = {};
 
-        if (tabModel.value === 'live') {
-          const { values, template } = apeReportViewerLiveEditRef.value?.onSaveReport();
-          payload.values = values;
-          payload.template = template;
-          console.warn('data', payload);
+        if (status === 'done') payload.done = true;
+        if (status === 'classified') payload.classify = true;
+        if (status === 'completed') payload.finalize = true;
+
+        const { values, template } = apeReportViewerLiveEditRef.value?.onSaveReport();
+        payload.values = values;
+        payload.template = template;
+
+        if (status === 'completed' && !template) {
+          showSnack({
+            message: 'You cannot finalize a blank report',
+            color: 'warning',
+          });
+          return;
         }
 
-        if (tabModel.value === 'focused') {
-          //
+        const existing = await getPmeEncounter({ id: encounterId });
+
+        console.warn('existing', existing?.apeReport?.id);
+
+        if (existing?.apeReport?.id) {
+          console.warn('payload: update', payload);
+          await sdk.service('medical-records').update(encounterApeReport.value?.id, payload);
+        } else {
+          console.warn('payload: create', payload);
+          payload.type = 'ape-report';
+          payload.encounter = encounter.value?.id;
+          payload.patient = encounter?.value?.patient;
+          await sdk.service('medical-records').create(payload);
         }
 
-        await sdk.service('medical-records').update(encounterApeReport.value?.id, payload);
+        showSnack({
+          color: 'positive',
+          message: 'Success',
+        });
+
         init();
       } catch (e) {
         console.error(e);
+      } finally {
+        loading.value = false;
       }
     }
 
@@ -297,6 +410,54 @@ export default {
       if (!template) return;
       encounterApeReport.value.templateData = template;
       console.warn('encounterApeReport.value.templateData', encounterApeReport.value.templateData);
+    }
+
+    async function onDeleteReport () {
+      try {
+        const result = await confirm({
+          title: 'Delete this encounter?',
+          message: 'Are you sure you want to delete this encounter? This action is irriversible.',
+        });
+        if (!result) return;
+        loading.value = true;
+        await sdk.service('medical-records').remove(encounterId?.value);
+        showSnack({
+          color: 'positive',
+          message: 'Report delete successfully',
+        });
+        init();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    async function onForChecking () {
+      const result = await confirm({
+        title: 'Update report?',
+        message: 'Mark report as "For Checking"?',
+      });
+      if (!result) return;
+      onSaveReport('classified');
+    }
+
+    async function onFinalize () {
+      const result = await confirm({
+        title: 'Finalized report?',
+        message: 'Mark report as "Finalized"?',
+      });
+      if (!result) return;
+      onSaveReport('completed');
+    }
+
+    async function onDone () {
+      const result = await confirm({
+        title: 'Update report?',
+        message: 'Mark report as "Done"?',
+      });
+      if (!result) return;
+      onSaveReport('classified');
     }
 
     function formatDoctorName (personalDetails) {
@@ -307,32 +468,42 @@ export default {
     init();
 
     return {
+      amendEnabled,
       apeReportCreatedAt,
       apeReportFieldsModel,
       apeReportStatus,
       apeReportViewerLiveEditRef,
       createdByNameFormatted,
       currentUser,
+      deleteAllowed,
       encounter,
       encounterApeReport,
       encounterFacility,
       encounterMedicalRecords,
       encounterPatient,
+      hasEncounterApeReport,
       evaluatorRoles,
       examinerNameFormatted,
+      finalizedAllowed,
       finalizedByNameFormatted,
       focusedModeFormRef,
       focusedModeModel,
+      forCheckingAllowed,
       formTemplate,
       isEditingEvaluator,
       isEditingExaminer,
       loading,
       medicalExaminerRoles,
+      readOnly,
       reviewerNameFormatted,
       selectedExaminer,
       selectedReviewer,
       tabModel,
       //
+      onDeleteReport,
+      onDone,
+      onFinalize,
+      onForChecking,
       onSaveReport,
       onTemplateSelect,
     };
