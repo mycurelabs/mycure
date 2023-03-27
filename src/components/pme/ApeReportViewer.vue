@@ -244,6 +244,7 @@ export default {
     });
 
     function onSaveReport () {
+      console.warn('apeFormTemplate', apeFormTemplate);
       const regex = /(?<=\{)\w+(?=\})/g;
       const tokens = selectedApeReportTemplate.value?.match(regex) || [];
       const values = encounterApeReport.value?.values || tokens.map(token => ({ id: token, answer: '' }));

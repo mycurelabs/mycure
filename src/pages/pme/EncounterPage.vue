@@ -28,13 +28,13 @@ generic-page(
             //-   icon="la la-bullseye"
             //-   no-caps
             //- )
-            q-tab(
-              name="signatories"
-              label="Signatories"
-              icon="las la-signature"
-              no-caps
-              :disable="!hasEncounterApeReport"
-            )
+            //- q-tab(
+            //-   name="signatories"
+            //-   label="Signatories"
+            //-   icon="las la-signature"
+            //-   no-caps
+            //-   :disable="!hasEncounterApeReport"
+            //- )
         q-separator
         q-card-section
           q-tab-panels(v-model="tabModel" animated)
@@ -60,18 +60,10 @@ generic-page(
                     :medical-records="encounterMedicalRecords"
                     :patient="encounterPatient"
                   )
-            //- q-tab-panel(name="focused")
-              //- ape-report-viewer(
-              //-   view="form"
-              //-   :ape-report="encounterApeReport"
-              //-   :patient="encounterPatient"
-              //-   :encounter="encounter"
-              //-   :medical-records="encounterMedicalRecords"
-              //-   :facility="encounterFacility"
-              //- )
-            q-tab-panel(name="signatories")
-              div.row.items-top
-                div.col-xs-12.col-md-6.q-pa-sm
+              div.row.items-top.q-mt-md
+                div.col-xs-12
+                  h1.text-primary.text-h6 Signatories
+                div.col-xs-12.col-md-6.q-py-sm
                   span.block Medical Examiner:
                   div(v-if="isEditingExaminer").row.items-center
                     div.col-grow
@@ -99,7 +91,7 @@ generic-page(
                       @click="isEditingExaminer = true"
                     )
 
-                div.col-xs-12.col-md-6.q-pa-sm
+                div.col-xs-12.col-md-6.q-py-sm
                   span.block Evaluated By:
                   div(v-if="isEditingEvaluator").row.items-center
                     div.col-grow
@@ -126,12 +118,84 @@ generic-page(
                       flat
                       @click="isEditingEvaluator = true"
                     )
-                div.col-xs-12.col-md-6.q-pa-sm
+                div.col-xs-12.col-md-6.q-py-sm
                   span.block Processed By:
                   span.text-weight-medium.block {{createdByNameFormatted || '-'}}
-                div.col-xs-12.col-md-6.q-pa-sm
+                div.col-xs-12.col-md-6.q-py-sm
                   span.block Finalized By:
                   span.text-weight-medium.block {{finalizedByNameFormatted || '-'}}
+            //- q-tab-panel(name="focused")
+              //- ape-report-viewer(
+              //-   view="form"
+              //-   :ape-report="encounterApeReport"
+              //-   :patient="encounterPatient"
+              //-   :encounter="encounter"
+              //-   :medical-records="encounterMedicalRecords"
+              //-   :facility="encounterFacility"
+              //- )
+            //- q-tab-panel(name="signatories")
+            //-   div.row.items-top
+            //-     div.col-xs-12.col-md-6.q-pa-sm
+            //-       span.block Medical Examiner:
+            //-       div(v-if="isEditingExaminer").row.items-center
+            //-         div.col-grow
+            //-           search-members(
+            //-             label="Medical Examiner"
+            //-             autofocus
+            //-             :roles="medicalExaminerRoles"
+            //-             @select="v => selectedExaminer = v"
+            //-           )
+            //-         div
+            //-           q-btn(
+            //-             @click="isEditingExaminer = false"
+            //-             icon="las la-times"
+            //-             color="negative"
+            //-             round
+            //-             flat
+            //-           ).q-ml-sm
+            //-       div(v-else).row.items-center.justify-between
+            //-         span.text-weight-medium.block {{examinerNameFormatted || '-'}}
+            //-         q-btn(
+            //-           icon="las la-edit"
+            //-           color="primary"
+            //-           round
+            //-           flat
+            //-           @click="isEditingExaminer = true"
+            //-         )
+
+            //-     div.col-xs-12.col-md-6.q-pa-sm
+            //-       span.block Evaluated By:
+            //-       div(v-if="isEditingEvaluator").row.items-center
+            //-         div.col-grow
+            //-           search-members(
+            //-             label="Evaluated By"
+            //-             autofocus
+            //-             :roles="evaluatorRoles"
+            //-             @select="v => selectedReviewer = v"
+            //-           )
+            //-         div
+            //-           q-btn(
+            //-             @click="isEditingEvaluator = false"
+            //-             icon="las la-times"
+            //-             color="negative"
+            //-             round
+            //-             flat
+            //-           ).q-ml-sm
+            //-       div(v-else).row.items-center.justify-between
+            //-         span.text-weight-medium.block {{reviewerNameFormatted || '-'}}
+            //-         q-btn(
+            //-           icon="las la-edit"
+            //-           color="primary"
+            //-           round
+            //-           flat
+            //-           @click="isEditingEvaluator = true"
+            //-         )
+            //-     div.col-xs-12.col-md-6.q-pa-sm
+            //-       span.block Processed By:
+            //-       span.text-weight-medium.block {{createdByNameFormatted || '-'}}
+            //-     div.col-xs-12.col-md-6.q-pa-sm
+            //-       span.block Finalized By:
+            //-       span.text-weight-medium.block {{finalizedByNameFormatted || '-'}}
   //- div.row.items-center.justify-center.q-mb-lg
     div.col-xs-12.col-md-10.q-mb-md
       span.text-h6.text-primary Past Encounters
@@ -368,9 +432,19 @@ export default {
         if (status === 'classified') payload.classify = true;
         if (status === 'completed') payload.finalize = true;
 
-        const { values, template } = apeReportViewerLiveEditRef.value?.onSaveReport();
+        const result = apeReportViewerLiveEditRef.value?.onSaveReport();
+        const values = result?.values;
+        const template = result?.template;
         payload.values = values;
         payload.template = template;
+
+        if (!values || !template) {
+          showSnack({
+            message: 'You cannot save a blank report',
+            color: 'warning',
+          });
+          return;
+        }
 
         if (status === 'completed' && !template) {
           showSnack({
@@ -381,8 +455,6 @@ export default {
         }
 
         const existing = await getPmeEncounter({ id: encounterId });
-
-        console.warn('existing', existing?.apeReport?.id);
 
         if (existing?.apeReport?.id) {
           console.warn('payload: update', payload);
