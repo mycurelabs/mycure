@@ -11,6 +11,33 @@ generic-page(
           q-toolbar-title.text-h6.text-primary PME Report {{apeReportCreatedAt}} #[q-chip(dense :color="apeReportStatus.color").text-white {{apeReportStatus.label}}]
             br
             span.text-body1 {{encounterFacility.name}}
+          q-btn(
+            v-if="amendEnabled"
+            label="Amendments"
+            color="primary"
+            no-caps
+            unelevated
+            @click="amendmentsDialog = true"
+          )
+          q-dialog(v-model="amendmentsDialog")
+            q-card(style="width: 500px")
+              q-toolbar
+                q-toolbar-title Amendments
+                q-space
+                q-btn(
+                  icon="las la-times"
+                  round
+                  flat
+                  @click="amendmentsDialog = false"
+                )
+              q-separator
+              q-card-section.q-pa-none
+                q-list(separator)
+                  template(v-for="history in amendments")
+                    q-item(clickable)
+                      q-item-section
+                        q-item-label(subtitle) {{history.creationDate}}
+                        q-item-label {{history.creatorName}}
         q-toolbar
           q-tabs(
             v-model="tabModel"
@@ -254,6 +281,7 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { formatDoctorName as formatDoctorNameUtil } from '@/utils';
+import { getAmendments } from '@/services/medical-records';
 
 import ApeReportViewer from '@/components/pme/ApeReportViewer';
 import GenericPage from '@/components/commons/GenericPage';
@@ -302,6 +330,9 @@ export default {
     const encounterPatient = ref({});
 
     const hasEncounterApeReport = computed(() => {
+      return encounterApeReport.value?.id;
+    });
+    const encounterApeReportId = computed(() => {
       return encounterApeReport.value?.id;
     });
 
@@ -355,11 +386,6 @@ export default {
       return ['classifying', 'checking'].includes(apeReportStatus.value?.value) &&
         (currentUserRoles.value?.isPMEStaff || currentUserRoles.value?.isPMESHead ||
         currentUserRoles.value?.isPMEDoctor || currentUserRoles.value?.isSuperAdmin);
-    });
-
-    const amendEnabled = computed(() => {
-      return apeReportStatus.value?.value === 'completed' &&
-        (currentUserRoles.value?.isPMESHead || currentUserRoles.value?.isSuperAdmin);
     });
 
     const readOnly = computed(() => {
@@ -416,6 +442,8 @@ export default {
         encounterFacility.value = result.facility;
         encounterMedicalRecords.value = result.medicalRecords;
         encounterPatient.value = result.patient;
+
+        fetchAmendments();
       } catch (e) {
         console.error(e);
       } finally {
@@ -542,8 +570,21 @@ export default {
 
     init();
 
+    // New convensions
+    const amendmentsDialog = ref(false);
+    const amendEnabled = computed(() => {
+      return apeReportStatus.value?.value === 'completed' &&
+        (currentUserRoles.value?.isPMESHead || currentUserRoles.value?.isSuperAdmin);
+    });
+    const amendments = ref([]);
+    async function fetchAmendments () {
+      const items = await getAmendments({ id: encounterApeReportId.value });
+      amendments.value = items || [];
+    }
+
     return {
       amendEnabled,
+      amendments,
       apeReportCreatedAt,
       apeReportFieldsModel,
       apeReportStatus,
@@ -575,6 +616,7 @@ export default {
       selectedExaminer,
       selectedReviewer,
       tabModel,
+      amendmentsDialog,
       //
       onDeleteReport,
       onDone,

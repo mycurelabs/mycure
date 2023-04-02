@@ -30,7 +30,7 @@ generic-page(
           name="las la-clipboard"
           style="margin-bottom: 5px;"
         ).text-primary.q-mr-sm
-        span APE Reports
+        span PME Reports
 
     //- Search and filter
     template(v-slot:top-right)
