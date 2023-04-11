@@ -1,5 +1,5 @@
 import { useHelpers } from '@/composables/helpers';
-import { differenceInYears, format } from 'date-fns';
+import { addMilliseconds, differenceInDays, differenceInYears, eachDayOfInterval, format } from 'date-fns';
 import _, { isEmpty, get } from 'lodash';
 import {
   calcBMI,
@@ -107,6 +107,68 @@ export default () => {
       package: packageFormatted,
       hmo,
       tags,
+      // Always use $data for the row data handling
+      $data: {
+        ...item,
+      },
+    };
+  };
+
+  const monitoringReportMapper = (item = {}) => {
+    const statuses = [pmeEncounterStatusMapper(item)];
+
+    if (item.isFollowup) {
+      statuses.push({ label: 'For Followup', color: 'black', value: 'followup' });
+    }
+
+    const normalTime = item?.invoiceItems?.[0]?.$populated?.serviceData?.normalTime || 0;
+    const name = formatName(item?.patient?.name, 'lastName, firstName');
+    const hmo = item?.patient?.companies?.map(company => company.name)?.join(', ');
+    const tags = item?.patient?.tags?.join(', ');
+    const examType = item?.tags?.join(', ');
+    const clinic = item?.facility?.name;
+    const dateOfExam = item?.createdAt ? format(item.createdAt, 'MM/dd/yy hh:mm a') : null;
+    const releaseDateRaw = item?.apeReport?.finalizedAt;
+    const releaseDate = releaseDateRaw ? format(releaseDateRaw, 'MM/dd/yy hh:mm a') : null;
+    const dueDateRaw = item?.createdAt && normalTime ? addMilliseconds(item.createdAt, normalTime) : null;
+    const dueDate = dueDateRaw ? format(dueDateRaw, 'MM/dd/yy hh:mm a') : null;
+
+    let noOfDays = null;
+
+    if (item?.createdAt && releaseDateRaw) {
+      const numberOfDays = differenceInDays(releaseDateRaw, item.createdAt);
+      const weekends = eachDayOfInterval({
+        start: item.createdAt,
+        end: releaseDateRaw,
+      }).filter(day => format(day, 'E') === '7');
+
+      noOfDays = numberOfDays - weekends.length;
+    }
+
+    let lapses = null;
+
+    if (dueDateRaw && releaseDateRaw) {
+      const lapseDates = differenceInDays(releaseDateRaw, dueDateRaw);
+      const weekends = eachDayOfInterval({
+        start: item?.createdAt,
+        end: item?.apeReport?.finalizedAt,
+      }).filter(day => format(day, 'E') === '7');
+
+      lapses = lapseDates - weekends.length;
+    }
+
+    return {
+      lapses,
+      name,
+      dateOfExam,
+      dueDate,
+      releaseDate,
+      noOfDays,
+      examType,
+      status: statuses,
+      hmo,
+      tags,
+      clinic,
       // Always use $data for the row data handling
       $data: {
         ...item,
@@ -2572,6 +2634,7 @@ export default () => {
     PME_ENCOUNTER_STATUS_TYPES,
     TEMPLATE_TOKENS_MAP,
     groupPackageMapper,
+    monitoringReportMapper,
     pmeEncounterStatusMapper,
     pmeEncounterStatusQueryBuilder,
     pmeWorklistMapper,

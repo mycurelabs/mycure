@@ -40,27 +40,32 @@ generic-page(
     //- Table body
     template(v-slot:body="props")
       q-tr(:props="props" class="hover:bg-grey-3 cursor-pointer" @click="onRowSelect(props.row)")
-        q-td(key="date" :props="props")
-          span {{props.row.date || '-'}}
         q-td(key="name" :props="props")
           div.row.no-wrap.items-center
             q-avatar(size="22px" color="grey").q-mr-sm
               q-img(v-if="getPicURL(props.row)" :src="getPicURL(props.row)")
               q-icon(v-else name="la la-user-alt" size="22px").text-white
             span {{props.row.name}}
+        q-td(key="company" :props="props")
+          span {{props.row.company || '-'}}
         q-td(key="exam-type" :props="props")
           div.ellipsis-2-lines {{props.row.examType || '-'}}
             q-tooltip(v-if="props.row.examType") {{props.row.examType}}
-        q-td(key="package" :props="props")
-          div.ellipsis-2-lines {{props.row.package || '-'}}
-            q-tooltip(v-if="props.row.package") {{props.row.package}}
-        q-td(key="hmo" :props="props")
-          span {{props.row.hmo || '-'}}
-        q-td(key="tags" :props="props")
-          span {{props.row.tags || '-'}}
+        q-td(key="date-of-exam" :props="props")
+          span {{props.row.dateOfExam || '-'}}
+        q-td(key="due-date" :props="props")
+          span {{props.row.dueDate || '-'}}
+        q-td(key="release-date" :props="props")
+          span {{props.row.releaseDate || '-'}}
+        q-td(key="no-of-days" :props="props")
+          span {{props.row.noOfDays || '-'}}
+        q-td(key="lapses" :props="props")
+          span {{props.row.lapses || '-'}}
         q-td(key="status" :props="props")
           template(v-for="status in props.row.status")
             q-badge(:color="status.color").q-mr-sm {{status.label}}
+        q-td(key="clinic" :props="props")
+          span {{props.row.clinic || '-'}}
 
     //- No data
     template(v-slot:no-data)
@@ -96,7 +101,7 @@ export default {
     const { tableColumnBuilder } = useHelpers();
     const {
       pmeEncounterStatusQueryBuilder,
-      pmeWorklistMapper,
+      monitoringReportMapper,
     } = usePmeHelpers();
     // Stores
     const pmeStore = usePmeStore();
@@ -118,19 +123,19 @@ export default {
     const pmeEncounters = computed(() => pmeStore.$state.pmeEncounters);
     const rows = computed(() => {
       if (!pmeEncounters.value?.length) return [];
-      return pmeEncounters.value.map(pmeWorklistMapper);
+      return pmeEncounters.value.map(monitoringReportMapper);
     });
 
     const columns = tableColumnBuilder([
       {
-        name: 'date',
-        field: 'date',
-        label: 'Date',
-      },
-      {
         name: 'name',
         field: 'name',
         label: 'Name',
+      },
+      {
+        name: 'company',
+        field: 'company',
+        label: 'Company',
       },
       {
         name: 'exam-type',
@@ -138,20 +143,29 @@ export default {
         label: 'Exam Type',
       },
       {
-        name: 'package',
-        field: 'package',
-        label: 'Package',
+        name: 'date-of-exam',
+        field: 'dateOfExam',
+        label: 'Date of Exam',
       },
       {
-        name: 'hmo',
-        field: 'hmo',
-        label: 'HMO',
+        name: 'due-date',
+        field: 'dueDate',
+        label: 'Due Date',
       },
       {
-        name: 'tags',
-        field: 'tags',
-        label: 'Tags',
-        style: 'max-width: 150px; white-space: normal;',
+        name: 'release-date',
+        field: 'releaseDate',
+        label: 'Release Date',
+      },
+      {
+        name: 'no-of-days',
+        field: 'noOfDays',
+        label: 'No. of Days',
+      },
+      {
+        name: 'lapses',
+        field: 'lapses',
+        label: 'Lapses',
       },
       {
         name: 'status',
@@ -159,6 +173,11 @@ export default {
         label: 'Status',
         align: 'right',
         style: 'max-width: 190px; white-space: normal;',
+      },
+      {
+        name: 'clinic',
+        field: 'clinic',
+        label: 'Clinic',
       },
     ]);
 
@@ -173,6 +192,7 @@ export default {
           facility: activeOrganization.value.id,
           $limit: rowsPerPage,
           $skip: (page - 1) * rowsPerPage,
+          APEReportFinalizedAt: { $exists: true },
         };
 
         // Selected patient
@@ -190,6 +210,20 @@ export default {
           };
         }
 
+        console.warn('selectedFilters?.finalizationDateType.value', selectedFilters);
+
+        // Finalization Date Type
+        if (selectedFilters?.finalizationDateType) {
+          if (selectedFilters?.finalizationDateType === 'Release Date' && selectedFilters?.filterDate?.dates?.start) {
+            const start = selectedFilters?.filterDate?.dates?.start;
+            const end = selectedFilters?.filterDate?.dates?.end;
+            query.APEReportFinalizedAt = {
+              $gte: start,
+              $lte: end,
+            };
+          }
+        }
+
         // Status Filter
         if (selectedFilters?.filterStatus?.value) {
           const status = selectedFilters?.filterStatus?.value;
@@ -202,7 +236,10 @@ export default {
           query.tags = selectedFilters?.filterExamType?.value;
         }
 
+        console.warn('query', query);
+
         const { total } = await pmeStore.getPmeEncounters(query);
+
         totalItems.value = total;
         pagination.value.page = page;
         pagination.value.rowsPerPage = rowsPerPage;

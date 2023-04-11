@@ -4,17 +4,61 @@ import { getPatient } from '@/services/patients';
 
 const MEDICAL_ENCOUNTER_SERVICE_NAME = 'medical-encounters';
 const MEDICAL_RECORDS_SERVICE_NAME = 'medical-records';
+const PERSONAL_DETAILS_SELECT_KEYS = [
+  'doc_eSignatureURL',
+  'doc_PRCLicenseNo',
+  'doc_PTRNo',
+  'name',
+  'picURL',
+  'PRCLicenseNo',
+];
+
+export const getApeReport = async (opts) => {
+  const encounterId = opts?.encounterId;
+  return sdk.service(MEDICAL_RECORDS_SERVICE_NAME).findOne({
+    encounter: encounterId,
+    type: 'ape-report',
+    $populate: {
+      examinedByData: {
+        service: 'personal-details',
+        foreignKey: 'id',
+        method: 'findOne',
+        localKey: 'examinedBy',
+        $select: PERSONAL_DETAILS_SELECT_KEYS,
+      },
+      reviewedByData: {
+        service: 'personal-details',
+        foreignKey: 'id',
+        method: 'findOne',
+        localKey: 'reviewedBy',
+        $select: PERSONAL_DETAILS_SELECT_KEYS,
+      },
+      createdByDetails: {
+        service: 'personal-details',
+        foreignKey: 'id',
+        method: 'findOne',
+        localKey: 'createdBy',
+        $select: PERSONAL_DETAILS_SELECT_KEYS,
+      },
+      finalizedByData: {
+        service: 'personal-details',
+        foreignKey: 'id',
+        method: 'findOne',
+        localKey: 'finalizedBy',
+        $select: PERSONAL_DETAILS_SELECT_KEYS,
+      },
+      templateData: {
+        service: 'form-templates',
+        foreignKey: 'id',
+        method: 'findOne',
+        localKey: 'template',
+      },
+    },
+  });
+};
 
 export const getPmeEncounter = async (opts) => {
   if (!opts?.id) throw new Error('Encounter id is required');
-  const personalDetailsSelectKeys = [
-    'doc_eSignatureURL',
-    'doc_PRCLicenseNo',
-    'doc_PTRNo',
-    'name',
-    'picURL',
-    'PRCLicenseNo',
-  ];
 
   const encounterId = opts.id;
   const encounter = await sdk.service(MEDICAL_ENCOUNTER_SERVICE_NAME).get(encounterId, {
@@ -120,50 +164,7 @@ export const getPmeEncounter = async (opts) => {
 
   const patient = await getPatient(encounter.patient);
 
-  // const { items: medicalRecords } = await sdk.service('medica-records').find({
-
-  // });
-
-  const apeReport = await sdk.service(MEDICAL_RECORDS_SERVICE_NAME).findOne({
-    encounter: encounterId,
-    type: 'ape-report',
-    $populate: {
-      examinedByData: {
-        service: 'personal-details',
-        foreignKey: 'id',
-        method: 'findOne',
-        localKey: 'examinedBy',
-        $select: personalDetailsSelectKeys,
-      },
-      reviewedByData: {
-        service: 'personal-details',
-        foreignKey: 'id',
-        method: 'findOne',
-        localKey: 'reviewedBy',
-        $select: personalDetailsSelectKeys,
-      },
-      createdByDetails: {
-        service: 'personal-details',
-        foreignKey: 'id',
-        method: 'findOne',
-        localKey: 'createdBy',
-        $select: personalDetailsSelectKeys,
-      },
-      finalizedByData: {
-        service: 'personal-details',
-        foreignKey: 'id',
-        method: 'findOne',
-        localKey: 'finalizedBy',
-        $select: personalDetailsSelectKeys,
-      },
-      templateData: {
-        service: 'form-templates',
-        foreignKey: 'id',
-        method: 'findOne',
-        localKey: 'template',
-      },
-    },
-  });
+  const apeReport = await getApeReport({ encounterId });
 
   const patientMapped = patient;
   const apeReportMapped = {
@@ -221,26 +222,49 @@ export const getPmeEncounters = async (opts) => {
           },
         },
       },
+      facilityData: {
+        service: 'organizations',
+        method: 'get',
+        localKey: 'facility',
+      },
+      apeReport: {
+        service: 'medical-records',
+        foreignKey: 'encounter',
+        type: 'ape-report',
+        method: 'get',
+      },
     },
     // query override
     ...opts,
   };
 
   if (opts?.patient) query.patient = opts.patient;
+  if (opts?.finishedAt) query.finishedAt = opts.finishedAt;
+
+  if (opts?.APEReportFinalizedAt) query.APEReportFinalizedAt = opts.APEReportFinalizedAt;
 
   const { items, total } = await sdk.service(MEDICAL_ENCOUNTER_SERVICE_NAME).find(query);
-  const itemsMapped = items.map(item => {
-    return {
+
+  const itemsMapped = [];
+
+  for (const item of items) {
+    const encounterId = item.id;
+    const apeReport = await getApeReport({ encounterId });
+    const newItem = {
       ...omit(item, ['$populated']),
       isFollowup: item?.preceding || item?.precedingParent,
-      patient: item?.$populated?.patient,
       // NOTE: combine unique billing items from current encounter and preceding encounter
       invoiceItems: uniqBy([
         ...(item?.$populated?.billingItemsData || []),
         ...(item?.$populated?.precedingBillingItemsData || []),
       ], 'ref'),
+      apeReport,
+      patient: item?.$populated?.patient,
+      facility: item?.$populated?.facilityData,
     };
-  });
+    itemsMapped.push(newItem);
+  }
+
   return {
     items: itemsMapped,
     total,

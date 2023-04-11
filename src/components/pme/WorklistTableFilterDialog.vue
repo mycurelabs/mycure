@@ -24,6 +24,22 @@ q-dialog(v-model="dialog" persistent)
     q-card-section
       div.row.items-center.justify-center.q-mb-md
         div.col-xs-12.col-md-6
+          span Finalization Date Type:
+        div.col-xs-12.col-md-6
+          q-select(
+            v-model="finalizationDateType"
+            label="Finalization Date Types"
+            style="width: 100%"
+            color="primary"
+            dropdown-icon="la la-angle-down"
+            clear-icon="la la-times"
+            clearable
+            dense
+            outlined
+            :options="finalizationDateTypes"
+          )
+      div.row.items-center.justify-center.q-mb-md
+        div.col-xs-12.col-md-6
           span Filter by Date:
         div.col-xs-12.col-md-6
           date-filter(
@@ -134,12 +150,15 @@ export default {
     const filterTemplate = ref(null);
     const filterStatus = ref(null);
     const filterCount = ref(0);
+    const finalizationDateType = ref('Date of Exam');
+    const finalizationDateTypes = ['Date of Exam', 'Date Release'];
     const pmeEncounterStatuses = PME_ENCOUNTER_STATUS_TYPES;
     const pmeEncounterExamTypes = PME_ENCOUNTER_EXAM_TYPES;
     const activeOrganizationBranches = computed(() => userStore.$state.userActiveOrganizationBranches?.map(branch => ({ value: branch.id, label: branch.name })));
 
     function onSubmitFilters () {
       const filters = {
+        finalizationDateType: finalizationDateType.value,
         filterBranch: filterBranch.value,
         filterDate: filterDate.value,
         filterExamType: filterExamType.value,
@@ -175,6 +194,8 @@ export default {
       filterStatus,
       pmeEncounterExamTypes,
       pmeEncounterStatuses,
+      finalizationDateType,
+      finalizationDateTypes,
       // methods
       clearFilters,
       dateSelected,
