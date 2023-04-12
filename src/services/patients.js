@@ -1,10 +1,12 @@
 import { sdk } from '@/boot/mycure';
 import { omit } from 'lodash';
+import { normalizePopulated } from '@/utils';
 
-const SERVICE_NAME = 'medical-patients';
+const SERVICE_NAME = 'personal-details';
 
 export const getPatient = async (id) => {
   const query = {
+    type: 'medical-patients',
     $populate: {
       personalDetails: {
         service: 'personal-details',
@@ -47,7 +49,6 @@ export const getPatient = async (id) => {
     // overrides
     medicalNote: patient?.$populated?.medicalNote,
     insuranceCards: insurances,
-    hell: '1',
   };
 };
 
@@ -69,7 +70,7 @@ export const getPatients = async (opts) => {
     archivedAt: { $exists: !!opts?.archived },
     removedAt: { $exists: false },
     $sort: { id: 1 },
-    $limit: 50,
+    $limit: 20,
     $populate: {
       patient: {
         service: 'medical-patients',
@@ -89,30 +90,10 @@ export const getPatients = async (opts) => {
     };
   }
 
-  // if (opts?.searchText || opts?.sex || opts?.tags) {
-  //   query.$search = {
-  //     query: {
-  //       text: opts.searchText,
-  //       sex: opts.sex,
-  //       tags: opts.tags,
-  //     },
-  //     sort: { 'name.lastNameNormalized': 1 },
-  //     archived: { $exists: !!opts?.archived },
-  //     archivedAt: { $exists: !!opts?.archived },
-  //   };
-  // }
-
   const { items, total } = await sdk.service(SERVICE_NAME).find(query);
 
-  const mapped = items?.map(item => {
-    return {
-      ...item,
-      ...item.$populated.personalDetails,
-    };
-  });
-
   return {
-    items: mapped,
+    items: normalizePopulated(items),
     total,
   };
 };

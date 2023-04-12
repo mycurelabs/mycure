@@ -1,6 +1,6 @@
 import { useHelpers } from '@/composables/helpers';
 import { addMilliseconds, differenceInDays, differenceInYears, eachDayOfInterval, format } from 'date-fns';
-import _, { isEmpty, get } from 'lodash';
+import _, { isEmpty, get, cloneDeep, uniq, map } from 'lodash';
 import {
   calcBMI,
   formatBirthHistory,
@@ -25,6 +25,7 @@ import {
   getRecords,
   recordsFieldFormatter,
 } from '@/utils/medical-records-formatter';
+import { PME_REPORT_MEDICAL_RECORDS_TOKENS } from '@/constants/pme';
 
 export default () => {
   const { formatName, formatAddress } = useHelpers();
@@ -140,7 +141,7 @@ export default () => {
       const weekends = eachDayOfInterval({
         start: item.createdAt,
         end: releaseDateRaw,
-      }).filter(day => format(day, 'E') === '7');
+      }).filter(day => format(day, 'i') === '7');
 
       noOfDays = numberOfDays - weekends.length;
     }
@@ -152,9 +153,9 @@ export default () => {
       const weekends = eachDayOfInterval({
         start: item?.createdAt,
         end: item?.apeReport?.finalizedAt,
-      }).filter(day => format(day, 'E') === '7');
-
-      lapses = lapseDates - weekends.length;
+      }).filter(day => format(day, 'i') === '7');
+      const diff = lapseDates - weekends.length;
+      lapses = diff > 0 ? diff : 0;
     }
 
     return {
@@ -2638,5 +2639,57 @@ export default () => {
     pmeEncounterStatusMapper,
     pmeEncounterStatusQueryBuilder,
     pmeWorklistMapper,
+  };
+};
+
+export const useEditorHelper = () => {
+  function editorTempalteToRawTemplate (editorTemplate) {
+    const elements = document.getElementsByClassName('ape-report-editor-tokens');
+    let rawTemplate = cloneDeep(editorTemplate);
+    if (elements.length) {
+      for (let i = 0; i < elements.length; i++) {
+        const elem = elements.item(i);
+        const elementId = elem.id;
+        const stringElem = elem.outerHTML;
+        rawTemplate = rawTemplate.replace(stringElem, `{${elementId}}`);
+      };
+    }
+
+    return rawTemplate;
+  }
+
+  function getSummaryReportFields (rawTemplate, config) {
+    const summaryReportFields = PME_REPORT_MEDICAL_RECORDS_TOKENS.reduce((acc, curr) => {
+      return {
+        ...acc,
+        [curr]: false,
+      };
+    }, {});
+
+    const regex = /(?<=\{)\w+(?=\})/g;
+    const tokens = rawTemplate?.match(regex) || [];
+
+    const uniqueTokens = uniq(map(tokens, (token) => {
+      const tokenArr = token.split('_');
+      tokenArr.pop(); // remove number at the end of the array
+      token = tokenArr.join('_');
+      return token;
+    }));
+
+    const hiddenItemsInPMEReport = config?.hiddenItemsInPMEReport || {};
+    const obj = uniqueTokens.reduce((acc, curr) => {
+      return {
+        ...acc,
+        [curr]: hiddenItemsInPMEReport?.[curr] || summaryReportFields?.value?.[curr] || false,
+      };
+    }, {});
+    return {
+      hiddenItemsInPMEReport: obj,
+    };
+  }
+
+  return {
+    editorTempalteToRawTemplate,
+    getSummaryReportFields,
   };
 };

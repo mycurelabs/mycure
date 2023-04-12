@@ -22,13 +22,13 @@ q-dialog(v-model="dialog" persistent)
         q-icon(name="la la-close")
     q-separator
     q-card-section
-      div.row.items-center.justify-center.q-mb-md
+      div(v-if="showFilterDateBy").row.items-center.justify-center.q-mb-md
         div.col-xs-12.col-md-6
           span Finalization Date Type:
         div.col-xs-12.col-md-6
           q-select(
             v-model="finalizationDateType"
-            label="Finalization Date Types"
+            label="Filter Date By"
             style="width: 100%"
             color="primary"
             dropdown-icon="la la-angle-down"
@@ -97,7 +97,7 @@ q-dialog(v-model="dialog" persistent)
             outlined
             :options="activeOrganizationBranches"
           )
-      div.row.items-center.justify-center.q-mb-md
+      div(v-if="showTemplateFilter").row.items-center.justify-center.q-mb-md
         div.col-xs-12.col-md-6
           span Filter by Template:
         div.col-xs-12.col-md-6
@@ -135,6 +135,10 @@ export default {
   components: {
     DateFilter,
     SearchFormTemplates,
+  },
+  props: {
+    showTemplateFilter: Boolean,
+    showFilterDateBy: Boolean,
   },
   emits: ['filter'],
   setup (props, { emit }) {

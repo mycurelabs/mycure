@@ -1,6 +1,8 @@
 import { sdk } from '@/boot/mycure';
 import { omit, uniqBy } from 'lodash';
 import { getPatient } from '@/services/patients';
+import { normalizePopulated } from 'src/utils';
+// import { normalizePopulated } from '@/utils';
 
 const MEDICAL_ENCOUNTER_SERVICE_NAME = 'medical-encounters';
 const MEDICAL_RECORDS_SERVICE_NAME = 'medical-records';
@@ -228,9 +230,10 @@ export const getPmeEncounters = async (opts) => {
         localKey: 'facility',
       },
       apeReport: {
+        type: 'ape-report',
         service: 'medical-records',
         foreignKey: 'encounter',
-        type: 'ape-report',
+        localKey: 'encounter',
         method: 'get',
       },
     },
@@ -241,15 +244,15 @@ export const getPmeEncounters = async (opts) => {
   if (opts?.patient) query.patient = opts.patient;
   if (opts?.finishedAt) query.finishedAt = opts.finishedAt;
 
-  if (opts?.APEReportFinalizedAt) query.APEReportFinalizedAt = opts.APEReportFinalizedAt;
-
   const { items, total } = await sdk.service(MEDICAL_ENCOUNTER_SERVICE_NAME).find(query);
 
   const itemsMapped = [];
 
   for (const item of items) {
-    const encounterId = item.id;
-    const apeReport = await getApeReport({ encounterId });
+    // const encounterId = item.id;
+    // const apeReport = await getApeReport({ encounterId });
+    // console.warn('apeReport', apeReport);
+    const apeReport = {};
     const newItem = {
       ...omit(item, ['$populated']),
       isFollowup: item?.preceding || item?.precedingParent,
@@ -269,4 +272,26 @@ export const getPmeEncounters = async (opts) => {
     items: itemsMapped,
     total,
   };
+};
+
+export const getApeReports = async (opts) => {
+  const query = {
+    type: 'ape-report',
+    facility: opts.facility,
+    $populate: {
+      encounter: {
+        service: 'medical-encounters',
+        localKey: 'encounter',
+        method: 'get',
+      },
+      template: {
+        service: 'form-templates',
+        localKey: 'template',
+        method: 'get',
+      },
+    },
+  };
+  const { items } = await sdk.service('medical-records').find(query);
+  const normalizedItems = normalizePopulated(items);
+  return normalizedItems;
 };

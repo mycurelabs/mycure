@@ -35,7 +35,10 @@ generic-page(
     //- Search and filter
     template(v-slot:top-right)
       search-patients(@select="onPatientSelect").q-mr-sm
-      worklist-table-filter-dialog(@filter="onFilter")
+      worklist-table-filter-dialog(
+        show-filter-date-by
+        @filter="onFilter"
+      )
 
     //- Table body
     template(v-slot:body="props")
@@ -201,23 +204,26 @@ export default {
         }
 
         // Date Filter
-        if (selectedFilters?.filterDate?.dates?.start) {
+        // if (selectedFilters?.filterDate?.dates?.start && !selectedFilters?.finalizationDateType) {
+        //   const start = selectedFilters?.filterDate?.dates?.start;
+        //   const end = selectedFilters?.filterDate?.dates?.end;
+        //   query.createdAt = {
+        //     $gte: start,
+        //     $lte: end,
+        //   };
+        // }
+
+        // Filter Date By
+        if (selectedFilters?.finalizationDateType) {
           const start = selectedFilters?.filterDate?.dates?.start;
           const end = selectedFilters?.filterDate?.dates?.end;
-          query.createdAt = {
-            $gte: start,
-            $lte: end,
-          };
-        }
-
-        console.warn('selectedFilters?.finalizationDateType.value', selectedFilters);
-
-        // Finalization Date Type
-        if (selectedFilters?.finalizationDateType) {
-          if (selectedFilters?.finalizationDateType === 'Release Date' && selectedFilters?.filterDate?.dates?.start) {
-            const start = selectedFilters?.filterDate?.dates?.start;
-            const end = selectedFilters?.filterDate?.dates?.end;
+          if (selectedFilters?.finalizationDateType === 'Date Release' && selectedFilters?.filterDate?.dates?.start) {
             query.APEReportFinalizedAt = {
+              $gte: start,
+              $lte: end,
+            };
+          } else if (selectedFilters?.filterDate?.dates?.start) {
+            query.createdAt = {
               $gte: start,
               $lte: end,
             };
@@ -235,8 +241,6 @@ export default {
         if (selectedFilters?.filterExamType?.value) {
           query.tags = selectedFilters?.filterExamType?.value;
         }
-
-        console.warn('query', query);
 
         const { total } = await pmeStore.getPmeEncounters(query);
 

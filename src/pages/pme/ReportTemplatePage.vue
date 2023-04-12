@@ -1,4 +1,10 @@
 <template lang="pug">
+
+report-template-advanced-config-dialog(
+  v-model="advancedConfigDialog"
+  :config-model="config"
+)
+
 q-header(bordered).text-black.bg-white
   q-toolbar
     q-btn(
@@ -104,6 +110,7 @@ generic-page(
       //- pre {{chosenCustomDropdown}}
       //- pre {{editorTemplate}}
       //- pre {{rawTemplate}}
+      //- pre {{config}}
 
   q-dialog(v-model="tokensDialog" position="top")
     q-card
@@ -194,6 +201,7 @@ generic-page(
           unelevated
           no-caps
           :disable="disableEditing"
+          @click="advancedConfigDialog = !advancedConfigDialog"
         ).full-width.q-mb-md
 
 //- LOCAL DIALOGS
@@ -324,20 +332,26 @@ import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
 import GenericPage from '@/components/commons/GenericPage';
-import pmeHelper from '@/composables/pme-helpers';
+// import pmeHelper from '@/composables/pme-helpers';
+import pmeHelper, { useEditorHelper } from '@/composables/pme-helpers';
 import SearchFormTemplateTokens from '@/components/commons/search/SearchFormTemplateTokens';
+import ReportTemplateAdvancedConfigDialog from '@/components/pme/ReportTemplateAdvancedConfigDialog';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
 
 export default {
   components: {
     GenericPage,
+    ReportTemplateAdvancedConfigDialog,
     SearchFormTemplateTokens,
   },
   setup () {
     const {
       TEMPLATE_TOKENS_MAP,
     } = pmeHelper();
+    const {
+      getSummaryReportFields,
+    } = useEditorHelper();
     const { q, confirm, showSnack } = useQuasarMixins();
     const editorRef = ref(null);
     const leftDrawer = ref(false);
@@ -355,6 +369,7 @@ export default {
     const customTextFormRef = ref(null);
     const formTemplateAlreadyInUse = ref(false);
     const mainFormRef = ref(null);
+    const advancedConfigDialog = ref(false);
 
     watch(dropdownOptions, (v) => console.warn('dropdownOptions', v), { deep: true });
 
@@ -377,6 +392,8 @@ export default {
     const hideReviewedBy = ref(false);
     const hideCreatedBy = ref(false);
     const hideFinalizedBy = ref(false);
+    const reportTemplateConfig = computed(() => formTemplate.value?.config || {});
+    const config = ref({});
 
     const isArchived = computed(() => !!formTemplate.value?.hiddenAt);
     const isUpdating = computed(() => {
@@ -470,7 +487,7 @@ export default {
       ['viewsource'],
     ];
 
-    watch(editorTemplate, async (val) => {
+    watch(editorTemplate, (val) => {
       if (val?.includes('::')) {
         tokensDialog.value = true;
       }
@@ -503,6 +520,10 @@ export default {
         name.value = formTemplate.value.name;
         description.value = formTemplate.value.description;
         setTokenToChip(formTemplate.value);
+
+        // HACK: For some reason the rawTemplate ref is not being
+        // updated on initial load of the app
+        setTimeout(() => editorRef.value.runCmd('insertHTML', ' '));
       } catch (e) {
         console.error(e);
       }
@@ -523,8 +544,6 @@ export default {
 
     async function create () {
       try {
-        updateRawTemplate();
-
         if (!await mainFormRef.value.validate()) return;
         if (!rawTemplate.value) {
           showSnack({
@@ -533,6 +552,10 @@ export default {
           });
           return;
         }
+
+        const hiddenItemsInPMEReport = { ...config.value?.hiddenItemsInPMEReport };
+
+        updateRawTemplate();
 
         const payload = {
           type: 'ape-report',
@@ -548,6 +571,7 @@ export default {
             hideReviewedBy: hideReviewedBy.value,
             hideCreatedBy: hideCreatedBy.value,
             hideFinalizedBy: hideFinalizedBy.value,
+            hiddenItemsInPMEReport,
           },
         };
 
@@ -585,6 +609,7 @@ export default {
         };
       }
       rawTemplate.value = template;
+      config.value = getSummaryReportFields(template, formTemplate.value?.config);
     }
 
     function onTokenSelect ({ label, value }) {
@@ -646,10 +671,15 @@ export default {
       customDropdownDialog.value = false;
     }
 
-    function setTokenToChip (formTemplate) {
-      let template = formTemplate.template || '';
+    function getTemplateTokens (template) {
       const regex = /(?<=\{)\w+(?=\})/g;
       const tokens = template.match(regex) || [];
+      return tokens;
+    }
+
+    function setTokenToChip (formTemplate) {
+      let template = formTemplate.template || '';
+      const tokens = getTemplateTokens(template);
 
       for (const token of tokens) {
         if (token.startsWith('custom_text') || token.startsWith('custom_choices')) {
@@ -670,6 +700,7 @@ export default {
       }
 
       editorTemplate.value = template;
+      return template;
     }
 
     function setChipToToken ({ label, value }) {
@@ -744,7 +775,9 @@ export default {
     });
 
     return {
+      advancedConfigDialog,
       chosenCustomDropdown,
+      config,
       customDropdownDialog,
       customDropdownFormRef,
       customText,
@@ -774,6 +807,7 @@ export default {
       mainFormRef,
       name,
       rawTemplate,
+      reportTemplateConfig,
       tokensDialog,
       //
       addOption,

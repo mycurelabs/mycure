@@ -86,7 +86,7 @@ export default {
     function onAbortSearch () {}
 
     watch(model, (val) => {
-      const patient = val?.value?.$populated?.patient;
+      const patient = val?.value?.patient;
       emit('select', patient);
     });
 
