@@ -122,17 +122,18 @@ export default () => {
       statuses.push({ label: 'For Followup', color: 'black', value: 'followup' });
     }
 
-    const normalTime = item?.invoiceItems?.[0]?.$populated?.serviceData?.normalTime || 0;
+    const normalTime = item?.invoiceItems?.[0]?.serviceData?.normalTime || 0;
     const name = formatName(item?.patient?.name, 'lastName, firstName');
     const hmo = item?.patient?.companies?.map(company => company.name)?.join(', ');
     const tags = item?.patient?.tags?.join(', ');
     const examType = item?.tags?.join(', ');
-    const clinic = item?.facility?.name;
+    const clinic = item?.facilityData?.name;
     const dateOfExam = item?.createdAt ? format(item.createdAt, 'MM/dd/yy hh:mm a') : null;
     const releaseDateRaw = item?.apeReport?.finalizedAt;
     const releaseDate = releaseDateRaw ? format(releaseDateRaw, 'MM/dd/yy hh:mm a') : null;
     const dueDateRaw = item?.createdAt && normalTime ? addMilliseconds(item.createdAt, normalTime) : null;
     const dueDate = dueDateRaw ? format(dueDateRaw, 'MM/dd/yy hh:mm a') : null;
+    const insurerDataName = item?.peContract?.insurerData?.name;
 
     let noOfDays = null;
 
@@ -162,6 +163,7 @@ export default () => {
       lapses,
       name,
       dateOfExam,
+      company: insurerDataName || hmo,
       dueDate,
       releaseDate,
       noOfDays,

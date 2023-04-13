@@ -31,21 +31,29 @@ export default {
     hideDefault: Boolean,
   },
   setup (props, { emit }) {
+    const dateToday = new Date();
     const defaultDateFilter = props.hideDefault
       ? null
       : {
-          label: 'All',
-          value: 'all',
+          label: `This Month (${format(dateToday, 'MMM yyyy')})`,
+          value: 'this-month',
           dates: {
-            start: null,
-            end: null,
+            start: toTimestamp(startOfMonth(dateToday)),
+            end: toTimestamp(endOfMonth(dateToday)),
           },
         };
     const selectedFilter = ref(defaultDateFilter);
     const customRange = ref(format(new Date(), 'yyyy/MM/dd'));
     const customRangeDialog = ref(false);
-    const dateToday = new Date();
     const options = [
+      {
+        label: 'All',
+        value: 'all',
+        dates: {
+          start: null,
+          end: null,
+        },
+      },
       {
         label: `Today (${format(dateToday, 'MMM dd, yyyy')})`,
         value: 'today',

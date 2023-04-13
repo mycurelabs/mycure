@@ -27,40 +27,48 @@ generic-page(
       q-toolbar-title
         q-icon(
           size="25px"
-          name="las la-chart-pie"
+          name="las la-chart-bar"
           style="margin-bottom: 5px;"
         ).text-primary.q-mr-sm
-        span Summary Reports
+        span Monitoring Report
 
     //- Search and filter
     template(v-slot:top-right)
       search-patients(@select="onPatientSelect").q-mr-sm
-      worklist-table-filter-dialog(@filter="onFilter")
+      worklist-table-filter-dialog(
+        show-template-filter
+        @filter="onFilter"
+      )
 
     //- Table body
     template(v-slot:body="props")
       q-tr(:props="props" class="hover:bg-grey-3 cursor-pointer" @click="onRowSelect(props.row)")
-        q-td(key="date" :props="props")
-          span {{props.row.date || '-'}}
+        q-td(key="date-of-exam" :props="props")
+          span {{props.row.dateOfExam || '-'}}
         q-td(key="name" :props="props")
           div.row.no-wrap.items-center
             q-avatar(size="22px" color="grey").q-mr-sm
               q-img(v-if="getPicURL(props.row)" :src="getPicURL(props.row)")
               q-icon(v-else name="la la-user-alt" size="22px").text-white
             span {{props.row.name}}
+        q-td(key="company" :props="props")
+          span {{props.row.company || '-'}}
         q-td(key="exam-type" :props="props")
           div.ellipsis-2-lines {{props.row.examType || '-'}}
             q-tooltip(v-if="props.row.examType") {{props.row.examType}}
-        q-td(key="package" :props="props")
-          div.ellipsis-2-lines {{props.row.package || '-'}}
-            q-tooltip(v-if="props.row.package") {{props.row.package}}
-        q-td(key="hmo" :props="props")
-          span {{props.row.hmo || '-'}}
-        q-td(key="tags" :props="props")
-          span {{props.row.tags || '-'}}
+        q-td(key="due-date" :props="props")
+          span {{props.row.dueDate || '-'}}
+        q-td(key="release-date" :props="props")
+          span {{props.row.releaseDate || '-'}}
+        q-td(key="no-of-days" :props="props")
+          span {{props.row.noOfDays || '-'}}
+        q-td(key="lapses" :props="props")
+          span {{props.row.lapses || '-'}}
         q-td(key="status" :props="props")
           template(v-for="status in props.row.status")
             q-badge(:color="status.color").q-mr-sm {{status.label}}
+        q-td(key="clinic" :props="props")
+          span {{props.row.clinic || '-'}}
 
     //- No data
     template(v-slot:no-data)
@@ -96,7 +104,7 @@ export default {
     const { tableColumnBuilder } = useHelpers();
     const {
       pmeEncounterStatusQueryBuilder,
-      pmeWorklistMapper,
+      monitoringReportMapper,
     } = usePmeHelpers();
     // Stores
     const pmeStore = usePmeStore();
@@ -118,40 +126,14 @@ export default {
     const pmeEncounters = computed(() => pmeStore.$state.pmeEncounters);
     const rows = computed(() => {
       if (!pmeEncounters.value?.length) return [];
-      return pmeEncounters.value.map(pmeWorklistMapper);
+      return pmeEncounters.value.map(monitoringReportMapper);
     });
 
     const columns = tableColumnBuilder([
       {
-        name: 'date',
-        field: 'date',
-        label: 'Date',
-      },
-      {
-        name: 'name',
-        field: 'name',
-        label: 'Name',
-      },
-      {
-        name: 'exam-type',
-        field: 'examType',
-        label: 'Exam Type',
-      },
-      {
-        name: 'package',
-        field: 'package',
-        label: 'Package',
-      },
-      {
-        name: 'hmo',
-        field: 'hmo',
-        label: 'HMO',
-      },
-      {
-        name: 'tags',
-        field: 'tags',
-        label: 'Tags',
-        style: 'max-width: 150px; white-space: normal;',
+        name: 'date-of-exam',
+        field: 'dateOfExam',
+        label: 'Date of Exam',
       },
       {
         name: 'status',
@@ -160,6 +142,46 @@ export default {
         align: 'right',
         style: 'max-width: 190px; white-space: normal;',
       },
+      {
+        name: 'name',
+        field: 'name',
+        label: 'Patient Name',
+      },
+      {
+        name: 'company',
+        field: 'company',
+        label: 'Company',
+      },
+      {
+        name: 'exam-type',
+        field: 'examType',
+        label: 'Exam Type',
+      },
+      {
+        name: 'clinic',
+        field: 'clinic',
+        label: 'Clinic',
+      },
+      // {
+      //   name: 'due-date',
+      //   field: 'dueDate',
+      //   label: 'Due Date',
+      // },
+      // {
+      //   name: 'release-date',
+      //   field: 'releaseDate',
+      //   label: 'Release Date',
+      // },
+      // {
+      //   name: 'no-of-days',
+      //   field: 'noOfDays',
+      //   label: 'No. of Days',
+      // },
+      // {
+      //   name: 'lapses',
+      //   field: 'lapses',
+      //   label: 'Lapses',
+      // },
     ]);
 
     const visibleColumns = ref(columns.map(column => column.name));
@@ -173,6 +195,7 @@ export default {
           facility: activeOrganization.value.id,
           $limit: rowsPerPage,
           $skip: (page - 1) * rowsPerPage,
+          hasAPEReport: true,
         };
 
         // Selected patient
@@ -203,6 +226,7 @@ export default {
         }
 
         const { total } = await pmeStore.getPmeEncounters(query);
+
         totalItems.value = total;
         pagination.value.page = page;
         pagination.value.rowsPerPage = rowsPerPage;

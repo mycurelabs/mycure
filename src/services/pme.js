@@ -160,6 +160,13 @@ export const getPmeEncounter = async (opts) => {
             },
           },
         },
+        apeReport: {
+          type: 'ape-report',
+          service: 'medical-records',
+          foreignKey: 'encounter',
+          localKey: 'id',
+          method: 'findOne',
+        },
       },
     },
   });
@@ -233,8 +240,27 @@ export const getPmeEncounters = async (opts) => {
         type: 'ape-report',
         service: 'medical-records',
         foreignKey: 'encounter',
-        localKey: 'encounter',
+        localKey: 'id',
+        method: 'findOne',
+      },
+      peContract: {
+        service: 'insurance-contracts',
+        localKey: 'peContract',
         method: 'get',
+        $populate: {
+          insurerData: {
+            service: 'insurance-contracts',
+            method: 'findOne',
+            foreignKey: 'insurer',
+            localKey: 'insurer',
+          },
+        },
+      },
+      APEReportTemplateData: {
+        foreignKey: 'id',
+        localKey: 'APEReportTemplate',
+        method: 'findOne',
+        service: 'form-templates',
       },
     },
     // query override
@@ -246,52 +272,18 @@ export const getPmeEncounters = async (opts) => {
 
   const { items, total } = await sdk.service(MEDICAL_ENCOUNTER_SERVICE_NAME).find(query);
 
-  const itemsMapped = [];
-
-  for (const item of items) {
-    // const encounterId = item.id;
-    // const apeReport = await getApeReport({ encounterId });
-    // console.warn('apeReport', apeReport);
-    const apeReport = {};
-    const newItem = {
-      ...omit(item, ['$populated']),
-      isFollowup: item?.preceding || item?.precedingParent,
-      // NOTE: combine unique billing items from current encounter and preceding encounter
-      invoiceItems: uniqBy([
-        ...(item?.$populated?.billingItemsData || []),
-        ...(item?.$populated?.precedingBillingItemsData || []),
-      ], 'ref'),
-      apeReport,
-      patient: item?.$populated?.patient,
-      facility: item?.$populated?.facilityData,
-    };
-    itemsMapped.push(newItem);
-  }
-
   return {
-    items: itemsMapped,
+    items: items.map(item => {
+      return {
+        ...normalizePopulated(item),
+        isFollowup: item?.preceding || item?.precedingParent,
+        // NOTE: combine unique billing items from current encounter and preceding encounter
+        invoiceItems: uniqBy([
+          ...(item?.$populated?.billingItemsData || []),
+          ...(item?.$populated?.precedingBillingItemsData || []),
+        ], 'ref'),
+      };
+    }),
     total,
   };
-};
-
-export const getApeReports = async (opts) => {
-  const query = {
-    type: 'ape-report',
-    facility: opts.facility,
-    $populate: {
-      encounter: {
-        service: 'medical-encounters',
-        localKey: 'encounter',
-        method: 'get',
-      },
-      template: {
-        service: 'form-templates',
-        localKey: 'template',
-        method: 'get',
-      },
-    },
-  };
-  const { items } = await sdk.service('medical-records').find(query);
-  const normalizedItems = normalizePopulated(items);
-  return normalizedItems;
 };
