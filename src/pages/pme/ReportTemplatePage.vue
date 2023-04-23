@@ -191,7 +191,7 @@ generic-page(
           :disable="disableEditing"
           label="Hide Finalizer"
         )
-    div.row
+    //- div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 More Advanced Configurations
       div.col-xs-12.q-pa-md

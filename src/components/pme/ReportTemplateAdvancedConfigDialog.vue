@@ -30,7 +30,7 @@ q-dialog(
     q-card-section
       span.text-h6 EMR Records Configuration
     q-card-section
-      pre {{configModel}}
+      //- pre {{configModel}}
 </template>
 
 <script>
