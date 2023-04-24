@@ -31,13 +31,16 @@ generic-page(
           style="margin-bottom: 5px;"
         ).text-primary.q-mr-sm
         span Monitoring Report
-
     //- Search and filter
     template(v-slot:top-right)
       search-patients(@select="onPatientSelect").q-mr-sm
       worklist-table-filter-dialog(
         show-filter-date-by
         @filter="onFilter"
+      )
+      export-data(
+        :columns="columns"
+        :tags="['pme-monitoring-report']"
       )
 
     //- Table body
@@ -88,6 +91,7 @@ import DateFilter from '@/components/commons/filters/DateFilter';
 import GenericPage from '@/components/commons/GenericPage';
 import SearchPatients from '@/components/commons/search/SearchPatients';
 import usePmeHelpers from '@/composables/pme-helpers';
+import ExportData from '@/components/commons/ExportData';
 import WorklistTableFilterDialog from '@/components/pme/WorklistTableFilterDialog';
 import { useRouter } from 'vue-router';
 
@@ -97,6 +101,7 @@ export default {
     GenericPage,
     SearchPatients,
     WorklistTableFilterDialog,
+    ExportData,
   },
   setup () {
     // Helpers

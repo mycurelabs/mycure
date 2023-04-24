@@ -39,6 +39,10 @@ generic-page(
         show-template-filter
         @filter="onFilter"
       )
+      export-data(
+        :columns="columns"
+        :tags="['pme-summary-report']"
+      )
 
     //- Table body
     template(v-slot:body="props")
@@ -85,6 +89,7 @@ import { useHelpers } from '@/composables/helpers';
 import { usePmeStore } from '@/stores/pme';
 import { useUserStore } from '@/stores/current-user';
 import DateFilter from '@/components/commons/filters/DateFilter';
+import ExportData from '@/components/commons/ExportData';
 import GenericPage from '@/components/commons/GenericPage';
 import SearchPatients from '@/components/commons/search/SearchPatients';
 import usePmeHelpers from '@/composables/pme-helpers';
@@ -94,6 +99,7 @@ import { useRouter } from 'vue-router';
 export default {
   components: {
     DateFilter,
+    ExportData,
     GenericPage,
     SearchPatients,
     WorklistTableFilterDialog,
