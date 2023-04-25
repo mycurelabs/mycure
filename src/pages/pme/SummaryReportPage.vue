@@ -42,6 +42,11 @@ generic-page(
       export-data(
         :columns="columns"
         :tags="['pme-summary-report']"
+        :account-owner="currentUserUid"
+        :query="exportQuery"
+        item-formatter="formatPMESummaryReport"
+        date-to-filter="createdAt"
+        service="medical-encounters"
       )
 
     //- Table body
@@ -87,6 +92,7 @@ import { computed, onMounted, ref } from 'vue';
 import { TABLE_ROWS_PER_PAGE_OPTION } from '@/constants/global';
 import { useHelpers } from '@/composables/helpers';
 import { usePmeStore } from '@/stores/pme';
+import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
 import DateFilter from '@/components/commons/filters/DateFilter';
 import ExportData from '@/components/commons/ExportData';
@@ -94,7 +100,6 @@ import GenericPage from '@/components/commons/GenericPage';
 import SearchPatients from '@/components/commons/search/SearchPatients';
 import usePmeHelpers from '@/composables/pme-helpers';
 import WorklistTableFilterDialog from '@/components/pme/WorklistTableFilterDialog';
-import { useRouter } from 'vue-router';
 
 export default {
   components: {
@@ -115,6 +120,7 @@ export default {
     // Stores
     const pmeStore = usePmeStore();
     const userStore = useUserStore();
+
     // Refs
     const initializing = ref(false);
     const loading = ref(false);
@@ -129,6 +135,7 @@ export default {
     });
     // Computed
     const activeOrganization = computed(() => userStore.$state.userActiveOrganization);
+    const currentUserUid = computed(() => userStore.$state.uid);
     const pmeEncounters = computed(() => pmeStore.$state.pmeEncounters);
     const rows = computed(() => {
       if (!pmeEncounters.value?.length) return [];
@@ -192,7 +199,7 @@ export default {
 
     const visibleColumns = ref(columns.map(column => column.name));
 
-    async function init (paginationOpts, selectedFilters) {
+    async function init (paginationOpts) {
       try {
         loading.value = true;
         const page = paginationOpts?.page || 1;
@@ -210,9 +217,9 @@ export default {
         }
 
         // Date Filter
-        if (selectedFilters?.filterDate?.dates?.start) {
-          const start = selectedFilters?.filterDate?.dates?.start;
-          const end = selectedFilters?.filterDate?.dates?.end;
+        if (selectedFilters.value?.filterDate?.dates?.start) {
+          const start = selectedFilters.value?.filterDate?.dates?.start;
+          const end = selectedFilters.value?.filterDate?.dates?.end;
           query.createdAt = {
             $gte: start,
             $lte: end,
@@ -220,15 +227,15 @@ export default {
         }
 
         // Status Filter
-        if (selectedFilters?.filterStatus?.value) {
-          const status = selectedFilters?.filterStatus?.value;
+        if (selectedFilters.value?.filterStatus?.value) {
+          const status = selectedFilters.value?.filterStatus?.value;
           const q = pmeEncounterStatusQueryBuilder(status, query);
           query = q;
         }
 
         // Exam Type Filter
-        if (selectedFilters?.filterExamType?.value) {
-          query.tags = selectedFilters?.filterExamType?.value;
+        if (selectedFilters.value?.filterExamType?.value) {
+          query.tags = selectedFilters.value?.filterExamType?.value;
         }
 
         const { total } = await pmeStore.getPmeEncounters(query);
@@ -273,12 +280,51 @@ export default {
       init();
     }
 
+    const selectedFilters = ref({});
+
     function onFilter (filters) {
+      selectedFilters.value = filters;
       init(null, filters);
     }
 
     onMounted(() => {
       tableRef.value.requestServerInteraction();
+    });
+
+    const exportQuery = computed(() => {
+      let query = {
+        facility: activeOrganization.value.id,
+        hasAPEReport: true,
+      };
+
+      // Selected patient
+      if (selectedPatient.value) {
+        query.patient = selectedPatient.value.id; ;
+      }
+
+      // Date Filter
+      if (selectedFilters.value?.filterDate?.dates?.start) {
+        const start = selectedFilters.value?.filterDate?.dates?.start;
+        const end = selectedFilters.value?.filterDate?.dates?.end;
+        query.createdAt = {
+          $gte: start,
+          $lte: end,
+        };
+      }
+
+      // Status Filter
+      if (selectedFilters.value?.filterStatus?.value) {
+        const status = selectedFilters.value?.filterStatus?.value;
+        const q = pmeEncounterStatusQueryBuilder(status, query);
+        query = q;
+      }
+
+      // Exam Type Filter
+      if (selectedFilters.value?.filterExamType?.value) {
+        query.tags = selectedFilters.value?.filterExamType?.value;
+      }
+
+      return query;
     });
 
     return {
@@ -291,6 +337,8 @@ export default {
       tableRef,
       totalItems,
       visibleColumns,
+      currentUserUid,
+      exportQuery,
       // methods
       init,
       getPicURL,

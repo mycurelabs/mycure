@@ -11,7 +11,7 @@ q-btn(
 q-dialog(
   v-model="dialog"
 )
-  q-card(style="width: 600px; max-width: 100%;")
+  q-card(style="width: 1000px; max-width: 100%;")
     q-toolbar(flat)
       q-toolbar-title {{title}}
     q-separator
@@ -45,6 +45,7 @@ q-dialog(
                       :val="type.value"
                       :label="type.name"
                     )
+
               div.column.q-mb-md
                 label.text-weight-medium Date Range
                 template(v-for="type in dateRangeTypes" :key="type.value")
@@ -59,9 +60,9 @@ q-dialog(
                         )
                       div.col
                         span.text-weight-medium.q-ml-sm {{type.date}}
-
-                template(v-if="dateRangeType === 'custom'")
+                //- template(v-if="dateRangeType === 'custom'")
                   span custom date range
+
               div.column.q-mb-md
                 label.q-mb-sm.text-weight-medium Column Types
                 q-select(
@@ -73,12 +74,24 @@ q-dialog(
                 template(v-if="columnType === 'All Columns'")
                   span {{allColumnsNamesJoined}}
                 template(v-if="columnType === 'Custom'")
+                  pre {{columnsModel}}
             template(v-else-if="tab.name === 'history'")
               q-banner(
                 dense
                 rounded
                 icon="las la-info-circle"
-              ).bg-primary.text-white Click the download button to download a file, then check your browser's #[b Downloads page].
+              ).q-mb-md.bg-primary.text-white Click the download button to download a file, then check your browser's #[b Downloads page].
+              div.row
+                q-space
+                q-btn(
+                  label="Refresh"
+                  color="primary"
+                  unelevated
+                  no-caps
+                  :disabled="loadingExportRequests"
+                  :loading="loadingExportRequests"
+                  @click="loadHistory"
+                )
               q-list
                 template(v-for="history in exportRequests" :key="history.id")
                   q-item
@@ -87,7 +100,7 @@ q-dialog(
                     q-item-section
                       q-item-label {{history.createdAt}}
                       q-item-label(subtitle)
-                        span(:class="{ 'text-positive': history.status === 'resolved', 'text-warning': history.status === 'pending' }").text-capitalize {{history.status}}
+                        span(:class="{ 'text-positive': history.status === 'resolved', 'text-warning': history.status === 'pending', 'text-negative': history.status === 'failed' }").text-capitalize {{history.status}}
                           span(v-if="history.finishedAt")  - Finished At {{history.finishedAt}}
                     q-item-section(avatar)
                       q-btn(
@@ -100,13 +113,25 @@ q-dialog(
                         :href="history.downloadURL"
                       )
                         q-tooltip(bottom) Download File
+    q-separator
+    q-card-actions
+      q-space
+      q-btn(
+        label="Export"
+        color="primary"
+        unelevated
+        no-caps
+        @click="submit"
+      )
 
 </template>
 
 <script>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, toRef } from 'vue';
 import { format, getTime, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { sdk } from '@/boot/mycure';
+import { useQuasarMixins } from '@/composables/quasar-mixins';
+import { useUserStore } from '@/stores/current-user';
 
 const today = new Date();
 const yesterday = subDays(today, 1);
@@ -121,7 +146,6 @@ const endOfCurrentMonth = endOfMonth(today);
 const startOfPreviousMonth = startOfMonth(subMonths(today, 1));
 const endOfPreviousMonth = endOfMonth(subMonths(today, 1));
 const DEFAULT_FIELDS_COUNT = 5;
-import { useUserStore } from '@/stores/current-user';
 
 function initDateRangeTypes () {
   return [
@@ -166,12 +190,12 @@ function initDateRangeTypes () {
     //   from: null,
     //   to: null,
     // },
-    {
-      label: 'Custom',
-      value: 'custom',
-      from: null,
-      to: null,
-    },
+    // {
+    //   label: 'Custom',
+    //   value: 'custom',
+    //   from: null,
+    //   to: null,
+    // },
   ];
 }
 
@@ -220,7 +244,8 @@ export default {
   },
   setup (props) {
     const dialog = ref(false);
-    const selectedTab = ref('history');
+    const selectedTab = ref('export');
+    const { showSnack } = useQuasarMixins();
     const tabs = [
       {
         name: 'export',
@@ -260,13 +285,14 @@ export default {
       name: column.label,
       key: column.field,
     }));
+    const columnsProps = toRef(props, 'columns');
+    const columnsModel = columnsProps.value.map(column => column.field);
     const allColumnsNamesJoined = columnsFormatted.map(column => column.name).join(', ');
 
     // History
     onMounted(() => {
       loadHistory();
     });
-
     const loadingExportRequests = ref(false);
     const userStore = useUserStore();
     const activeOrganization = computed(() => userStore.$state.userActiveOrganization);
@@ -317,6 +343,70 @@ export default {
       }
     }
 
+    // Submit
+    async function submit () {
+      const exportQuery = {};
+      if (props.accountOwner) {
+        exportQuery.account = props.accountOwner;
+      }
+      const timeZone = Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone;
+      if (timeZone) {
+        exportQuery.dateFormatterTimezone = timeZone;
+      }
+      if (exportType.value) {
+        exportQuery.exportType = exportType.value;
+      }
+      if (props.query) {
+        const query = props.query;
+        const dateRange = dateRangeTypes.find(item => item.value === dateRangeType.value);
+        query[props.dateToFilter] = {
+          $gte: getTime(startOfDay(dateRange.from)),
+          $lte: getTime(endOfDay(dateRange.to)),
+        };
+        console.warn('query', query);
+        exportQuery.query = JSON.stringify(query);
+      }
+      exportQuery.tags = [`${activeOrganization.value?.id}::${props.tags?.[0]}`];
+      exportQuery.service = props.service;
+
+      exportQuery.exportFields = [
+        {
+          name: 'Date of Exam',
+          key: 'creationDate',
+        },
+        {
+          name: 'Status',
+          key: 'status',
+        },
+        {
+          name: 'Patient Name',
+          key: 'patientName',
+        },
+        {
+          name: 'Company',
+          key: 'companyNames',
+        },
+        {
+          name: 'Exam Type',
+          key: 'tags',
+        },
+        {
+          name: 'Clinic Name',
+          key: 'clinicName',
+        },
+      ];
+
+      console.warn('exportQuery', exportQuery);
+
+      await sdk.service('export-requests').create(exportQuery);
+      await loadHistory();
+      showSnack({
+        message: 'Export request has been submitted.',
+        color: 'positive',
+      });
+      selectedTab.value = 'history';
+    }
+
     return {
       dialog,
       selectedTab,
@@ -331,6 +421,10 @@ export default {
       columnsFormatted,
       allColumnsNamesJoined,
       exportRequests,
+      columnsModel,
+      loadingExportRequests,
+      submit,
+      loadHistory,
     };
   },
 };
