@@ -5,6 +5,7 @@ import { omit } from 'lodash';
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: {},
+    uid: null,
     userMemberships: [],
     userOrganizations: [],
     userActiveOrganization: {},
@@ -24,6 +25,7 @@ export const useUserStore = defineStore('user', {
           ...user,
           ...personalDetails,
         };
+        this.uid = user.uid;
 
         /**
          * Get user membership data
