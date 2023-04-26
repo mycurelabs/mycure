@@ -97,6 +97,15 @@ generic-page(
           :disable="disableEditing"
           @click="customDropdownDialog = true"
         )
+        q-btn(
+          label="Table"
+          color="primary"
+          icon="las la-table"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="customTableDialog = true"
+        )
     q-card-section.q-pa-0
       q-editor(
         ref="editorRef"
@@ -300,6 +309,63 @@ q-dialog(v-model="customDropdownDialog")
         @click="insertCustomDropdown"
       )
 
+q-dialog(v-model="customTableDialog")
+  q-card(style="width: 700px")
+    q-form(ref="customTableFormRef" @submit.prevent="insertCustomTable")
+      q-toolbar
+        q-toolbar-title Add a Custom Table
+        q-btn(
+          icon="la la-times"
+          flat
+          rounded
+          @click="customTableDialog = false"
+        )
+      q-card-section
+        div.row
+          div.col-xs-12.col-md-6.q-pa-sm
+            q-input(
+              v-model="tableRows"
+              label="Table rows"
+              type="number"
+              min="1"
+              max="100"
+              skip="1"
+              outlined
+              dense
+              autofocus
+              :rules="[v => !!v || 'This is required', v => (Number(v) >= 1 && Number(v) <= 100) || 'Table rows must be 1 - 100 only' ]"
+            )
+          div.col-xs-12.col-md-6.q-pa-sm
+            q-input(
+              v-model="tableColumns"
+              label="Table columns"
+              type="number"
+              min="1"
+              max="100"
+              skip="1"
+              outlined
+              dense
+              :rules="[v => !!v || 'This is required', v => (Number(v) >= 1 && Number(v) <= 100) || 'Table columns must be 1 - 100 only' ]"
+            )
+          div(style="overflow: auto; max-height: 500px;").col-xs-12.q-pa-sm
+            table
+              template(v-for="(row, rowIndex) in Number(tableRows)")
+                tr
+                  template(v-for="(col, colIndex) in Number(tableColumns)")
+                    td(style="padding: 10px;")
+
+      q-separator
+      q-card-actions
+        q-space
+        q-btn(
+          label="Insert a new table"
+          color="primary"
+          icon="la la-plus"
+          type="submit"
+          unelevated
+          no-caps
+        )
+
 q-footer(
   bordered
 ).bg-white
@@ -493,6 +559,10 @@ export default {
       }
       updateRawTemplate();
     }, { immediate: true });
+
+    onMounted(() => {
+      isUpdating.value && init();
+    });
 
     async function init () {
       try {
@@ -770,9 +840,43 @@ export default {
       router.push({ name: 'pme-report-templates' });
     }
 
-    onMounted(() => {
-      isUpdating.value && init();
-    });
+    // Custom table
+    const customTableDialog = ref(false);
+    const customTableFormRef = ref(null);
+    const tableRows = ref(null);
+    const tableColumns = ref(null);
+    async function insertCustomTable () {
+      if (!await customTableFormRef.value.validate()) return;
+      const tableString = `
+        <table style="border-collapse: collapse; width: 100%;">
+          <thead>
+            <tr style="border: 1px solid #ccc;">
+              ${Array.from({ length: tableColumns.value }, () => '<th style="border: 1px solid #ccc; padding: 5px;"></th>').join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${Array.from({ length: tableRows.value }, () => `
+              <tr style="border: 1px solid #ccc;">
+                ${Array.from({ length: tableColumns.value }, () => '<td style="border: 1px solid #ccc; padding: 5px;"></td>').join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(tableString, 'text/html');
+
+      const tableHtml = doc.body;
+
+      setTimeout(() => editorRef.value.runCmd('insertHTML', tableString));
+
+      console.warn('tableString', tableString);
+      console.warn('tableHtml', tableHtml);
+
+      customTableFormRef.value.resetValidation();
+      customTableDialog.value = false;
+    }
 
     return {
       advancedConfigDialog,
@@ -821,6 +925,11 @@ export default {
       removeOption,
       submit,
       updateRawTemplate,
+      customTableDialog,
+      insertCustomTable,
+      customTableFormRef,
+      tableRows,
+      tableColumns,
     };
   },
 };
@@ -835,4 +944,15 @@ export default {
     border-radius: 3px
   .q-icon
     background: #0099aa
+</style>
+
+<style scoped>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table > tr > td {
+  border: 1px solid #ccc;
+}
 </style>
