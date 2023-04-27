@@ -116,10 +116,8 @@ generic-page(
         :toolbar="editorToolbarOptions"
         :fonts="editorFontOptions"
       )
-      //- pre {{chosenCustomDropdown}}
-      //- pre {{editorTemplate}}
-      //- pre {{rawTemplate}}
-      //- pre {{config}}
+      //- pre {{(config || {}).records}}
+      //- pre {{reportTemplateConfig}}
 
   q-dialog(v-model="tokensDialog" position="top")
     q-card
@@ -200,7 +198,7 @@ generic-page(
           :disable="disableEditing"
           label="Hide Finalizer"
         )
-    //- div.row
+    div.row
       div.col-xs-12.q-pa-md
         span.text-subtitle1 More Advanced Configurations
       div.col-xs-12.q-pa-md
@@ -399,7 +397,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
 import GenericPage from '@/components/commons/GenericPage';
 // import pmeHelper from '@/composables/pme-helpers';
-import pmeHelper, { useEditorHelper } from '@/composables/pme-helpers';
+import pmeHelper from '@/composables/pme-helpers';
 import SearchFormTemplateTokens from '@/components/commons/search/SearchFormTemplateTokens';
 import ReportTemplateAdvancedConfigDialog from '@/components/pme/ReportTemplateAdvancedConfigDialog';
 
@@ -415,9 +413,9 @@ export default {
     const {
       TEMPLATE_TOKENS_MAP,
     } = pmeHelper();
-    const {
-      getSummaryReportFields,
-    } = useEditorHelper();
+    // const {
+    //   getSummaryReportFields,
+    // } = useEditorHelper();
     const { q, confirm, showSnack } = useQuasarMixins();
     const editorRef = ref(null);
     const leftDrawer = ref(false);
@@ -459,7 +457,7 @@ export default {
     const hideCreatedBy = ref(false);
     const hideFinalizedBy = ref(false);
     const reportTemplateConfig = computed(() => formTemplate.value?.config || {});
-    const config = ref({});
+    const config = ref(reportTemplateConfig.value.hiddenItemsInPMEReport); // Initial value
 
     const isArchived = computed(() => !!formTemplate.value?.hiddenAt);
     const isUpdating = computed(() => {
@@ -575,6 +573,7 @@ export default {
         hideReviewedBy.value = !!formTemplate.value?.config?.hideReviewedBy || false;
         hideCreatedBy.value = !!formTemplate.value?.config?.hideCreatedBy || false;
         hideFinalizedBy.value = !!formTemplate.value?.config?.hideFinalizedBy || false;
+        config.value = formTemplate.value?.config || {};
 
         const formTemplateItems = formTemplate.value?.items || [];
         chosenCustomDropdown.value = formTemplateItems.map(item => {
@@ -624,6 +623,7 @@ export default {
         }
 
         const hiddenItemsInPMEReport = { ...config.value?.hiddenItemsInPMEReport };
+        const records = { ...config.value?.records };
 
         updateRawTemplate();
 
@@ -642,6 +642,7 @@ export default {
             hideCreatedBy: hideCreatedBy.value,
             hideFinalizedBy: hideFinalizedBy.value,
             hiddenItemsInPMEReport,
+            records,
           },
         };
 
@@ -679,7 +680,7 @@ export default {
         };
       }
       rawTemplate.value = template;
-      config.value = getSummaryReportFields(template, formTemplate.value?.config);
+      // config.value = getSummaryReportFields(template, formTemplate.value?.config);
     }
 
     function onTokenSelect ({ label, value }) {
