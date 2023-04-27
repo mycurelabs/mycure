@@ -80,6 +80,7 @@ module.exports = {
     'comma-dangle': [2, 'always-multiline'],
     'no-console': 'off',
     'no-multi-str': 'off',
-    'curly': 1
+    'curly': 1,
+    'vue/multi-word-component-names': 'off',
   }
 }
