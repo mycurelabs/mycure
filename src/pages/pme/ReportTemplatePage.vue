@@ -457,7 +457,7 @@ export default {
     const hideCreatedBy = ref(false);
     const hideFinalizedBy = ref(false);
     const reportTemplateConfig = computed(() => formTemplate.value?.config || {});
-    const config = ref(reportTemplateConfig.value.hiddenItemsInPMEReport); // Initial value
+    const config = ref(reportTemplateConfig.value.hiddenItemsInPMEReport || { record: {} }); // Initial value
 
     const isArchived = computed(() => !!formTemplate.value?.hiddenAt);
     const isUpdating = computed(() => {

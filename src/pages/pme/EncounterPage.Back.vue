@@ -92,7 +92,7 @@ generic-page(
 
   //- div.row.items-center.justify-center.q-mb-lg
     div.col-xs-12.col-md-10.q-mb-md
-      span.text-h6.text-primary Past Encounters
+      span.text-h3.text-primary Past Encounters
     div.col-xs-12.col-md-10
       q-card.shadow-1
         q-card-section

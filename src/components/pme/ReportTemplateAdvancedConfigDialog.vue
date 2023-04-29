@@ -20,7 +20,7 @@ q-dialog(
     q-separator
     q-card-section(v-if="!noSummaryReportConfig")
       div(style="max-height: 400px; overflow-y: auto; outline: 1px solid #ccc;").q-pa-sm
-        span.text-h6 Configure Items to hide in Summary Report
+        span.text-h3 Configure Items to hide in Summary Report
         div.row
           template(v-for="(value, field) in configModel.hiddenItemsInPMEReport")
             div.col-xs-6.col-md-3
@@ -29,7 +29,7 @@ q-dialog(
                 :label="`Hide ${toStartCase(field)}`"
               )
     q-card-section
-      span.text-h6 EMR Records Configuration
+      span.text-h3 EMR Records Configuration
     q-card-section
       div.row
         template(v-for="(config, index) in emrConfig" :key="index")
@@ -38,13 +38,13 @@ q-dialog(
               div.row
                 div.number-circle.row.justify-center.items-center
                   span {{index + 1}}
-                span.text-h6.text-primary {{config.name}}
+                span(style="margin-top: 5px;").text-h4.text-primary {{config.name}}
             div.col-xs-12.col-md-12
               template(v-for="(record, recordIndex) in config.records" :key="recordIndex")
                 q-separator(v-if="recordIndex !== 0").q-my-md
                 div.row
                   div.col-xs-12.col-md-12
-                    span.text-h6.text-primary {{record.name}}
+                    span.text-h3.text-primary {{record.name}}
                   div.col-xs-12.col-md-12
                     q-toolbar
                       span.text-subtitle1 Record {{recordIndex + 1}}

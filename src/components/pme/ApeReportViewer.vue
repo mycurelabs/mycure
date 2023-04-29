@@ -2,7 +2,7 @@
 template(v-if="view === 'paper'")
   //- pre {{formTemplate}}
   //- pre {{encounterApeReport}}
-  div(v-html="templatePrefilled" style="width: 990px; padding-bottom: 100px; padding: 10px;")
+  div(v-html="templatePrefilled" style="width: 990px; padding-bottom: 100px; padding: 10px;")#paper-view
 template(v-if="view === 'form'")
   q-form(ref="focusedModeFormRef" @submit.prevent="onSaveReport")
     div.row
@@ -35,7 +35,7 @@ template(v-if="view === 'form'")
 </template>
 
 <script>
-import { computed, ref, toRef } from 'vue';
+import { computed, onMounted, ref, toRef } from 'vue';
 import { useQuasar } from 'quasar';
 import { format } from 'date-fns';
 import { capitalized } from '@/utils';
@@ -294,6 +294,17 @@ export default {
       });
       return item || { choices: [] };
     }
+
+    onMounted(() => {
+      // const link = document.createElement('link');
+      // link.setAttribute('rel', 'stylesheet');
+      // link.setAttribute('href', 'https://necolas.github.io/normalize.css/8.0.1/normalize.css');
+      // const paperView = document.getElementById('paper-view');
+      // console.warn('paperView', paperView);
+      // console.warn('link', link);
+      // paperView.appendChild(link);
+      // document.head.appendChild(link);
+    });
 
     return {
       apeEncounter,
