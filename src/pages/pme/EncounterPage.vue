@@ -38,17 +38,18 @@ generic-page(
                       q-item-section
                         q-item-label(subtitle) {{history.creationDate}}
                         q-item-label {{history.creatorName}}
-        q-toolbar
+        //- NOTE: Bring back when we have more ways to edit the report
+        //- q-toolbar
           q-tabs(
             v-model="tabModel"
             indicator-color="primary"
           )
-            q-tab(
-              name="live"
-              label="Live Edit Mode"
-              icon="la la-pen"
-              no-caps
-            )
+            //- q-tab(
+            //-   name="live"
+            //-   label="Live Edit Mode"
+            //-   icon="la la-pen"
+            //-   no-caps
+            //- )
             //- q-tab(
             //-   name="focused"
             //-   label="Focused Mode"
@@ -456,15 +457,14 @@ export default {
         loading.value = true;
         const payload = {};
 
-        if (status === 'done') payload.done = true;
-        if (status === 'classified') payload.classify = true;
-        if (status === 'completed') payload.finalize = true;
-
-        const result = apeReportViewerLiveEditRef.value?.onSaveReport();
+        const result = apeReportViewerLiveEditRef.value?.onSaveReport(); // returns the saved template { values, template }
         const values = result?.values;
         const template = result?.template;
+        const report = result?.report;
+
         payload.values = values;
         payload.template = template;
+        payload.report = report;
 
         if (!values || !template) {
           showSnack({
@@ -484,8 +484,13 @@ export default {
 
         const existing = await getPmeEncounter({ id: encounterId });
 
+        console.warn('existing', existing?.apeReport);
+
         if (existing?.apeReport?.id) {
           console.warn('payload: update', payload);
+          if (status === 'done') payload.done = true;
+          if (status === 'classified') payload.classify = true;
+          if (status === 'completed') payload.finalize = true;
           await sdk.service('medical-records').update(encounterApeReport.value?.id, payload);
         } else {
           console.warn('payload: create', payload);
@@ -542,7 +547,8 @@ export default {
         message: 'Mark report as "For Checking"?',
       });
       if (!result) return;
-      onSaveReport('classified');
+      await onSaveReport();
+      await onSaveReport('classified');
     }
 
     async function onFinalize () {
@@ -551,7 +557,8 @@ export default {
         message: 'Mark report as "Finalized"?',
       });
       if (!result) return;
-      onSaveReport('completed');
+      await onSaveReport();
+      await onSaveReport('completed');
     }
 
     async function onDone () {
@@ -560,7 +567,8 @@ export default {
         message: 'Mark report as "Done"?',
       });
       if (!result) return;
-      onSaveReport('classified');
+      await onSaveReport();
+      await onSaveReport('classified');
     }
 
     function formatDoctorName (personalDetails) {
