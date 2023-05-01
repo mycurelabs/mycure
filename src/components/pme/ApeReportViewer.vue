@@ -125,7 +125,12 @@ export default {
         };
       });
 
-      if (!report) return '';
+      const defaultDisplay = `
+        <h3 align="center" style="color: grey;">No Report Template Selected</h3>
+        <p align="center" style="color: grey;">Seach for a report template and select it to view the report.</p>
+      `;
+
+      if (!report?.length) return defaultDisplay;
 
       /**
        * Iterate through all of the tokens
@@ -244,7 +249,7 @@ export default {
     });
 
     function onSaveReport () {
-      console.warn('apeFormTemplate', apeFormTemplate);
+      console.warn('apeFormTemplate', apeFormTemplate.value);
       const regex = /(?<=\{)\w+(?=\})/g;
       const tokens = selectedApeReportTemplate.value?.match(regex) || [];
       const values = encounterApeReport.value?.values || tokens.map(token => ({ id: token, answer: '' }));
@@ -268,6 +273,7 @@ export default {
       return {
         values: data,
         template: apeFormTemplate?.value?.id,
+        report: apeFormTemplate.value?.template,
       };
     }
 
