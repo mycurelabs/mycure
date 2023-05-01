@@ -38,10 +38,10 @@ generic-page(
         show-filter-date-by
         @filter="onFilter"
       )
-      export-data(
-        :columns="columns"
-        :tags="['pme-monitoring-report']"
-      )
+      //- export-data(
+      //-   :columns="columns"
+      //-   :tags="['pme-monitoring-report']"
+      //- )
 
     //- Table body
     template(v-slot:body="props")
