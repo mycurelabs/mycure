@@ -563,3 +563,22 @@ export const formatPE = (record) => {
 
   return results.join(', ');
 };
+
+export const readInputFile = (event, type = 'dataURL') => {
+  return new Promise((resolve, reject) => {
+    if (!event.target.files || !event.target.files[0]) {
+      reject(new Error('No file chosen.'));
+    }
+
+    const reader = new window.FileReader();
+    reader.onload = e => resolve(e.target.result);
+
+    if (type === 'dataURL') {
+      reader.readAsDataURL(event.target.files[0]);
+    } else if (type === 'binary') {
+      reader.readAsBinaryString(event.target.files[0]);
+    } else if (type === 'text') {
+      reader.readAsText(event.target.files[0]);
+    }
+  });
+};
