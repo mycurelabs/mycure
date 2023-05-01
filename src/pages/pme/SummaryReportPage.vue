@@ -39,15 +39,16 @@ generic-page(
         show-template-filter
         @filter="onFilter"
       )
-      export-data(
-        :columns="columns"
-        :tags="['pme-summary-report']"
-        :account-owner="currentUserUid"
-        :query="exportQuery"
-        item-formatter="formatPMESummaryReport"
-        date-to-filter="createdAt"
-        service="medical-encounters"
-      )
+      //- TODO: fix import
+      //- export-data(
+      //-   :columns="columns"
+      //-   :tags="['pme-summary-report']"
+      //-   :account-owner="currentUserUid"
+      //-   :query="exportQuery"
+      //-   item-formatter="formatPMESummaryReport"
+      //-   date-to-filter="createdAt"
+      //-   service="medical-encounters"
+      //- )
 
     //- Table body
     template(v-slot:body="props")
