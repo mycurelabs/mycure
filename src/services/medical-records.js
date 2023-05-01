@@ -35,7 +35,7 @@ export const getAmendments = async (opts) => {
 
   const { items } = await sdk.service('medical-records').find(query);
   return items.map((item) => {
-    const creator = item?.$populated?.creator;
+    const creator = item?.$populated?.creator || {};
     const creatorName = formatDoctorName({ name: creator.name });
     const creationDate = format(item._createdAt, 'MMM dd, yyyy hh:mm a');
     return {
