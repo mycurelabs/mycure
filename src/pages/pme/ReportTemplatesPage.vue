@@ -62,13 +62,18 @@ generic-page(
         :to="{ name: 'report-template' }"
       ).q-mr-sm
 
-      //- TODO: Implement
-      //- q-btn(
-      //-   label="Import/Export"
-      //-   color="primary"
-      //-   outline
-      //-   no-caps
-      //- )
+      q-btn(
+        label="Import/Export"
+        color="primary"
+        outline
+        no-caps
+      )
+        q-menu
+          q-list
+            q-item(clickable @click="importFromJSON")
+              q-item-section Import from JSON
+            q-item(clickable @click="exportToJSON")
+              q-item-section Export to JSON
 
     //- Table body
     template(v-slot:body="props")
@@ -85,15 +90,21 @@ generic-page(
         div.col-xs-12.text-center
           q-icon(name="la la-meh" size="60px").text-grey
           h2.text-grey.text-h6 No Report Templates found
+
+input(style="visibility: hidden;" ref="fileInput" type="file" accept=".json" @change="onFileChange")
 </template>
 
 <script>
+import _ from 'lodash';
 import { computed, onMounted, ref, watch } from 'vue';
 import { getFormTemplates } from '@/services/form-templates';
+import { readInputFile } from '@/utils/medical-records-formatter';
 import { TABLE_ROWS_PER_PAGE_OPTION } from '@/constants/global';
 import { useHelpers } from '@/composables/helpers';
 import { useRouter } from 'vue-router';
+import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { useUserStore } from '@/stores/current-user';
+import { sdk } from '@/boot/mycure';
 import GenericPage from '@/components/commons/GenericPage';
 import SearchFormTemplates from '@/components/commons/search/SearchFormTemplates';
 import WorklistTableFilterDialog from '@/components/pme/WorklistTableFilterDialog';
@@ -108,6 +119,7 @@ export default {
     // Helpers
     const router = useRouter();
     const { tableColumnBuilder } = useHelpers();
+    const { showSnack } = useQuasarMixins();
     // Stores
     const userStore = useUserStore();
     // Refs
@@ -206,9 +218,56 @@ export default {
       tableRef.value.requestServerInteraction();
     });
 
+    const fileInput = ref(null);
+    function importFromJSON () {
+      console.warn('importFromJSON');
+      fileInput.value.click();
+    }
+
+    async function onFileChange (event) {
+      try {
+        const json = await readInputFile(event, 'text');
+
+        const payload = JSON.parse(json);
+        const normalizedPayload = _.isArray(payload) ? payload : [payload];
+        const contextualizedPayload = _.map(normalizedPayload, template => ({
+          ...template,
+          facility: activeOrganization.value.id,
+        }));
+
+        await sdk.service('form-templates').create(contextualizedPayload);
+        await tableRef.value.requestServerInteraction();
+        showSnack({
+          message: 'Form templates imported!',
+          color: 'positive',
+        });
+      } catch (error) {
+        console.error(error);
+        showSnack({
+          message: error.message || 'Something went wrong! Please try again.',
+          color: 'negative',
+        });
+      } finally {
+        this.loading = false;
+      }
+    }
+
+    function exportToJSON () {
+      console.warn('exportToJSON');
+      const a = document.createElement('a');
+      const data = _.map(reportTemplates.value, temp => _.pick(temp, 'type',
+        'subtype', 'name', 'description', 'template', 'items', 'tags',
+        'meta', 'config'));
+      const json = JSON.stringify(data);
+      a.setAttribute('href', 'data:text/plain;charset=utf-u,' + window.encodeURIComponent(json));
+      a.setAttribute('download', 'pme-report-templates.json');
+      a.click();
+    }
+
     return {
       columns,
       initializing,
+      fileInput,
       loading,
       pagination,
       rows,
@@ -221,6 +280,9 @@ export default {
       init,
       onPaginate,
       onRowSelect,
+      importFromJSON,
+      exportToJSON,
+      onFileChange,
     };
   },
 };
