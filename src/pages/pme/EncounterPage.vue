@@ -12,6 +12,15 @@ generic-page(
             br
             span.text-body1 {{encounterFacility.name}}
           q-btn(
+            v-if="printEnabled"
+            label="Print"
+            color="primary"
+            icon="las la-print"
+            no-caps
+            unelevated
+            @click="onPrint"
+          ).q-mr-sm
+          q-btn(
             v-if="amendEnabled"
             label="Amendments"
             color="primary"
@@ -278,7 +287,7 @@ import { computed, ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { getPmeEncounter } from '@/services/pme';
 import { sdk } from '@/boot/mycure';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { formatDoctorName as formatDoctorNameUtil } from '@/utils';
@@ -301,7 +310,7 @@ export default {
     const loading = ref(false);
     const route = useRoute();
     const tabModel = ref('live');
-    // const router = useRouter();
+    const router = useRouter();
     const focusedModeModel = ref({});
     const searchFormTemplatesRef = ref(null);
     const focusedModeFormRef = ref(null);
@@ -590,9 +599,25 @@ export default {
       amendments.value = items || [];
     }
 
+    // Print
+    const printEnabled = computed(() => {
+      console.warn('apeReportStatus.value', apeReportStatus.value);
+      return apeReportStatus.value?.value === 'completed';
+    });
+
+    function onPrint () {
+      router.push({
+        name: 'print-pme-report',
+        params: {
+          encounter: encounterId,
+        },
+      });
+    }
+
     return {
       amendEnabled,
       amendments,
+      amendmentsDialog,
       apeReportCreatedAt,
       apeReportFieldsModel,
       apeReportStatus,
@@ -605,7 +630,6 @@ export default {
       encounterFacility,
       encounterMedicalRecords,
       encounterPatient,
-      hasEncounterApeReport,
       evaluatorRoles,
       examinerNameFormatted,
       finalizedAllowed,
@@ -614,22 +638,24 @@ export default {
       focusedModeModel,
       forCheckingAllowed,
       formTemplate,
+      hasEncounterApeReport,
       isEditingEvaluator,
-      searchFormTemplatesRef,
       isEditingExaminer,
       loading,
       medicalExaminerRoles,
+      printEnabled,
       readOnly,
       reviewerNameFormatted,
+      searchFormTemplatesRef,
       selectedExaminer,
       selectedReviewer,
       tabModel,
-      amendmentsDialog,
       //
       onDeleteReport,
       onDone,
       onFinalize,
       onForChecking,
+      onPrint,
       onSaveReport,
       onTemplateSelect,
     };

@@ -30,7 +30,7 @@ generic-page(
           name="las la-chart-bar"
           style="margin-bottom: 5px;"
         ).text-primary.q-mr-sm
-        span Monitoring Report
+        span Summary Report
 
     //- Search and filter
     template(v-slot:top-right)

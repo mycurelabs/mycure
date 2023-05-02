@@ -1,6 +1,7 @@
 // Import all routes.
 import emrRoutes from './emr';
 import pmeRoutes from './pme';
+import printRoutes from './print';
 import pmeEncounterRoutes from './pme-encounter';
 import reportTemplateRoutes from './report-template';
 import groupPackageRoutes from './group-package';
@@ -18,7 +19,9 @@ const moduleRoutesMap = {
 };
 
 // Register the landing page route.
-const routes = [];
+const routes = [
+  printRoutes,
+];
 
 // Check APP_BUILD_TYPE
 // If value is 'full', register
