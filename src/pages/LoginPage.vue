@@ -50,8 +50,10 @@ export default {
     const loading = ref(false);
     const router = useRouter();
     const userStore = useUserStore();
-    const email = ref('superadmin@test.com');
-    const password = ref('mycure');
+    // const email = ref('superadmin@test.com');
+    // const password = ref('mycure');
+    const email = ref('');
+    const password = ref('');
     const loginFormRef = ref(null);
 
     async function init () {
