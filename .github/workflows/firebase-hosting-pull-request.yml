@@ -42,13 +42,13 @@ jobs:
           EOF
       - name: Run Build
         run: yarn build:spa:pme
-      - name: Setup target
+      - name: Set firebase target
         env:
-          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           firebase use mc-v4-stg
           firebase target:clear hosting staging
-          firebase target:apply hosting staging mycure-suite-staging
+          firebase target:apply hosting staging staging-web-cms
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
