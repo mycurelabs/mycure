@@ -10,7 +10,7 @@
         ]
       }
     },
-    "mc-v4-staging": {
+    "mc-v4-stg": {
       "hosting": {
         "staging": [
           "mycure-suite-staging"
