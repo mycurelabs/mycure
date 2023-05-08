@@ -47,6 +47,5 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MC_V4_STG }}
           projectId: mc-v4-stg
-          target: staging
-          channelId: pull-requests
+          channelId: staging
           expires: 7d
