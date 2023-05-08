@@ -22,6 +22,8 @@ jobs:
           node-version: 16
       - name: Install Yarn
         run: npm install yarn@latest -g
+      - name: Install Firebase Tools
+        run: npm install firebase-tools@~9.23.3 -g
       - name: Install Dependencies
         run: yarn
         env:
@@ -40,13 +42,17 @@ jobs:
           EOF
       - name: Run Build
         run: yarn build:spa:pme
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Set firebase target
         env:
-          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          firebase use mc-v4-stg
+          firebase target:clear hosting staging
+          firebase target:apply hosting staging staging-web-cms
+      - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MYCURE }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MC_V4_STG }}
           projectId: mc-v4-stg
-          target: staging
-          channelId: pull-requests
+          channelId: staging
           expires: 7d
