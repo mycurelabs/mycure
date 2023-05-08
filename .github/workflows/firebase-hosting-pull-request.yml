@@ -22,6 +22,8 @@ jobs:
           node-version: 16
       - name: Install Yarn
         run: npm install yarn@latest -g
+      - name: Install Firebase Tools
+        run: npm install firebase-tools@~9.23.3 -g
       - name: Install Dependencies
         run: yarn
         env:
