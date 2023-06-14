@@ -1,7 +1,7 @@
 <template lang="pug">
 q-layout(view="hHh LpR lFr" style="background: #fafafa")
-  q-header.bg-primary.text-white
-    q-toolbar(style="height: 60px")
+  q-header(dark)
+    q-toolbar(style="height: 60px; background: #00597a")
       q-btn(
         flat,
         dense,
