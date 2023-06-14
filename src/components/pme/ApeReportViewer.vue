@@ -39,7 +39,7 @@ import { computed, onMounted, ref, toRef } from 'vue';
 import { useQuasar } from 'quasar';
 import { format } from 'date-fns';
 import { capitalized } from '@/utils';
-import pmeHelper from '@/composables/pme-helpers';
+import pmeHelper, { useMedicalHistoryUIComponentHandler } from '@/composables/pme-helpers';
 export default {
   props: {
     patient: {
@@ -131,6 +131,12 @@ export default {
       `;
 
       if (!report?.length) return defaultDisplay;
+
+      // Make composable for parsing just a part of
+      // the report template
+      if (/report-template-medical-history-group/gi.test(report)) {
+        report = useMedicalHistoryUIComponentHandler(report, encounterMedicalRecords.value);
+      }
 
       /**
        * Iterate through all of the tokens
