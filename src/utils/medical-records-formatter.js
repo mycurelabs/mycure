@@ -41,7 +41,7 @@ export const getFtUtil = (h) => {
 
 export const computeEdcByDate = (date) => {
   if (!date) return '--';
-  return format(addDays(addMonths(date, 9), 7), 'MM/DD/YY');
+  return format(addDays(addMonths(date, 9), 7), 'MM/dd/yy');
 };
 
 export const computeAOGUsingLMP = (date, createdAt) => {
@@ -64,7 +64,7 @@ export const computeAOGUsingLMP = (date, createdAt) => {
 export const computeEDCUsingUS = (date, aog) => {
   if (!date || !aog) return '--';
   const days = 280 - aog;
-  return format(addDays(date, days), 'MM/DD/YY');
+  return format(addDays(date, days), 'MM/dd/yy');
 };
 
 export const recordsFieldFormatter = (records, options) => {
@@ -95,7 +95,7 @@ export const formatSocialHistory = (record) => {
       i = `${i} (${record.drugName})`;
     }
     if (record.drugLastUsedAt) {
-      i = `${i} (Last used: ${format(record.drugLastUsedAt, 'MM/DD/YY')})`;
+      i = `${i} (Last used: ${format(record.drugLastUsedAt, 'MM/dd/yy')})`;
     }
     results.push(i);
   }
@@ -125,7 +125,7 @@ export const formatSocialHxPackYears = (record) => {
 export const formatBirthHistory = (record) => {
   const restuls = [];
   if (!record) return null;
-  if (record.deliveredAt) restuls.push(`${format(record.deliveredAt, 'MM/DD/YY')}`);
+  if (record.deliveredAt) restuls.push(`${format(record.deliveredAt, 'MM/dd/yy')}`);
   if (record.methodOfDelivery) restuls.push(`${record.methodOfDelivery}`);
   if (record.attendedBy) restuls.push(`${record.attendedBy}`);
   if (record.complications) restuls.push(`${record.complications}`);
@@ -137,7 +137,7 @@ export const formatBirthHistory = (record) => {
 export const formatGynecologicHistory = (record) => {
   const results = [];
   if (!record) return null;
-  if (record.prevCervicSmearsDate) results.push(`Previous Cervix Smears Date: ${format(record.prevCervicSmearsDate, 'MM/DD/YY')}`);
+  if (record.prevCervicSmearsDate) results.push(`Previous Cervix Smears Date: ${format(record.prevCervicSmearsDate, 'MM/dd/yy')}`);
   if (record.prevCervicSmearsResult) results.push(`Previous Cervix Smears Result: ${record.prevCervicSmearsResult}`);
   if (record.prevProblemsTreatments) results.push(`Previous Problems/Treatments: ${record.prevProblemsTreatments}`);
   if (record.currentContraception) results.push(`Current Contraception: ${record.currentContraception}`);
@@ -149,7 +149,7 @@ export const formatGynecologicHistory = (record) => {
 export const formatHospitalizationHistory = (record) => {
   const results = [];
   if (!record) return null;
-  if (record.hospitalizedAt) results.push(`${format(record.hospitalizedAt, 'MM/DD/YY')}`);
+  if (record.hospitalizedAt) results.push(`${format(record.hospitalizedAt, 'MM/dd/yy')}`);
   if (record.hospitalName) results.push(`${record.hospitalName}`);
   if (record.diagnosis) results.push(`${record.diagnosis}`);
   if (record.treatment) results.push(`${record.treatment}`);
@@ -185,7 +185,7 @@ export const formatObstestricHistory = (record) => {
 export const formatDentalHistory = (record) => {
   const results = [];
   if (!record) return null;
-  if (record.medicalConditionAt) results.push(`Date occured: ${format(record.medicalConditionAt, 'MM/DD/YY')}`);
+  if (record.medicalConditionAt) results.push(`Date occured: ${format(record.medicalConditionAt, 'MM/dd/yy')}`);
   if (record.teeth && record.teeth.length) results.push(`Teeth: ${record.teeth.join(', ')}`);
   if (record.gingivae) results.push(`Gingivae: ${record.gingivae}`);
   if (record.palate) results.push(`Palate: ${record.palate}`);
@@ -234,7 +234,7 @@ export const formatROS = (record) => {
 export const formatVitals = (record) => {
   const results = [];
   if (!record) return null;
-  if (record.takenAt) results.push(`Date Taken: ${format(record.takenAt, 'MM/DD/YY')}`);
+  if (record.takenAt) results.push(`Date Taken: ${format(record.takenAt, 'MM/dd/yy')}`);
   if (record.weight) results.push(`Weight (kg): ${record.weight}`);
   if (record.height) results.push(`Hieght (cm): ${record.height}`);
   if (record.weight && record.height) results.push(`BMI: ${calcBMI(record.weight, record.height)}`);
@@ -252,7 +252,7 @@ export const formatVitals = (record) => {
   if (record.endocrine) results.push(`Chest Inspiration (cm): ${record.endocrine}`);
   if (record.chestExpiration) results.push(`Chest Expiration (cm): ${record.chestExpiration}`);
   if (record.o2sats) results.push(`O2 Sat (mm): ${record.o2sats}`);
-  if (record.lmp) results.push(`LMP Date:  ${format(record.lmp, 'MM/DD/YY')}`);
+  if (record.lmp) results.push(`LMP Date:  ${format(record.lmp, 'MM/dd/yy')}`);
   if (record.lmp) results.push(`EDC: ${computeEdcByDate(record.lmp)}`);
   if (record.lmp) results.push(`AOG: ${computeAOGUsingLMP(record.lmp, record.createdAt)}`);
   // - Old Visual Acuity Fields - will only show if there are old existing records
@@ -295,8 +295,8 @@ export const formatENTNote = (record) => {
 export const formatOBNote = (record) => {
   const restults = [];
   if (!record) return null;
-  if (record.lmp) restults.push(`LMP Date: ${format(record.lmp, 'MM/DD/YY')}`);
-  if (record.ultrasoundDate) restults.push(`US Date: ${format(record.ultrasoundDate, 'MM/DD/YY')}`);
+  if (record.lmp) restults.push(`LMP Date: ${format(record.lmp, 'MM/dd/yy')}`);
+  if (record.ultrasoundDate) restults.push(`US Date: ${format(record.ultrasoundDate, 'MM/dd/yy')}`);
   if (record.ultrasoundAog) restults.push(`AOG by US: ${record.ultrasoundAog}`);
   if (record.lmp) restults.push(`EDC: ${computeEdcByDate(record.lmp)}`);
   if (record.lmp) restults.push(`AOG: ${computeAOGUsingLMP(record.lmp, record.createdAt)}`);
