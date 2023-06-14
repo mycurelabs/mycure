@@ -200,7 +200,7 @@ export default () => {
   const formatSurgicalHistory = (record) => {
     const results = [];
     if (!record) return null;
-    if (record.performedAt) results.push(`${format(record.performedAt, 'MM/DD/YY')}`);
+    if (record.performedAt) results.push(`${format(record.performedAt, 'MM/dd/yy')}`);
     if (record.hospitalName) results.push(`${record.hospitalName}`);
     if (record.procedure) results.push(`${record.procedure}`);
     if (record.notes) results.push(`${record.notes}`);
@@ -2694,4 +2694,36 @@ export const useEditorHelper = () => {
     editorTempalteToRawTemplate,
     getSummaryReportFields,
   };
+};
+
+export const useMedicalHistoryUIComponentHandler = (report, records) => {
+  // HTML string
+  const htmlString = report;
+  // Create a new DOMParser instance
+  const parser = new DOMParser();
+  // Parse the HTML string
+  const parsedHTML = parser.parseFromString(htmlString, 'text/html');
+  // Access the parsed HTML
+  const medicalHistoryGroups = parsedHTML.querySelectorAll('#report-template-medical-history-group');
+
+  const medicalHistories = records?.filter(record => record.type === 'medical-history') || [];
+
+  const medicalHistoryGroup = document.createElement('div');
+  medicalHistoryGroup.style.display = 'grid';
+  medicalHistoryGroup.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  // medicalHistoryGroup.style.outline = '1px solid green';
+  medicalHistoryGroup.style.gap = '5px';
+
+  const medicalHistoryGroupsHTML = medicalHistories.map((medicalHistory, index) => {
+    return `<small>${index + 1}) <b>${medicalHistory.medicalCondition}</b> - ${medicalHistory.notes}</small>`.trim();
+  });
+
+  medicalHistoryGroup.innerHTML = medicalHistoryGroupsHTML.join('');
+
+  // TODO: implement medical records replacement
+  medicalHistoryGroups.forEach((item) => {
+    item.innerHTML = medicalHistoryGroup.outerHTML;
+  });
+
+  return parsedHTML.body.innerHTML;
 };
