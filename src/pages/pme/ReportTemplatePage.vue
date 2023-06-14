@@ -68,8 +68,8 @@ generic-page(
     //- q-card-section.q-pa-0
       search-form-template-tokens(@select="onTokenSelect" style="width: 100%")
     q-card-section.q-pa-0
-      div.row.items-center.q-gutter-sm
-        span.text-medium Tokens:
+      div.row.items-center.q-gutter-sm.q-mb-sm
+        div.block.text-medium Tokens:
         q-btn(
           label="Add Tokens"
           color="primary"
@@ -105,6 +105,17 @@ generic-page(
           no-caps
           :disable="disableEditing"
           @click="customTableDialog = true"
+        )
+      div.row.items-center.q-gutter-sm
+        span.text-medium UI Components:
+        q-btn(
+          label="Medical History Group"
+          color="primary"
+          icon="las la-table"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertMedicalHistoryGroup"
         )
     q-card-section.q-pa-0
       q-editor(
@@ -841,6 +852,18 @@ export default {
       router.push({ name: 'pme-report-templates' });
     }
 
+    // New implementation
+    function insertMedicalHistoryGroup () {
+      const edit = editorRef.value;
+      edit.runCmd('insertHTML', `
+        <div id="report-template-medical-history-group">
+          <div style="height: 200px; display: flex; justify-content: center; align-items: center; border: 1px solid grey;">
+            <h3 style="color: grey;">Medical History will show here</h3>
+          </div>
+        </div>
+      `);
+    }
+
     // Custom table
     const customTableDialog = ref(false);
     const customTableFormRef = ref(null);
@@ -931,6 +954,7 @@ export default {
       customTableFormRef,
       tableRows,
       tableColumns,
+      insertMedicalHistoryGroup,
     };
   },
 };
