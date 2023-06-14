@@ -1,7 +1,6 @@
 <template lang="pug">
 q-btn(
   icon="la la-exchange-alt"
-  color="primary"
   flat
   dense
   round
