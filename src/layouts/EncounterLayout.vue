@@ -1,7 +1,7 @@
 <template lang="pug">
 q-layout(view="hHh LpR lFr" style="background: #fafafa")
-  q-header(bordered).text-black.bg-white
-    q-toolbar
+  q-header(dark bordered)
+    q-toolbar(style="height: 60px; background: #00597a")
       q-btn(
         icon="la la-arrow-left"
         dense
@@ -13,7 +13,6 @@ q-layout(view="hHh LpR lFr" style="background: #fafafa")
       q-space
       q-btn(
         icon="la la-prescription"
-        color="primary"
         dense
         unelevated
         outline
