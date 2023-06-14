@@ -7,7 +7,7 @@ import { getPmeEncounter } from '@/services/pme';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
-import pmeHelper from '@/composables/pme-helpers';
+import pmeHelper, { useMedicalHistoryUIComponentHandler } from '@/composables/pme-helpers';
 export default {
   setup () {
     const route = useRoute();
@@ -40,6 +40,13 @@ export default {
       console.warn('rawTemplate', rawTemplate);
       const values = encounterApeReport.value?.values || [];
       console.warn('values', values);
+
+      // Make composable for parsing just a part of
+      // the report template
+      if (/report-template-medical-history-group/gi.test(rawTemplate)) {
+        rawTemplate = useMedicalHistoryUIComponentHandler(rawTemplate, encounterMedicalRecords.value);
+      }
+
       values?.forEach((item) => {
         const mapKey = generateKeyFromToken(item.id);
         const matchedToken = TEMPLATE_TOKENS_MAP.get(mapKey);
@@ -109,9 +116,13 @@ export default {
 
 <style scoped>
 @media print {
+  body {
+    background: white !important;
+  }
   #print-container {
-    size: letter;
+    size: legal;
     zoom: 90%;
+    background: white !important;
   }
 }
 </style>
