@@ -7,7 +7,18 @@ import { getPmeEncounter } from '@/services/pme';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
-import pmeHelper, { useMedicalHistoryUIComponentHandler } from '@/composables/pme-helpers';
+import pmeHelper, { replaceMedicalHistoryGroupUIValue, replaceDiagnosticGroupUIValue } from '@/composables/pme-helpers';
+import {
+  UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID,
+} from '@/constants/pme';
+
 export default {
   setup () {
     const route = useRoute();
@@ -16,7 +27,7 @@ export default {
     const encounter = ref({});
     const encounterApeReport = ref({});
     const encounterFacility = ref({});
-    const encounterMedicalRecords = ref({});
+    const encounterMedicalRecords = ref([]);
     const encounterPatient = ref({});
 
     const router = useRouter();
@@ -36,15 +47,83 @@ export default {
     };
 
     const templateWithValues = computed(() => {
-      let rawTemplate = encounterApeReport.value?.report || '';
-      console.warn('rawTemplate', rawTemplate);
+      let report = encounterApeReport.value?.report || '';
       const values = encounterApeReport.value?.values || [];
-      console.warn('values', values);
 
-      // Make composable for parsing just a part of
-      // the report template
-      if (/report-template-medical-history-group/gi.test(rawTemplate)) {
-        rawTemplate = useMedicalHistoryUIComponentHandler(rawTemplate, encounterMedicalRecords.value);
+      // UI Components
+      const medicalHistoryGroupRegex = new RegExp(UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID, 'gi');
+      const medicalHistories = encounterMedicalRecords.value?.filter(record => {
+        return record.type === 'medical-history' && record.notes;
+      }) || [];
+      if (medicalHistoryGroupRegex.test(report) && medicalHistories.length) {
+        report = replaceMedicalHistoryGroupUIValue({
+          id: UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID,
+          report,
+          data: medicalHistories,
+        });
+      }
+
+      const diagnosticHepatitisBGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID, 'gi');
+      if (diagnosticHepatitisBGroupRegex.test(report)) {
+        report = replaceDiagnosticGroupUIValue({
+          id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID,
+          report,
+          data: [],
+        });
+      }
+
+      const diagnosticHematologyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID, 'gi');
+      if (diagnosticHematologyGroupRegex.test(report)) {
+        report = replaceDiagnosticGroupUIValue({
+          id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID,
+          report,
+          data: [],
+        });
+      }
+
+      const diagnosticUrinalysisGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID, 'gi');
+      if (diagnosticUrinalysisGroupRegex.test(report)) {
+        report = replaceDiagnosticGroupUIValue({
+          id: UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID,
+          report,
+          data: [],
+        });
+      }
+
+      const diagnosticFecalysisGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID, 'gi');
+      if (diagnosticFecalysisGroupRegex.test(report)) {
+        report = replaceDiagnosticGroupUIValue({
+          id: UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID,
+          report,
+          data: [],
+        });
+      }
+
+      const diagnosticPregnancyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID, 'gi');
+      if (diagnosticPregnancyGroupRegex.test(report)) {
+        report = replaceDiagnosticGroupUIValue({
+          id: UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID,
+          report,
+          data: [],
+        });
+      }
+
+      const diagnosticHepatitisAGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID, 'gi');
+      if (diagnosticHepatitisAGroupRegex.test(report)) {
+        report = replaceDiagnosticGroupUIValue({
+          id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID,
+          report,
+          data: [],
+        });
+      }
+
+      const diagnosticRadiologyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID, 'gi');
+      if (diagnosticRadiologyGroupRegex.test(report)) {
+        report = replaceDiagnosticGroupUIValue({
+          id: UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID,
+          report,
+          data: [],
+        });
       }
 
       values?.forEach((item) => {
@@ -52,7 +131,7 @@ export default {
         const matchedToken = TEMPLATE_TOKENS_MAP.get(mapKey);
 
         if (!matchedToken) {
-          rawTemplate = rawTemplate.replace(`{${item.id}}`, item.answer || '');
+          report = report.replace(`{${item.id}}`, item.answer || '');
         }
 
         const dataSource = tokenDataSourceMap[matchedToken?.dataSource];
@@ -61,16 +140,16 @@ export default {
 
         if (matchedToken?.dataSource === 'patient') {
           answer = matchedToken.format(dataSource?.value);
-          rawTemplate = rawTemplate.replace(`{${item.id}}`, answer);
+          report = report.replace(`{${item.id}}`, answer);
           return;
         }
 
         /** Display the formatted answer */
         answer = matchedToken?.format(dataSource?.value);
-        rawTemplate = rawTemplate.replace(`{${item.id}}`, answer);
+        report = report.replace(`{${item.id}}`, answer);
       });
 
-      return rawTemplate;
+      return report;
     });
 
     function generateKeyFromToken (id) {
