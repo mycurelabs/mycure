@@ -117,6 +117,69 @@ generic-page(
           :disable="disableEditing"
           @click="insertMedicalHistoryGroup"
         )
+        q-btn(
+          label="Hematology Report"
+          color="primary"
+          icon="las la-vial"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertDiagnosticResultsGroup('hematology')"
+        )
+        q-btn(
+          label="Urinalysis Report"
+          color="primary"
+          icon="las la-vial"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertDiagnosticResultsGroup('urinalysis')"
+        )
+        q-btn(
+          label="Fecalysis Report"
+          color="primary"
+          icon="las la-vial"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertDiagnosticResultsGroup('fecalysis')"
+        )
+        q-btn(
+          label="Hepatitis B Surface Antigen (HBsAg)"
+          color="primary"
+          icon="las la-vial"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertDiagnosticResultsGroup('hepatitis-b')"
+        )
+        q-btn(
+          label="Pregnancy Test"
+          color="primary"
+          icon="las la-vial"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertDiagnosticResultsGroup('pregnancy')"
+        )
+        q-btn(
+          label="Hepatitis A (Screening Test)"
+          color="primary"
+          icon="las la-vial"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertDiagnosticResultsGroup('hepatitis-a')"
+        )
+        q-btn(
+          label="Radiology Report"
+          color="primary"
+          icon="las la-x-ray"
+          outline
+          no-caps
+          :disable="disableEditing"
+          @click="insertDiagnosticResultsGroup('radiology')"
+        )
     q-card-section.q-pa-0
       q-editor(
         ref="editorRef"
@@ -127,8 +190,10 @@ generic-page(
         :toolbar="editorToolbarOptions"
         :fonts="editorFontOptions"
       )
+      //- pre {{editorTemplate}}
       //- pre {{(config || {}).records}}
       //- pre {{reportTemplateConfig}}
+      //- pre {{rawTemplate}}
 
   q-dialog(v-model="tokensDialog" position="top")
     q-card
@@ -140,7 +205,6 @@ generic-page(
     side="left"
     show-if-above
     bordered
-    :width="500"
   )
     div.row
       div.col-xs-12.q-pa-md
@@ -408,9 +472,20 @@ import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
 import GenericPage from '@/components/commons/GenericPage';
 // import pmeHelper from '@/composables/pme-helpers';
-import pmeHelper from '@/composables/pme-helpers';
+import pmeHelper, { insertUIComponent } from '@/composables/pme-helpers';
 import SearchFormTemplateTokens from '@/components/commons/search/SearchFormTemplateTokens';
 import ReportTemplateAdvancedConfigDialog from '@/components/pme/ReportTemplateAdvancedConfigDialog';
+import {
+  UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID,
+} from '@/constants/pme';
+import { copyToClipboard } from 'quasar';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
 
@@ -494,12 +569,6 @@ export default {
           icon: q.iconSet.editor.align,
           fixedLabel: true,
           list: 'only-icons',
-          options: ['left', 'center', 'right', 'justify'],
-        },
-        {
-          label: q.lang.editor.align,
-          icon: q.iconSet.editor.align,
-          fixedLabel: true,
           options: ['left', 'center', 'right', 'justify'],
         },
       ],
@@ -711,6 +780,8 @@ export default {
 
       edit.focus();
       tokensDialog.value = false;
+
+      copyToClipboard(`{${id}}`).then(() => console.warn(`{${id}} copied to clipboard`));
     }
 
     async function insertCustomText () {
@@ -724,6 +795,8 @@ export default {
       customTextFormRef.value.resetValidation();
       customText.value = '';
       customTextDialog.value = false;
+
+      copyToClipboard(`{${id}}`).then(() => console.warn(`{${id}} copied to clipboard`));
     }
 
     async function insertCustomDropdown () {
@@ -751,6 +824,8 @@ export default {
       dropdownQuestion.value = '';
       dropdownOptions.value = [{ option: '' }];
       customDropdownDialog.value = false;
+
+      copyToClipboard(`{${id}}`).then(() => console.warn(`{${id}} copied to clipboard`));
     }
 
     function getTemplateTokens (template) {
@@ -852,16 +927,49 @@ export default {
       router.push({ name: 'pme-report-templates' });
     }
 
-    // New implementation
+    // Insert Medical History Group UI
     function insertMedicalHistoryGroup () {
       const edit = editorRef.value;
-      edit.runCmd('insertHTML', `
-        <div id="report-template-medical-history-group">
-          <div style="height: 200px; display: flex; justify-content: center; align-items: center; border: 1px solid grey;">
-            <h3 style="color: grey;">Medical History will show here</h3>
-          </div>
-        </div>
-      `);
+      edit.runCmd('insertHTML', insertUIComponent(UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID, 'No Medical History Data'));
+    }
+
+    // Insert Diagnostic Results Group UI
+    function insertDiagnosticResultsGroup (type) {
+      const types = [
+        'hematology',
+        'urinalysis',
+        'fecalysis',
+        'hepatitis-b',
+        'pregnancy',
+        'hepatitis-a',
+        'radiology',
+      ];
+      const idMap = {
+        hematology: UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID,
+        urinalysis: UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID,
+        fecalysis: UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID,
+        'hepatitis-b': UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID,
+        pregnancy: UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID,
+        'hepatitis-a': UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID,
+        radiology: UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID,
+      };
+      const textMap = {
+        hematology: 'No Hematology Data',
+        urinalysis: 'No Urinalysis Data',
+        fecalysis: 'No Fecalysis Data',
+        'hepatitis-b': 'No Hepatitis B Data',
+        pregnancy: 'No Pregnancy Data',
+        'hepatitis-a': 'No Hepatitis A Data',
+        radiology: 'No Radiology Data',
+      };
+      if (!types.includes(type)) {
+        console.error('Invalid type');
+        return;
+      }
+      const edit = editorRef.value;
+      edit.runCmd('insertHTML',
+        insertUIComponent(idMap[type], textMap[type]),
+      );
     }
 
     // Custom table
@@ -955,6 +1063,7 @@ export default {
       tableRows,
       tableColumns,
       insertMedicalHistoryGroup,
+      insertDiagnosticResultsGroup,
     };
   },
 };
