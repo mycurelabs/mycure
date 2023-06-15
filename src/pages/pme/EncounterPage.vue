@@ -96,6 +96,7 @@ generic-page(
                     :form-template="formTemplate"
                     :medical-records="encounterMedicalRecords"
                     :patient="encounterPatient"
+                    :diagnostic-orders="encounterDiagnosticOrders"
                   )
               div.row.items-top.q-mt-md
                 div.col-xs-12
@@ -338,6 +339,7 @@ export default {
     const encounterFacility = ref({});
     const encounterMedicalRecords = ref([]);
     const encounterPatient = ref({});
+    const encounterDiagnosticOrders = ref([]);
 
     const hasEncounterApeReport = computed(() => {
       return encounterApeReport.value?.id;
@@ -452,6 +454,7 @@ export default {
         encounterFacility.value = result.facility;
         encounterMedicalRecords.value = result.medicalRecords;
         encounterPatient.value = result.patient;
+        encounterDiagnosticOrders.value = result.diagnosticOrders;
 
         fetchAmendments();
       } catch (e) {
@@ -581,7 +584,6 @@ export default {
     }
 
     function formatDoctorName (personalDetails) {
-      console.warn('personalDetails', personalDetails);
       return formatDoctorNameUtil(personalDetails);
     }
 
@@ -630,6 +632,7 @@ export default {
       encounterFacility,
       encounterMedicalRecords,
       encounterPatient,
+      encounterDiagnosticOrders,
       evaluatorRoles,
       examinerNameFormatted,
       finalizedAllowed,
