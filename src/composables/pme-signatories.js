@@ -27,7 +27,6 @@ export default (apeReport) => {
   const finalizedByNameFormatted = computed(() => formatDoctorName(finalizedByDetails.value));
 
   function formatDoctorName (personalDetails) {
-    console.warn('personalDetails', personalDetails);
     return formatDoctorNameUtil(personalDetails);
   }
 
