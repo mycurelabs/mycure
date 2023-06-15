@@ -167,6 +167,52 @@ export const getPmeEncounter = async (opts) => {
           localKey: 'id',
           method: 'findOne',
         },
+        diagnosticOrders: {
+          service: 'diagnostic-orders',
+          foreignKey: 'encounter',
+          localKey: 'id',
+          method: 'find',
+          $populate: {
+            diagnosticOrderTests: {
+              service: 'diagnostic-order-tests',
+              method: 'find',
+              localKey: 'id',
+              foreignKey: 'order',
+              cancelledAt: { $exists: false },
+              $populate: {
+                test: {
+                  service: 'diagnostic-tests',
+                  method: 'get',
+                  localKey: 'test',
+                },
+                measures: {
+                  service: 'diagnostic-measures',
+                  method: 'find',
+                  localKey: 'results',
+                  extractKey: 'measure',
+                  foreignKey: 'id',
+                  foreignOps: '$in',
+                  skipEmpty: true,
+                },
+                technician: {
+                  service: 'personal-details',
+                  method: 'get',
+                  localKey: 'technician',
+                },
+                verifiedByDetails: {
+                  service: 'personal-details',
+                  method: 'get',
+                  localKey: 'verifiedBy',
+                },
+                pathologist: {
+                  service: 'personal-details',
+                  method: 'get',
+                  localKey: 'pathologist',
+                },
+              },
+            },
+          },
+        },
       },
     },
   });
@@ -183,12 +229,47 @@ export const getPmeEncounter = async (opts) => {
   const facilityMapped = encounter.$populated?.facility;
   const medicalRecords = encounter.$populated?.medicalRecords;
 
+  /**
+   * Retrieves diagnostic orders from an encounter object and transforms them into a modified format.
+   * Populated data is included where available.
+   * The code iterates over the diagnosticOrders array, mapping each order to a new object. The new object
+   * includes all properties of the original order except for the '$populated' property, which is omitted.
+   * The populated data of the order is spread into the new object.
+   * Additionally, the code maps the diagnosticOrderTests array of each order. Each test is transformed into
+   * a new object that follows a similar pattern as the order. The results array of each test is also mapped,
+   * transforming each result object. The 'measure' property is assigned by finding a measure object in the
+   * populated data of the test that matches the 'measure' property of the result.
+   * Finally, the modified diagnosticOrders array is returned.
+   */
+  const diagnosticOrders = encounter.$populated?.diagnosticOrders?.map((order) => {
+    return {
+      ...omit(order, ['$populated']),
+      ...order?.$populated,
+      diagnosticOrderTests: order?.$populated.diagnosticOrderTests?.map((test) => {
+        const results = test.results?.map((result) => {
+          const measure = test.$populated?.measures?.find((measure) => measure.id === result.measure);
+          return {
+            ...omit(result, ['$populated']),
+            ...result?.$populated,
+            measure,
+          };
+        });
+        return {
+          ...omit(test, ['$populated']),
+          ...test?.$populated,
+          results,
+        };
+      }),
+    };
+  });
+
   return {
     encounter: omit(encounter, ['$populated']),
     patient: patientMapped,
     facility: facilityMapped,
     apeReport: apeReportMapped,
     medicalRecords,
+    diagnosticOrders,
   };
 };
 
