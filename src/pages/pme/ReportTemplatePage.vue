@@ -852,7 +852,7 @@ export default {
           tokenArr.pop(); // remove number at the end of the array
           const id = tokenArr.join('_');
           const matchedToken = TEMPLATE_TOKENS_MAP.get(id);
-          template = template.replace(`{${token}}`, setChipToToken({ label: matchedToken.name, value: token }));
+          template = template.replace(`{${token}}`, setChipToToken({ label: matchedToken?.name || 'Invalid Token', value: token }));
         }
       }
 
