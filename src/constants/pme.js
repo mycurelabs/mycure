@@ -30,3 +30,12 @@ export const PME_REPORT_MEDICAL_RECORDS_TOKENS = [
   'patient_hmo_expiry', 'patient_hmo_status', 'patient_companies', 'patient_company_accountno', 'patient_dp', 'patient_lg_dp', 'patient_xl_dp',
   'patient_full_width_dp', 'custom_text', 'custom_choices',
 ];
+
+export const UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID = 'report-template-medical-record-group-medical-history';
+export const UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID = 'report-template-diagnostic-group-hematology';
+export const UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID = 'report-template-diagnostic-group-urinalysis';
+export const UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID = 'report-template-diagnostic-group-fecalysis';
+export const UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID = 'report-template-diagnostic-group-hepatitis-b';
+export const UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID = 'report-template-diagnostic-group-pregnancy';
+export const UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID = 'report-template-diagnostic-group-hepatitis-a';
+export const UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID = 'report-template-diagnostic-group-radiology';
