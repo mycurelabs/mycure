@@ -1,3 +1,4 @@
+/* eslint-disable no-lone-blocks */
 import { useHelpers } from '@/composables/helpers';
 import { addMilliseconds, differenceInDays, differenceInYears, eachDayOfInterval, format } from 'date-fns';
 import _, { isEmpty, get, cloneDeep, uniq, map } from 'lodash';
@@ -25,7 +26,16 @@ import {
   getRecords,
   recordsFieldFormatter,
 } from '@/utils/medical-records-formatter';
-import { PME_REPORT_MEDICAL_RECORDS_TOKENS } from '@/constants/pme';
+import {
+  PME_REPORT_MEDICAL_RECORDS_TOKENS,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID,
+  UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID,
+} from '@/constants/pme';
 
 export default () => {
   const { formatName, formatAddress } = useHelpers();
@@ -2696,34 +2706,263 @@ export const useEditorHelper = () => {
   };
 };
 
-export const useMedicalHistoryUIComponentHandler = (report, records) => {
+export const insertUIComponent = (id, text) => {
+  return `
+    <br>
+    <div id="${id}">
+      <div style="height: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px dashed grey;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      ">
+        <span style="color: grey;">${text}</span>
+      </div>
+    </div>
+    <br>
+  `;
+};
+
+/*
+  @param {string} report - HTML string of the report
+  @param {string} id - id of the UI component container where the value will be inserted
+  @returns {object} - parsedReportHTML - the HTML element version of the report string, parsedUIComponentElements - the HTML element version of all matched UI component containers
+*/
+function parseHTML (report, id) {
   // HTML string
   const htmlString = report;
   // Create a new DOMParser instance
   const parser = new DOMParser();
   // Parse the HTML string
-  const parsedHTML = parser.parseFromString(htmlString, 'text/html');
+  const parsedReportHTML = parser.parseFromString(htmlString, 'text/html');
   // Access the parsed HTML
-  const medicalHistoryGroups = parsedHTML.querySelectorAll('#report-template-medical-history-group');
+  return {
+    parsedReportHTML,
+    parsedUIComponentElements: parsedReportHTML.querySelectorAll(`#${id}`),
+  };
+}
 
-  const medicalHistories = records?.filter(record => record.type === 'medical-history') || [];
+export const replaceMedicalHistoryGroupUIValue = ({ id, report, data }) => {
+  const { parsedReportHTML, parsedUIComponentElements } = parseHTML(report, id);
 
-  const medicalHistoryGroup = document.createElement('div');
-  medicalHistoryGroup.style.display = 'grid';
-  medicalHistoryGroup.style.gridTemplateColumns = 'repeat(3, 1fr)';
-  // medicalHistoryGroup.style.outline = '1px solid green';
-  medicalHistoryGroup.style.gap = '5px';
+  const containerElement = document.createElement('div');
+  containerElement.style.display = 'grid';
+  containerElement.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  containerElement.style.gap = '5px';
 
-  const medicalHistoryGroupsHTML = medicalHistories.map((medicalHistory, index) => {
-    return `<small>${index + 1}) <b>${medicalHistory.medicalCondition}</b> - ${medicalHistory.notes}</small>`.trim();
+  const valuesHTMLString = data.map((medicalHistory, index) => {
+    return `<small>${medicalHistory.medicalCondition} <br>- <b>${medicalHistory.notes}</b></small>`.trim();
   });
 
-  medicalHistoryGroup.innerHTML = medicalHistoryGroupsHTML.join('');
+  containerElement.innerHTML = valuesHTMLString.join('');
 
-  // TODO: implement medical records replacement
-  medicalHistoryGroups.forEach((item) => {
-    item.innerHTML = medicalHistoryGroup.outerHTML;
+  // replace all the UI component containers with the data value
+  parsedUIComponentElements.forEach((item) => {
+    item.innerHTML = containerElement.outerHTML;
   });
 
-  return parsedHTML.body.innerHTML;
+  return parsedReportHTML.body.innerHTML;
+};
+
+function getDiagnosticHematologyHTMLValue (tests) {
+  const firstTest = tests?.[0];
+  console.warn('hematology', firstTest);
+
+  const resultsWithMeasureWithSet = firstTest?.results?.filter((result) => {
+    return result?.measure?.set;
+  });
+  const setName = resultsWithMeasureWithSet?.[0]?.measure?.set;
+
+  const resultsWithoutMeasureWithSet = firstTest?.results?.filter((result) => {
+    return !result?.measure?.set;
+  });
+
+  function getMinMaxLabel (min, max) {
+    if (min && max) {
+      return `${min}-${max}`;
+    }
+  };
+
+  function getRows (results, withSet) {
+    return results?.map((result) => {
+      const measure = result?.measure;
+      const referenceRange = measure?.referenceRanges?.[0];
+      const min = referenceRange?.min;
+      const max = referenceRange?.max;
+      const unit = measure?.unit;
+      return `
+        <tr>
+          <td style="${withSet ? 'padding-left: 10px' : ''}">${result?.measure?.name}</td>
+          <td>${result?.value}</td>
+          <td>
+            <span>${getMinMaxLabel(min, max) || ''}</span>
+            <span>${unit || ''}</span>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  const rows = getRows(resultsWithoutMeasureWithSet).join('');
+  const rowsWithSet = getRows(resultsWithMeasureWithSet, true).join('');
+
+  return `
+    <div style="display: flex; outline: 1px solid gray;">
+      <div style="flex: 1">
+        <table width="100%" border="1" style="border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th width="33%">Constituent</th>
+              <th width="33%">Result</th>
+              <th width="33%">Reference Values</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+      <div style="flex: 1">
+        <table width="100%" border="1" style="border-collapse: collapse;">
+          <tbody>
+            <tr>
+              <td colspan="3" align="center">
+                <b>${setName}</b>
+              </td>
+            </tr>
+            <tr>
+              <th>Constituent</th>
+              <th>Result</th>
+              <th>Reference Values</th>
+            </tr>
+            ${rowsWithSet}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function getDiagnosticUrinalysisHTMLValue (tests) {
+  const firstTest = tests?.[0];
+  console.warn('urinalysis', firstTest);
+
+  function getResults (test) {
+    return test?.results?.map((result) => {
+      return `
+        <tr>
+          <td>${result?.measure?.name}</td>
+          <td>${result?.value}</td>
+          <td>${result?.measure?.unit || ''}</td>
+        </tr>
+      `;
+    });
+  }
+
+  const rows = getResults(firstTest).join('');
+
+  return `
+    <table width="100%" border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th width="33%">Test</th>
+          <th width="33%">Result</th>
+          <th width="33%">Unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+function getDiagnosticFecalysisHTMLValue (tests) {
+  const firstTest = tests?.[0];
+  console.warn('fecalysis', firstTest);
+
+  function getResults (test) {
+    return test?.results?.map((result) => {
+      return `
+        <tr>
+          <td>${result?.measure?.name}</td>
+          <td>${result?.value}</td>
+          <td>${result?.measure?.unit || ''}</td>
+        </tr>
+      `;
+    });
+  }
+
+  const rows = getResults(firstTest).join('');
+
+  return `
+    <table width="100%" border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th width="33%">Test</th>
+          <th width="33%">Result</th>
+          <th width="33%">Unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+function getDiagnosticHepatitisBHTMLValue (tests) {
+  return '<h3>Hepatitis B HTML Value</h3>';
+}
+
+function getDiagnosticPregnancyHTMLValue (tests) {
+  return '<h3>Pregnancy HTML Value</h3>';
+}
+
+function getDiagnosticHepatitisAHTMLValue (tests) {
+  return '<h3>Pregnancy A HTML Value</h3>';
+}
+
+function getDiagnosticRadiologyAHTMLValue (tests) {
+  const firstTest = tests?.[0];
+  const htmlStrings = firstTest?.results?.[0].value || '';
+  return htmlStrings;
+}
+
+export const replaceDiagnosticGroupUIValue = ({ id, report, data: tests }) => {
+  const { parsedReportHTML, parsedUIComponentElements } = parseHTML(report, id);
+  const containerElement = document.createElement('div');
+
+  switch (id) {
+    case UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID: {
+      containerElement.innerHTML = getDiagnosticHematologyHTMLValue(tests);
+    }; break;
+    case UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID: {
+      containerElement.innerHTML = getDiagnosticUrinalysisHTMLValue(tests);
+    }; break;
+    case UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID: {
+      containerElement.innerHTML = getDiagnosticFecalysisHTMLValue(tests);
+    }; break;
+    case UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID: {
+      containerElement.innerHTML = getDiagnosticHepatitisBHTMLValue(tests);
+    }; break;
+    case UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID: {
+      containerElement.innerHTML = getDiagnosticPregnancyHTMLValue(tests);
+    }; break;
+    case UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID: {
+      containerElement.innerHTML = getDiagnosticHepatitisAHTMLValue(tests);
+    }; break;
+    case UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID: {
+      containerElement.innerHTML = getDiagnosticRadiologyAHTMLValue(tests);
+    }; break;
+    default: break;
+  }
+
+  parsedUIComponentElements.forEach((item) => {
+    item.innerHTML = containerElement.outerHTML;
+  });
+
+  return parsedReportHTML.body.innerHTML;
 };
