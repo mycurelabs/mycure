@@ -29,6 +29,7 @@ export default {
     const encounterFacility = ref({});
     const encounterMedicalRecords = ref([]);
     const encounterPatient = ref({});
+    const encounterDiagnosticOrders = ref([]);
 
     const router = useRouter();
     const userStore = useUserStore();
@@ -44,6 +45,7 @@ export default {
       clinic: encounterFacility,
       encounter,
       patient: encounterPatient,
+      diagnosticOrders: encounterDiagnosticOrders,
     };
 
     const templateWithValues = computed(() => {
@@ -63,67 +65,133 @@ export default {
         });
       }
 
-      const diagnosticHepatitisBGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID, 'gi');
-      if (diagnosticHepatitisBGroupRegex.test(report)) {
-        report = replaceDiagnosticGroupUIValue({
-          id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID,
-          report,
-          data: [],
+      // Laboratory Block
+      const laboratoryOrders = encounterDiagnosticOrders.value?.filter(order => {
+        return order.type === 'laboratory';
+      }) || [];
+      const allLaboratoryTests = laboratoryOrders.reduce((acc, order) => {
+        return [...acc, ...order.diagnosticOrderTests];
+      }, []);
+
+      if (allLaboratoryTests.length) {
+        const diagnosticHepatitisBGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID, 'gi');
+        const hepatitisBKeywords = ['hepatitis b', 'hepatitis-b', 'hepatitisb'];
+        const hepatitisBTests = allLaboratoryTests.filter(test => {
+          return hepatitisBKeywords.some(keyword => {
+            return test.testName?.toLowerCase().includes(keyword) ||
+              test.section?.toLowerCase().includes(keyword) ||
+              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+          });
         });
+        if (diagnosticHepatitisBGroupRegex.test(report) && hepatitisBTests.length) {
+          report = replaceDiagnosticGroupUIValue({
+            id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_B_ID,
+            report,
+            data: hepatitisBTests,
+          });
+        }
+
+        const diagnosticHematologyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID, 'gi');
+        const hematologyKeywords = ['hematology', 'cbc', 'complete blood count'];
+        const hematologyTests = allLaboratoryTests.filter(test => {
+          return hematologyKeywords.some(keyword => {
+            return test.testName?.toLowerCase().includes(keyword) ||
+              test.section?.toLowerCase().includes(keyword) ||
+              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+          });
+        });
+        if (diagnosticHematologyGroupRegex.test(report) && hematologyTests.length) {
+          report = replaceDiagnosticGroupUIValue({
+            id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID,
+            report,
+            data: hematologyTests,
+          });
+        }
+
+        const diagnosticUrinalysisGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID, 'gi');
+        const urinalysisKeywords = ['urinalysis', 'urine'];
+        const urinalysisTests = allLaboratoryTests.filter(test => {
+          return urinalysisKeywords.some(keyword => {
+            return test.testName?.toLowerCase().includes(keyword) ||
+              test.section?.toLowerCase().includes(keyword) ||
+              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+          });
+        });
+        if (diagnosticUrinalysisGroupRegex.test(report) && urinalysisTests.length) {
+          report = replaceDiagnosticGroupUIValue({
+            id: UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID,
+            report,
+            data: urinalysisTests,
+          });
+        }
+
+        const diagnosticFecalysisGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID, 'gi');
+        const fecalysisKeywords = ['fecalysis', 'stool'];
+        const fecalysisTests = allLaboratoryTests.filter(test => {
+          return fecalysisKeywords.some(keyword => {
+            return test.testName?.toLowerCase().includes(keyword) ||
+              test.section?.toLowerCase().includes(keyword) ||
+              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+          });
+        });
+        if (diagnosticFecalysisGroupRegex.test(report) && fecalysisTests.length) {
+          report = replaceDiagnosticGroupUIValue({
+            id: UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID,
+            report,
+            data: fecalysisTests,
+          });
+        }
+
+        const diagnosticPregnancyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID, 'gi');
+        const pregnancyKeywords = ['pregnancy', 'pregnancy test'];
+        const pregnancyTests = allLaboratoryTests.filter(test => {
+          return pregnancyKeywords.some(keyword => {
+            return test.testName?.toLowerCase().includes(keyword) ||
+              test.section?.toLowerCase().includes(keyword) ||
+              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+          });
+        });
+        if (diagnosticPregnancyGroupRegex.test(report) && pregnancyTests.length) {
+          report = replaceDiagnosticGroupUIValue({
+            id: UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID,
+            report,
+            data: pregnancyTests,
+          });
+        }
+
+        const diagnosticHepatitisAGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID, 'gi');
+        const hepatitisAKeywords = ['hepatitis a', 'hepatitis-a', 'hepatitisa'];
+        const hepatitisATests = allLaboratoryTests.filter(test => {
+          return hepatitisAKeywords.some(keyword => {
+            return test.testName?.toLowerCase().includes(keyword) ||
+              test.section?.toLowerCase().includes(keyword) ||
+              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+          });
+        });
+        if (diagnosticHepatitisAGroupRegex.test(report) && hepatitisATests.length) {
+          report = replaceDiagnosticGroupUIValue({
+            id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID,
+            report,
+            data: hepatitisATests,
+          });
+        }
       }
 
-      const diagnosticHematologyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID, 'gi');
-      if (diagnosticHematologyGroupRegex.test(report)) {
-        report = replaceDiagnosticGroupUIValue({
-          id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEMATOLOGY_ID,
-          report,
-          data: [],
-        });
-      }
+      // Radiology Block
+      const radiologyOrders = encounterDiagnosticOrders.value?.filter(order => order.type === 'radiology') || [];
+      const allRadiologyTests = radiologyOrders.reduce((acc, order) => {
+        return [...acc, ...order.diagnosticOrderTests];
+      }, []);
 
-      const diagnosticUrinalysisGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID, 'gi');
-      if (diagnosticUrinalysisGroupRegex.test(report)) {
-        report = replaceDiagnosticGroupUIValue({
-          id: UI_COMPONENT_GROUP_DIAGNOSTIC_URINALYSIS_ID,
-          report,
-          data: [],
-        });
-      }
-
-      const diagnosticFecalysisGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID, 'gi');
-      if (diagnosticFecalysisGroupRegex.test(report)) {
-        report = replaceDiagnosticGroupUIValue({
-          id: UI_COMPONENT_GROUP_DIAGNOSTIC_FECALYSIS_ID,
-          report,
-          data: [],
-        });
-      }
-
-      const diagnosticPregnancyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID, 'gi');
-      if (diagnosticPregnancyGroupRegex.test(report)) {
-        report = replaceDiagnosticGroupUIValue({
-          id: UI_COMPONENT_GROUP_DIAGNOSTIC_PREGNANCY_ID,
-          report,
-          data: [],
-        });
-      }
-
-      const diagnosticHepatitisAGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID, 'gi');
-      if (diagnosticHepatitisAGroupRegex.test(report)) {
-        report = replaceDiagnosticGroupUIValue({
-          id: UI_COMPONENT_GROUP_DIAGNOSTIC_HEPATITIS_A_ID,
-          report,
-          data: [],
-        });
-      }
-
-      const diagnosticRadiologyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID, 'gi');
-      if (diagnosticRadiologyGroupRegex.test(report)) {
-        report = replaceDiagnosticGroupUIValue({
-          id: UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID,
-          report,
-          data: [],
-        });
+      if (allRadiologyTests.length) {
+        const diagnosticRadiologyGroupRegex = new RegExp(UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID, 'gi');
+        if (diagnosticRadiologyGroupRegex.test(report)) {
+          report = replaceDiagnosticGroupUIValue({
+            id: UI_COMPONENT_GROUP_DIAGNOSTIC_RADIOLOGY_ID,
+            report,
+            data: allRadiologyTests,
+          });
+        }
       }
 
       values?.forEach((item) => {
@@ -169,6 +237,7 @@ export default {
         encounterFacility.value = result.facility;
         encounterMedicalRecords.value = result.medicalRecords;
         encounterPatient.value = result.patient;
+        encounterDiagnosticOrders.value = result.diagnosticOrders;
 
         setTimeout(() => {
           window.print();

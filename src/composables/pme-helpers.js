@@ -2914,15 +2914,105 @@ function getDiagnosticFecalysisHTMLValue (tests) {
 }
 
 function getDiagnosticHepatitisBHTMLValue (tests) {
-  return '<h3>Hepatitis B HTML Value</h3>';
+  const firstTest = tests?.[0];
+  console.warn('hepatitis b', firstTest);
+
+  function getResults (test) {
+    return test?.results?.map((result) => {
+      return `
+        <tr>
+          <td>${result?.measure?.name}</td>
+          <td>${result?.value}</td>
+          <td>${result?.measure?.unit || ''}</td>
+        </tr>
+      `;
+    });
+  }
+
+  const rows = getResults(firstTest).join('');
+
+  return `
+    <table width="100%" border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th width="33%">Test</th>
+          <th width="33%">Result</th>
+          <th width="33%">Unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
 }
 
 function getDiagnosticPregnancyHTMLValue (tests) {
-  return '<h3>Pregnancy HTML Value</h3>';
+  const firstTest = tests?.[0];
+  console.warn('pregnancy', firstTest);
+
+  function getResults (test) {
+    return test?.results?.map((result) => {
+      return `
+        <tr>
+          <td>${result?.measure?.name}</td>
+          <td>${result?.value}</td>
+          <td>${result?.measure?.unit || ''}</td>
+        </tr>
+      `;
+    });
+  }
+
+  const rows = getResults(firstTest).join('');
+
+  return `
+    <table width="100%" border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th width="33%">Test</th>
+          <th width="33%">Result</th>
+          <th width="33%">Unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
 }
 
 function getDiagnosticHepatitisAHTMLValue (tests) {
-  return '<h3>Pregnancy A HTML Value</h3>';
+  const firstTest = tests?.[0];
+  console.warn('hepatitis a', firstTest);
+
+  function getResults (test) {
+    return test?.results?.map((result) => {
+      return `
+        <tr>
+          <td>${result?.measure?.name}</td>
+          <td>${result?.value}</td>
+          <td>${result?.measure?.unit || ''}</td>
+        </tr>
+      `;
+    });
+  }
+
+  const rows = getResults(firstTest).join('');
+
+  return `
+    <table width="100%" border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th width="33%">Test</th>
+          <th width="33%">Result</th>
+          <th width="33%">Unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
 }
 
 function getDiagnosticRadiologyAHTMLValue (tests) {
