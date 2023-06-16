@@ -368,6 +368,10 @@ export default {
         //   console.warn('dataSource', dataSource.value);
         // }
 
+        if (matchedToken.dataSource === 'clinic') {
+          console.warn('dataSource', dataSource);
+        }
+
         /**
          * Readonly Token Objects
          * When a Token Object is readonly, there will be no input components

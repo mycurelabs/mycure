@@ -47,6 +47,7 @@ module.exports = function (ctx) {
       'axios',
       'i18n',
       'footprints',
+      'html-to-paper',
       {
         server: false,
         path: 'mycure.js',

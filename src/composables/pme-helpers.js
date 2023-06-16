@@ -277,6 +277,7 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
+        console.warn('Clinic Logo', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 80px;" />`;
       },
@@ -287,6 +288,7 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
+        console.warn('Clinic Logo - Large', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100px;" />`;
       },
@@ -297,6 +299,7 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
+        console.warn('Clinic Logo - X-Large', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 125px;" />`;
       },
@@ -307,6 +310,7 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
+        console.warn('Clinic Logo - Full-Width', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100%;" />`;
       },
@@ -366,7 +370,8 @@ export default () => {
       dataSource: 'attending-doctor',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        // return 'no-formatter-yet';
+        return '';
       },
     },
     {
@@ -375,7 +380,8 @@ export default () => {
       dataSource: 'attending-doctor',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        // return 'no-formatter-yet';
+        return '';
       },
     },
     {
@@ -384,7 +390,8 @@ export default () => {
       dataSource: 'attending-doctor',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        // return 'no-formatter-yet';
+        return '';
       },
     },
     {
@@ -393,7 +400,8 @@ export default () => {
       dataSource: 'attending-doctor',
       readonly: true,
       format: (data) => {
-        return 'no-formatter-yet';
+        // return 'no-formatter-yet';
+        return '';
       },
     },
     {
@@ -456,7 +464,7 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        return data?.name?.middleName;
+        return data?.name?.middleName || '';
       },
     },
     {
@@ -516,7 +524,7 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        return data?.mobileNo;
+        return data?.mobileNo || '';
       },
     },
     {
@@ -635,6 +643,7 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
+        console.warn('patient dp', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100px;" />`;
       },
@@ -645,6 +654,7 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
+        console.warn('patient dp lg', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 200px;" />`;
       },
@@ -655,6 +665,7 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
+        console.warn('patient dp xl', data); ;
         const src = data?.picURL;
         return `<img src="${src}" style="width: 300px;" />`;
       },
@@ -665,6 +676,7 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
+        console.warn('patient full', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100%;" />`;
       },
@@ -2777,7 +2789,7 @@ function getDiagnosticHematologyHTMLValue (tests) {
 
   const resultsWithoutMeasureWithSet = firstTest?.results?.filter((result) => {
     return !result?.measure?.set;
-  });
+  }) || [];
 
   function getMinMaxLabel (min, max) {
     if (min && max) {
@@ -2805,8 +2817,8 @@ function getDiagnosticHematologyHTMLValue (tests) {
     });
   }
 
-  const rows = getRows(resultsWithoutMeasureWithSet).join('');
-  const rowsWithSet = getRows(resultsWithMeasureWithSet, true).join('');
+  const rows = getRows(resultsWithoutMeasureWithSet)?.join('') || '';
+  const rowsWithSet = getRows(resultsWithMeasureWithSet, true)?.join('') || '';
 
   return `
     <div style="display: flex; outline: 1px solid gray;">
@@ -2861,7 +2873,7 @@ function getDiagnosticUrinalysisHTMLValue (tests) {
     });
   }
 
-  const rows = getResults(firstTest).join('');
+  const rows = getResults(firstTest)?.join('') || '';
 
   return `
     <table width="100%" border="1" style="border-collapse: collapse;">
@@ -2895,7 +2907,7 @@ function getDiagnosticFecalysisHTMLValue (tests) {
     });
   }
 
-  const rows = getResults(firstTest).join('');
+  const rows = getResults(firstTest)?.join('') || '';
 
   return `
     <table width="100%" border="1" style="border-collapse: collapse;">
@@ -2929,7 +2941,7 @@ function getDiagnosticHepatitisBHTMLValue (tests) {
     });
   }
 
-  const rows = getResults(firstTest).join('');
+  const rows = getResults(firstTest)?.join('') || '';
 
   return `
     <table width="100%" border="1" style="border-collapse: collapse;">
@@ -2963,7 +2975,7 @@ function getDiagnosticPregnancyHTMLValue (tests) {
     });
   }
 
-  const rows = getResults(firstTest).join('');
+  const rows = getResults(firstTest)?.join('') || '';
 
   return `
     <table width="100%" border="1" style="border-collapse: collapse;">
@@ -2997,7 +3009,7 @@ function getDiagnosticHepatitisAHTMLValue (tests) {
     });
   }
 
-  const rows = getResults(firstTest).join('');
+  const rows = getResults(firstTest)?.join('') || '';
 
   return `
     <table width="100%" border="1" style="border-collapse: collapse;">

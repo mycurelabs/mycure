@@ -7779,6 +7779,11 @@ vue-footprints@^1.0.0:
   resolved "https://registry.yarnpkg.com/vue-footprints/-/vue-footprints-1.0.0.tgz#81cd83403d8ec733e63c895489cef8f90547487e"
   integrity sha512-Oe4BRmMLARtfVk6zEP/3gnIgA8M92ULBL6lgabBLBHTcCzfoYdZ0LWDZGcbeFLId1EeV3OgO9d+5XCDnY0w8/Q==
 
+vue-html-to-paper@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/vue-html-to-paper/-/vue-html-to-paper-2.0.3.tgz#66fccdb3a645c2ca564bdc9373436c83cdb20c2f"
+  integrity sha512-2Kbud/3yZNw1oho05vJgkYfqoXkHlpB7C06BdF89OkQgzKRLYeatVhJgPwXHnH+HskmhNWjSKzJyay9HnN4QvQ==
+
 vue-i18n@^9.0.0:
   version "9.2.2"
   resolved "https://registry.yarnpkg.com/vue-i18n/-/vue-i18n-9.2.2.tgz#aeb49d9424923c77e0d6441e3f21dafcecd0e666"

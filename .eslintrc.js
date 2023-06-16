@@ -82,5 +82,6 @@ module.exports = {
     'no-multi-str': 'off',
     'curly': 1,
     'vue/multi-word-component-names': 'off',
+    'no-unused-vars': 'off',
   }
 }

@@ -7,6 +7,7 @@ import { getPmeEncounter } from '@/services/pme';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
+import { fakeAwait } from '@/utils';
 import pmeHelper, { replaceMedicalHistoryGroupUIValue, replaceDiagnosticGroupUIValue } from '@/composables/pme-helpers';
 import {
   UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID,
@@ -20,6 +21,16 @@ import {
 } from '@/constants/pme';
 
 export default {
+  // async mounted () {
+  // console.warn('mounted');
+  // await fakeAwait(3000);
+  // await this.$htmlToPaper('print-container');
+  // await this.$htmlToPaper('print-container', {
+  //   styles: [
+  //     'https://necolas.github.io/normalize.css/8.0.1/normalize.css',
+  //   ],
+  // });
+  // },
   setup () {
     const route = useRoute();
     const encounterId = route.params.encounter;
@@ -239,15 +250,62 @@ export default {
         encounterPatient.value = result.patient;
         encounterDiagnosticOrders.value = result.diagnosticOrders;
 
-        setTimeout(() => {
-          window.print();
-          router.go(-1);
-        }, 1000);
+        await fakeAwait(3000);
+        await print();
       } catch (e) {
         console.error(e);
       } finally {
         loading.value = false;
       }
+    }
+
+    function addStyles (win, styles) {
+      styles.forEach(style => {
+        const link = win.document.createElement('link');
+        link.setAttribute('rel', 'stylesheet');
+        link.setAttribute('type', 'text/css');
+        link.setAttribute('href', style);
+        win.document.getElementsByTagName('head')[0].appendChild(link);
+      });
+    }
+
+    function openWindow (url, name, props) {
+      let windowRef = null;
+      windowRef = window.open(url, name, props);
+      if (!windowRef.opener) {
+        windowRef.opener = self;
+      }
+      windowRef.focus();
+      return windowRef;
+    }
+
+    async function print () {
+      const element = window.document.getElementById('print-container');
+      const url = '';
+      const win = openWindow(url);
+
+      win.document.write(`
+        <html>
+          <head>
+            <title>Print</title>
+            <style>
+              body, span, a, p, div, b, small, td, th {
+                font-size: 12px !important;
+              }
+            </style>
+          </head>
+          <body>
+            ${element.outerHTML.trim()}
+          </body>
+        </html>
+      `);
+
+      addStyles(win);
+
+      win.focus();
+      win.print();
+
+      router.go(-1);
     }
 
     onMounted(() => init());
@@ -269,7 +327,7 @@ export default {
   }
   #print-container {
     size: legal;
-    zoom: 80%;
+    zoom: 70%;
     background: white !important;
   }
 }
