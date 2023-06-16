@@ -269,7 +269,7 @@ export default {
   }
   #print-container {
     size: legal;
-    zoom: 90%;
+    zoom: 80%;
     background: white !important;
   }
 }
