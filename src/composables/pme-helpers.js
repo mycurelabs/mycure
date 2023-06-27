@@ -2718,19 +2718,17 @@ export const useEditorHelper = () => {
   };
 };
 
-export const insertUIComponent = (id, text) => {
+export const insertUIComponent = ({ id, text, heightPx }) => {
   return `
     <br>
     <div id="${id}">
-      <div style="height: 80px;
+      <div style="height: ${heightPx || '80px'};
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 1px dashed grey;
-        border-radius: 5px;
         margin-bottom: 10px;
       ">
-        <span style="color: grey;">${text}</span>
+        <span style="color: grey;">${text || ''}</span>
       </div>
     </div>
     <br>
@@ -2756,7 +2754,7 @@ function parseHTML (report, id) {
   };
 }
 
-export const replaceMedicalHistoryGroupUIValue = ({ id, report, data }) => {
+export const replaceMedicalHistoryGroupUIValue = ({ id, report, medicalRecords }) => {
   const { parsedReportHTML, parsedUIComponentElements } = parseHTML(report, id);
 
   const containerElement = document.createElement('div');
@@ -2764,11 +2762,15 @@ export const replaceMedicalHistoryGroupUIValue = ({ id, report, data }) => {
   containerElement.style.gridTemplateColumns = 'repeat(3, 1fr)';
   containerElement.style.gap = '5px';
 
-  const valuesHTMLString = data.map((medicalHistory, index) => {
-    return `<small>${medicalHistory.medicalCondition} <br>- <b>${medicalHistory.notes}</b></small>`.trim();
-  });
+  if (medicalRecords?.length) {
+    const valuesHTMLString = medicalRecords.map((medicalHistory, index) => {
+      return `<small>${medicalHistory.medicalCondition} <br>- <b>${medicalHistory.notes}</b></small>`.trim();
+    });
 
-  containerElement.innerHTML = valuesHTMLString.join('');
+    containerElement.innerHTML = valuesHTMLString.join('');
+  } else {
+    containerElement.innerHTML = insertUIComponent({ id, heightPx: '200px' });
+  }
 
   // replace all the UI component containers with the data value
   parsedUIComponentElements.forEach((item) => {

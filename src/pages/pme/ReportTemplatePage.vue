@@ -930,7 +930,10 @@ export default {
     // Insert Medical History Group UI
     function insertMedicalHistoryGroup () {
       const edit = editorRef.value;
-      edit.runCmd('insertHTML', insertUIComponent(UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID, 'No Medical History Data'));
+      edit.runCmd('insertHTML', insertUIComponent({
+        id: UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID,
+        text: 'No Medical History Data',
+      }));
     }
 
     // Insert Diagnostic Results Group UI
@@ -968,7 +971,10 @@ export default {
       }
       const edit = editorRef.value;
       edit.runCmd('insertHTML',
-        insertUIComponent(idMap[type], textMap[type]),
+        insertUIComponent({
+          id: idMap[type],
+          text: textMap[type],
+        }),
       );
     }
 

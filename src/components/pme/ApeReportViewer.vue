@@ -158,11 +158,14 @@ export default {
       const medicalHistories = encounterMedicalRecords.value?.filter(record => {
         return record.type === 'medical-history' && record.notes;
       }) || [];
-      if (medicalHistoryGroupRegex.test(report) && medicalHistories.length) {
+
+      // Replace Medical History Group even if there is no medical history
+      // with blank div so users can still write on the printed report
+      if (medicalHistoryGroupRegex.test(report)) {
         report = replaceMedicalHistoryGroupUIValue({
           id: UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID,
           report,
-          data: medicalHistories,
+          data: medicalHistories || [],
         });
       }
 
