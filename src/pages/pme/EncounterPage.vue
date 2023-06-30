@@ -535,7 +535,7 @@ export default {
       try {
         const result = await confirm({
           title: 'Delete this encounter?',
-          message: 'Are you sure you want to delete this encounter? This action is irriversible.',
+          message: 'Are you sure you want to delete this encounter? This action is irreversible.',
         });
         if (!result) return;
         loading.value = true;
