@@ -1,5 +1,5 @@
 import { date } from 'quasar';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure-old';
 import { useRoute, useRouter } from 'vue-router';
 
 const DEFAULT_ADDRESS_FORMAT = 'street1 street2 village city municipality province state region country';

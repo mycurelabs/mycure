@@ -88,7 +88,7 @@ q-layout(view="lHh LpR lFr" style="background: #fafafa")
 <script>
 import { computed, ref } from 'vue';
 import { formatDoctorName } from '@/utils';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure';
 import { usePmeNavRoutes } from '@/composables/navigation';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { useRouter } from 'vue-router';

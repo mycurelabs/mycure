@@ -39,7 +39,7 @@ generic-page(padding :loading="loading")
 
 <script>
 import GenericPage from '@/components/commons/GenericPage';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';

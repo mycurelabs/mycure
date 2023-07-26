@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure-old';
 import { omit } from 'lodash';
 
 export const useUserStore = defineStore('user', {

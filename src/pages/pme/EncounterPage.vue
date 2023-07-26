@@ -287,7 +287,7 @@ q-footer(
 import { computed, ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { getPmeEncounter } from '@/services/pme';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/current-user';
 import { useQuasarMixins } from '@/composables/quasar-mixins';

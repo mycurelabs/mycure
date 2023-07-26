@@ -1,4 +1,4 @@
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure-old';
 
 const SERVICE_NAME = 'form-templates';
 

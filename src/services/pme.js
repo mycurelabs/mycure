@@ -1,4 +1,4 @@
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure-old';
 import { omit, uniqBy } from 'lodash';
 import { getPatient } from '@/services/patients';
 import { normalizePopulated } from 'src/utils';

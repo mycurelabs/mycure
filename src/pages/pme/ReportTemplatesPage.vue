@@ -104,7 +104,7 @@ import { useHelpers } from '@/composables/helpers';
 import { useRouter } from 'vue-router';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { useUserStore } from '@/stores/current-user';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure';
 import GenericPage from '@/components/commons/GenericPage';
 import SearchFormTemplates from '@/components/commons/search/SearchFormTemplates';
 import WorklistTableFilterDialog from '@/components/pme/WorklistTableFilterDialog';

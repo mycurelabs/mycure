@@ -1,4 +1,4 @@
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure-old';
 const appBuildType = process.env.APP_BUILD_TYPE;
 
 export default async (to, from, next) => {

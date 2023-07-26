@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { formatDoctorName } from '@/utils';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure-old';
 
 const SERVICE_NAME = 'medical-records';
 

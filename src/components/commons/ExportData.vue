@@ -129,7 +129,7 @@ q-dialog(
 <script>
 import { computed, onMounted, ref, toRef } from 'vue';
 import { format, getTime, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure';
 import { useQuasarMixins } from '@/composables/quasar-mixins';
 import { useUserStore } from '@/stores/current-user';
 

@@ -1,5 +1,5 @@
 import { date } from 'quasar';
-import { sdk } from '@/boot/mycure';
+import { sdk } from 'src/boot/mycure-old';
 import { useRoute, useRouter } from 'vue-router';
 import { format } from 'date-fns';
 import { uniqBy, join, isEmpty, isArray, isObject, omit, mapValues } from 'lodash';
