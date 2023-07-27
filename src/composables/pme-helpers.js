@@ -2814,6 +2814,7 @@ function getDiagnosticHematologyHTMLValue (tests) {
             <span>${getMinMaxLabel(min, max) || ''}</span>
             <span>${unit || ''}</span>
           </td>
+          <td>${result?.remarks || ''}</td>
         </tr>
       `;
     });
@@ -2828,9 +2829,10 @@ function getDiagnosticHematologyHTMLValue (tests) {
         <table width="100%" border="1" style="border-collapse: collapse;">
           <thead>
             <tr>
-              <th width="33%">Constituent</th>
-              <th width="33%">Result</th>
-              <th width="33%">Reference Values</th>
+              <th width="25%">Constituent</th>
+              <th width="25%">Result</th>
+              <th width="25%">Reference Values</th>
+              <th width="25%">Remarks</th>
             </tr>
           </thead>
           <tbody>
