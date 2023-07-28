@@ -2840,11 +2840,12 @@ function getDiagnosticHematologyHTMLValue (tests) {
           </tbody>
         </table>
       </div>
+
       <div style="flex: 1">
         <table width="100%" border="1" style="border-collapse: collapse;">
           <tbody>
             <tr>
-              <td colspan="3" align="center">
+              <td colspan="4" align="center">
                 <b>${setName}</b>
               </td>
             </tr>
@@ -2852,6 +2853,7 @@ function getDiagnosticHematologyHTMLValue (tests) {
               <th>Constituent</th>
               <th>Result</th>
               <th>Reference Values</th>
+              <th>Remarks</th>
             </tr>
             ${rowsWithSet}
           </tbody>
@@ -2883,7 +2885,7 @@ function getDiagnosticUrinalysisHTMLValue (tests) {
     <table width="100%" border="1" style="border-collapse: collapse;">
       <thead>
         <tr>
-          <th width="33%">Test</th>
+          <th width="33%">Constituent</th>
           <th width="33%">Result</th>
           <th width="33%">Unit</th>
         </tr>
@@ -2905,7 +2907,6 @@ function getDiagnosticFecalysisHTMLValue (tests) {
         <tr>
           <td>${result?.measure?.name}</td>
           <td>${result?.value}</td>
-          <td>${result?.measure?.unit || ''}</td>
         </tr>
       `;
     });
@@ -2917,9 +2918,8 @@ function getDiagnosticFecalysisHTMLValue (tests) {
     <table width="100%" border="1" style="border-collapse: collapse;">
       <thead>
         <tr>
-          <th width="33%">Test</th>
+          <th width="33%">Constituent</th>
           <th width="33%">Result</th>
-          <th width="33%">Unit</th>
         </tr>
       </thead>
       <tbody>
