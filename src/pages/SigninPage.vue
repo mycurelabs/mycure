@@ -76,6 +76,7 @@ export default {
         if (!await loginFormRef.value.validate()) return;
         const user = await signin({ email: email.value, password: password.value });
         console.warn('user', user);
+        router.push({ name: 'dashboard' });
         // await userStore.populateCurrentUser();
         // gotoDashboard();
       } catch (e) {

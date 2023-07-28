@@ -1,3 +1,5 @@
+import appRoutes from './app.js';
+
 const routes = [
   {
     path: '/',
@@ -7,7 +9,7 @@ const routes = [
       { path: 'signin', component: () => import('pages/SigninPage.vue') },
     ],
   },
-
+  appRoutes,
   // Always leave this as last one,
   // but you can also remove it
   {
