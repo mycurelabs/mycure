@@ -9,9 +9,12 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { useSdk } from 'src/boot/mycure';
 
-export default defineComponent({
-  name: 'IndexPage',
-});
+export default {
+  setup () {
+    const sdk = useSdk();
+    console.warn(sdk);
+  },
+};
 </script>

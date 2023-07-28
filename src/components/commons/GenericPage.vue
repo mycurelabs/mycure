@@ -15,7 +15,7 @@ q-page(:padding="padding")
 
 <script>
 import { computed } from 'vue';
-import SkeletonTable from '@/components/commons/skeletons/SkeletonTable';
+import SkeletonTable from 'components/skeletons/SkeletonTable.vue';
 export default {
   components: {
     SkeletonTable,

@@ -1,5 +1,7 @@
-<template lang="pug">
-q-layout(style="background: #fafafa")
-  q-page-container
-    router-view
+<template>
+<q-layout>
+  <q-page-container>
+    <router-view />
+  </q-page-container>
+</q-layout>
 </template>
