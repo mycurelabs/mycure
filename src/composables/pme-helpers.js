@@ -2809,12 +2809,12 @@ function getDiagnosticHematologyHTMLValue (tests) {
       return `
         <tr>
           <td style="${withSet ? 'padding-left: 10px' : ''}">${result?.measure?.name}</td>
-          <td>${result?.value}</td>
-          <td>
+          <td align="center">${result?.value}</td>
+          <td align="center">
             <span>${getMinMaxLabel(min, max) || ''}</span>
             <span>${unit || ''}</span>
           </td>
-          <td>${result?.remarks || ''}</td>
+          <td align="center">${result?.remarks || ''}</td>
         </tr>
       `;
     });
@@ -2824,9 +2824,9 @@ function getDiagnosticHematologyHTMLValue (tests) {
   const rowsWithSet = getRows(resultsWithMeasureWithSet, true)?.join('') || '';
 
   return `
-    <div style="display: flex; outline: 1px solid gray;">
+    <div style="display: flex;">
       <div style="flex: 1">
-        <table width="100%" border="1" style="border-collapse: collapse;">
+        <table width="100%" border="1" style="border-collapse: collapse; border: none;">
           <thead>
             <tr>
               <th width="25%">Constituent</th>
@@ -2842,14 +2842,14 @@ function getDiagnosticHematologyHTMLValue (tests) {
       </div>
 
       <div style="flex: 1">
-        <table width="100%" border="1" style="border-collapse: collapse;">
+        <table width="100%" border="1" style="border-collapse: collapse; border: none;">
           <tbody>
             <tr>
               <td colspan="4" align="center">
-                <b>${setName}</b>
+                <b>${setName || 'Differential Count'}</b>
               </td>
             </tr>
-            <tr>
+            <tr align="center">
               <th>Constituent</th>
               <th>Result</th>
               <th>Reference Values</th>
@@ -2867,33 +2867,64 @@ function getDiagnosticUrinalysisHTMLValue (tests) {
   const firstTest = tests?.[0];
   console.warn('urinalysis', firstTest);
 
-  function getResults (test) {
-    return test?.results?.map((result) => {
-      return `
+  function getSet1Results (test) {
+    return test?.results
+      ?.filter(result => result.measure.set !== 'Microscopic')
+      ?.map((result) => {
+        return `
         <tr>
           <td>${result?.measure?.name}</td>
-          <td>${result?.value}</td>
-          <td>${result?.measure?.unit || ''}</td>
+          <td align="center">${result?.value}</td>
         </tr>
       `;
-    });
+      });
   }
 
-  const rows = getResults(firstTest)?.join('') || '';
+  function getSet2Results (test) {
+    return test?.results
+      ?.filter(result => result.measure.set === 'Microscopic')
+      ?.map((result) => {
+        return `
+        <tr>
+          <td>${result?.measure?.name}</td>
+          <td align="center">${result?.value}</td>
+        </tr>
+      `;
+      });
+  }
+
+  const set1Rows = getSet1Results(firstTest)?.join('') || '';
+  const set2Rows = getSet2Results(firstTest)?.join('') || '';
 
   return `
-    <table width="100%" border="1" style="border-collapse: collapse;">
-      <thead>
-        <tr>
-          <th width="33%">Constituent</th>
-          <th width="33%">Result</th>
-          <th width="33%">Unit</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
+    <div style="display: flex; align-items: top;">
+      <div style="flex: 1;">
+        <table width="100%" border="1" style="border-collapse: collapse; border: none;">
+          <thead>
+            <tr align="center">
+              <th width="33%">Constituent</th>
+              <th width="33%">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${set1Rows}
+          </tbody>
+        </table>
+      </div>
+      <div style="flex: 1;">
+        <table width="100%" border="1" style="border-collapse: collapse; border: none;">
+          <thead>
+            <tr align="center">
+              <th width="33%">Microscopy</th>
+              <th width="33%">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${set2Rows}
+          </tbody>
+        </table>
+      </div>
+    </div>
   `;
 }
 
@@ -2906,7 +2937,7 @@ function getDiagnosticFecalysisHTMLValue (tests) {
       return `
         <tr>
           <td>${result?.measure?.name}</td>
-          <td>${result?.value}</td>
+          <td align="center">${result?.value}</td>
         </tr>
       `;
     });
@@ -2915,9 +2946,9 @@ function getDiagnosticFecalysisHTMLValue (tests) {
   const rows = getResults(firstTest)?.join('') || '';
 
   return `
-    <table width="100%" border="1" style="border-collapse: collapse;">
+    <table width="100%" border="1" style="border-collapse: collapse; border: none;">
       <thead>
-        <tr>
+        <tr align="center">
           <th width="33%">Constituent</th>
           <th width="33%">Result</th>
         </tr>
