@@ -21,16 +21,6 @@ import {
 } from '@/constants/pme';
 
 export default {
-  // async mounted () {
-  // console.warn('mounted');
-  // await fakeAwait(3000);
-  // await this.$htmlToPaper('print-container');
-  // await this.$htmlToPaper('print-container', {
-  //   styles: [
-  //     'https://necolas.github.io/normalize.css/8.0.1/normalize.css',
-  //   ],
-  // });
-  // },
   setup () {
     const route = useRoute();
     const encounterId = route.params.encounter;
@@ -46,9 +36,7 @@ export default {
     const userStore = useUserStore();
     const currentUser = computed(() => userStore.$state.user);
 
-    const {
-      TEMPLATE_TOKENS_MAP,
-    } = pmeHelper();
+    const { TEMPLATE_TOKENS_MAP } = pmeHelper();
 
     const tokenDataSourceMap = {
       'current-user': currentUser,
@@ -253,7 +241,9 @@ export default {
         encounterDiagnosticOrders.value = result.diagnosticOrders;
 
         await fakeAwait(3000);
-        await print();
+        // await print();
+        window.focus();
+        window.print();
       } catch (e) {
         console.error(e);
       } finally {
