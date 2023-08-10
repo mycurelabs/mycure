@@ -2754,7 +2754,7 @@ function parseHTML (report, id) {
   };
 }
 
-export const replaceMedicalHistoryGroupUIValue = ({ id, report, medicalRecords }) => {
+export const replaceMedicalHistoryGroupUIValue = ({ id, report, data }) => {
   const { parsedReportHTML, parsedUIComponentElements } = parseHTML(report, id);
 
   const containerElement = document.createElement('div');
@@ -2762,8 +2762,8 @@ export const replaceMedicalHistoryGroupUIValue = ({ id, report, medicalRecords }
   containerElement.style.gridTemplateColumns = 'repeat(3, 1fr)';
   containerElement.style.gap = '5px';
 
-  if (medicalRecords?.length) {
-    const valuesHTMLString = medicalRecords.map((medicalHistory, index) => {
+  if (data?.length) {
+    const valuesHTMLString = data.map((medicalHistory, index) => {
       return `<small>${medicalHistory.medicalCondition} <br>- <b>${medicalHistory.notes}</b></small>`.trim();
     });
 
