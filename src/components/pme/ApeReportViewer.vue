@@ -405,10 +405,17 @@ export default {
          */
         if (!matchedToken?.readonly) {
           const label = generateLabelFromId(value.id);
-          let element = `<input id="${value.id}" value="${value.answer}" placeholder="${label}" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -3px; width: 120px; max-width: 200px;" />`;
+
+          // NOTE: What's the priority? The value from the encounter or the value from the data source?
+          let answer = value.answer;
+          if (matchedToken.dataSource === 'medical-records') {
+            answer = matchedToken.format(dataSource?.value);
+          }
+
+          let element = `<input id="${value.id}" value="${answer}" placeholder="${label}" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -3px; width: 120px; max-width: 200px;" />`;
           switch (matchedToken?.inputType) {
             case 'textarea': {
-              element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -3px; height: 35px; max-height: 35px; width: 120px; max-width: 300px;">${value.answer}</textarea>`;
+              element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -3px; height: 35px; max-height: 35px; width: 120px; max-width: 300px;">${answer}</textarea>`;
             }
           }
           report = report.replace(`{${value.id}}`, element);
@@ -469,17 +476,6 @@ export default {
       });
       return item || { choices: [] };
     }
-
-    onMounted(() => {
-      // const link = document.createElement('link');
-      // link.setAttribute('rel', 'stylesheet');
-      // link.setAttribute('href', 'https://necolas.github.io/normalize.css/8.0.1/normalize.css');
-      // const paperView = document.getElementById('paper-view');
-      // console.warn('paperView', paperView);
-      // console.warn('link', link);
-      // paperView.appendChild(link);
-      // document.head.appendChild(link);
-    });
 
     return {
       apeEncounter,
