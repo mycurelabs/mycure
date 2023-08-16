@@ -277,7 +277,6 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
-        console.warn('Clinic Logo', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 80px;" />`;
       },
@@ -288,7 +287,6 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
-        console.warn('Clinic Logo - Large', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100px;" />`;
       },
@@ -299,7 +297,6 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
-        console.warn('Clinic Logo - X-Large', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 125px;" />`;
       },
@@ -310,7 +307,6 @@ export default () => {
       dataSource: 'clinic',
       readonly: true,
       format: (data) => {
-        console.warn('Clinic Logo - Full-Width', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100%;" />`;
       },
@@ -331,7 +327,6 @@ export default () => {
       dataSource: 'current-user',
       readonly: true,
       format: (data) => {
-        console.warn('doctor_name', data);
         const name = data?.name || {};
         return formatName(name, 'firstName middleName lastName');
       },
@@ -643,7 +638,6 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        console.warn('patient dp', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100px;" />`;
       },
@@ -654,7 +648,6 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        console.warn('patient dp lg', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 200px;" />`;
       },
@@ -665,7 +658,6 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        console.warn('patient dp xl', data); ;
         const src = data?.picURL;
         return `<img src="${src}" style="width: 300px;" />`;
       },
@@ -676,7 +668,6 @@ export default () => {
       dataSource: 'patient',
       readonly: true,
       format: (data) => {
-        console.warn('patient full', data);
         const src = data?.picURL;
         return `<img src="${src}" style="width: 100%;" />`;
       },
@@ -2782,7 +2773,6 @@ export const replaceMedicalHistoryGroupUIValue = ({ id, report, data }) => {
 
 function getDiagnosticHematologyHTMLValue (tests) {
   const firstTest = tests?.[0];
-  console.warn('hematology', firstTest);
 
   const resultsWithMeasureWithSet = firstTest?.results?.filter((result) => {
     return result?.measure?.set;
@@ -2865,7 +2855,6 @@ function getDiagnosticHematologyHTMLValue (tests) {
 
 function getDiagnosticUrinalysisHTMLValue (tests) {
   const firstTest = tests?.[0];
-  console.warn('urinalysis', firstTest);
 
   function getSet1Results (test) {
     return test?.results
@@ -2930,7 +2919,6 @@ function getDiagnosticUrinalysisHTMLValue (tests) {
 
 function getDiagnosticFecalysisHTMLValue (tests) {
   const firstTest = tests?.[0];
-  console.warn('fecalysis', firstTest);
 
   function getResults (test) {
     return test?.results?.map((result) => {
@@ -2962,7 +2950,6 @@ function getDiagnosticFecalysisHTMLValue (tests) {
 
 function getDiagnosticHepatitisBHTMLValue (tests) {
   const firstTest = tests?.[0];
-  console.warn('hepatitis b', firstTest);
 
   function getResults (test) {
     return test?.results?.map((result) => {
@@ -2996,7 +2983,6 @@ function getDiagnosticHepatitisBHTMLValue (tests) {
 
 function getDiagnosticPregnancyHTMLValue (tests) {
   const firstTest = tests?.[0];
-  console.warn('pregnancy', firstTest);
 
   function getResults (test) {
     return test?.results?.map((result) => {
@@ -3030,7 +3016,6 @@ function getDiagnosticPregnancyHTMLValue (tests) {
 
 function getDiagnosticHepatitisAHTMLValue (tests) {
   const firstTest = tests?.[0];
-  console.warn('hepatitis a', firstTest);
 
   function getResults (test) {
     return test?.results?.map((result) => {
