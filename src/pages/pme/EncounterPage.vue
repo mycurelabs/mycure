@@ -409,7 +409,6 @@ export default {
 
     // WATCHERS
     watch(selectedExaminer, async (val) => {
-      console.warn('val', val);
       if (!val?.uid) return;
       if (!encounterApeReport.value?.id) return;
       await sdk.service('medical-records').update(encounterApeReport.value?.id, { examinedBy: val?.uid });
@@ -421,7 +420,6 @@ export default {
     });
 
     watch(selectedReviewer, async (val) => {
-      console.warn('val', val);
       if (!val?.uid) return;
       if (!encounterApeReport.value?.id) return;
       await sdk.service('medical-records').update(encounterApeReport.value?.id, { reviewedBy: val?.uid });
@@ -603,7 +601,6 @@ export default {
 
     // Print
     const printEnabled = computed(() => {
-      console.warn('apeReportStatus.value', apeReportStatus.value);
       return apeReportStatus.value?.value === 'completed';
     });
 
