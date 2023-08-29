@@ -365,6 +365,7 @@ export default () => {
       dataSource: 'attending-doctor',
       readonly: true,
       format: (data) => {
+        console.warn('attending_doc_name', data);
         // return 'no-formatter-yet';
         return '';
       },
