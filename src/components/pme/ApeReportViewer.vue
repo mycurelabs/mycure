@@ -107,11 +107,13 @@ export default {
     const focusedModeModel = ref({});
 
     const apeEncounter = toRef(props, 'encounter');
+    console.warn('apeEncounter', apeEncounter.value);
     const encounterFacility = toRef(props, 'facility');
     const encounterPatient = toRef(props, 'patient');
     const encounterApeReport = toRef(props, 'apeReport');
     const encounterMedicalRecords = toRef(props, 'medicalRecords');
     const encounterDiagnosticOrders = toRef(props, 'diagnosticOrders');
+    console.warn('encounterDiagnosticOrders', encounterDiagnosticOrders.value);
     const apeFormTemplate = toRef(props, 'formTemplate');
 
     const apeReportCreatedAt = computed(() => format(encounterApeReport.value?.createdAt || new Date(), 'MMM dd, yyyy'));
@@ -411,7 +413,6 @@ export default {
           if (matchedToken.dataSource === 'medical-records') {
             answer = matchedToken.format(dataSource?.value);
           }
-
           let element = `<input id="${value.id}" value="${answer}" placeholder="${label}" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -3px; width: 120px; max-width: 200px;" />`;
           switch (matchedToken?.inputType) {
             case 'textarea': {
