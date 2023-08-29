@@ -4,7 +4,7 @@ import {
   addMonths,
   differenceInDays,
 } from 'date-fns';
-import { cloneDeep, isEmpty } from 'lodash';
+import { cloneDeep, isEmpty, get } from 'lodash';
 
 const dentalExamFields = ['8', '7', '6', '5', '4', '3', '2', '1'];
 
@@ -71,7 +71,7 @@ export const recordsFieldFormatter = (records, options) => {
   const { field, type, subtype, joinerToken = ', ' } = options;
   const results = getRecords(records, type, subtype);
   if (!results?.length) return '';
-  return results.map(record => record[field]).filter(Boolean).join(joinerToken);
+  return results.map(record => get(record, field)).filter(Boolean).join(joinerToken);
 };
 
 export const formatSocialHistory = (record) => {
