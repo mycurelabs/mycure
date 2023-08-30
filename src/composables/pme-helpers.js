@@ -1932,8 +1932,8 @@ export default () => {
       format: (data) => {
         const records = getRecords(data, 'physical-exam');
         const mapped = records.map((record) => {
-          const breasts = record?.breasts?.text;
-          const chest = record?.chest?.text;
+          const breasts = record?.breasts?.text || record?.breasts?.status;
+          const chest = record?.chest?.text || record?.chest?.status;
 
           return `${breasts}; ${chest}`;
         });

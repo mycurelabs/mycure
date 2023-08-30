@@ -38,6 +38,7 @@ template(v-if="view === 'form'")
 
 <script>
 import { computed, onMounted, ref, toRef } from 'vue';
+import { startCase, toLowerCase } from 'lodash';
 import { useQuasar } from 'quasar';
 import { format } from 'date-fns';
 import { capitalized } from '@/utils';
@@ -310,6 +311,7 @@ export default {
         /** For Custom Texts Only */
         if (value.id.startsWith('custom_text')) {
           const label = generateLabelFromId(value.id);
+          value.answer = startCase(value.answer);
           const element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -7px; max-height: 50px; width: 80px; max-width: 200px;">${value.answer}</textarea>`;
           report = report.replace(`{${value.id}}`, element);
           return;
@@ -320,6 +322,7 @@ export default {
           const questionItem = getQuestionItem(value.id);
           const choices = questionItem?.choices || [];
           const label = generateLabelFromId(value.id);
+          value.answer = startCase(value.answer);
           const element = `
             <select id="${value.id}" placeholder="${label}" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -5px; max-height: 50px; max-width: 200px; width: 80px;">
               ${choices.map(choice => {
@@ -334,6 +337,7 @@ export default {
 
         /** For Dental Note Result Table */
         if (value.id.startsWith('dental_note_result_table')) {
+          value.answer = startCase(value.answer);
           // Answer is always an HTML table
           report = report.replace(`{${value.id}}`, value.answer);
           return;
@@ -359,6 +363,7 @@ export default {
 
         /** If there's no matched Token Object, just display the current value */
         if (!matchedToken) {
+          value.answer = startCase(value.answer);
           report = report.replace(`{${value.id}}`, `<span>${value.answer}</span>`);
           return;
         }
@@ -384,7 +389,7 @@ export default {
          * as is.
          */
         if (matchedToken?.readonly) {
-          let answer = value.answer;
+          let answer = startCase(value.answer);
 
           /**
            * Patient Data requires special handling because the data being used
@@ -413,6 +418,8 @@ export default {
           if (matchedToken.dataSource === 'medical-records') {
             answer = matchedToken.format(dataSource?.value);
           }
+          // to force the value to be capitalized
+          answer = startCase(startCase(answer).toLowerCase());
           let element = `<input id="${value.id}" value="${answer}" placeholder="${label}" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -3px; width: 120px; max-width: 200px;" />`;
           switch (matchedToken?.inputType) {
             case 'textarea': {
@@ -434,8 +441,8 @@ export default {
       const data = tokens.map(token => {
         const id = token;
         const found = values.find(value => {
-          console.warn('token', token);
-          console.warn('value.id', value.id);
+          // console.warn('token', token);
+          // console.warn('value.id', value.id);
           return value.id === token;
         });
         console.warn('found', found);
