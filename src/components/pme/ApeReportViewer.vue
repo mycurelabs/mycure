@@ -37,8 +37,8 @@ template(v-if="view === 'form'")
 </template>
 
 <script>
-import { computed, onMounted, ref, toRef } from 'vue';
-import { startCase, toLowerCase } from 'lodash';
+import { computed, ref, toRef } from 'vue';
+import { startCase } from 'lodash';
 import { useQuasar } from 'quasar';
 import { format } from 'date-fns';
 import { capitalized } from '@/utils';
@@ -416,14 +416,14 @@ export default {
           // NOTE: What's the priority? The value from the encounter or the value from the data source?
           let answer = value.answer;
           if (matchedToken.dataSource === 'medical-records') {
-            answer = matchedToken.format(dataSource?.value);
+            answer = value.answer || matchedToken.format(dataSource?.value);
           }
           // to force the value to be capitalized
           answer = startCase(startCase(answer).toLowerCase());
           let element = `<input id="${value.id}" value="${answer}" placeholder="${label}" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -3px; width: 120px; max-width: 200px;" />`;
           switch (matchedToken?.inputType) {
             case 'textarea': {
-              element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; height: 20px; margin-bottom: -3px; height: 35px; max-height: 35px; width: 120px; max-width: 300px;">${answer}</textarea>`;
+              element = `<textarea id="${value.id}" placeholder="${label}" rows="1" style="border-radius: 3px; border: 1px solid ${primaryColor}; margin-bottom: -3px; min-height: 35px; max-height: 35px; min-width: 120px; max-width: 300px;">${answer}</textarea>`;
             }
           }
           report = report.replace(`{${value.id}}`, element);

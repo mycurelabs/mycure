@@ -207,14 +207,16 @@ export default {
 
         let answer = '';
 
+        console.warn('item', item.answer);
+
         if (matchedToken?.dataSource === 'patient') {
-          answer = matchedToken.format(dataSource?.value);
+          answer = item.answer || matchedToken.format(dataSource?.value);
           report = report.replace(`{${item.id}}`, answer);
           return;
         }
 
         /** Display the formatted answer */
-        answer = matchedToken?.format(dataSource?.value);
+        answer = item.answer || matchedToken?.format(dataSource?.value);
         report = report.replace(`{${item.id}}`, answer);
       });
 
@@ -244,6 +246,7 @@ export default {
         // await print();
         window.focus();
         window.print();
+        router.go(-1);
       } catch (e) {
         console.error(e);
       } finally {
