@@ -416,6 +416,8 @@ export default {
           // NOTE: What's the priority? The value from the encounter or the value from the data source?
           let answer = value.answer;
           if (matchedToken.dataSource === 'medical-records') {
+            // TODO: remove this. Replace with an inital logic to prefill the
+            // values from the medical records.
             answer = value.answer || matchedToken.format(dataSource?.value);
           }
           // to force the value to be capitalized
@@ -438,26 +440,22 @@ export default {
       const tokens = selectedApeReportTemplate.value?.match(regex) || [];
       const values = encounterApeReport.value?.values || tokens.map(token => ({ id: token, answer: '' }));
 
-      const data = tokens.map(token => {
-        const id = token;
-        const found = values.find(value => {
-          // console.warn('token', token);
-          // console.warn('value.id', value.id);
-          return value.id === token;
-        });
-        console.warn('found', found);
-        const element = document.getElementById(found?.id);
-        const answer = element?.value || found?.answer || '';
-        return {
-          id,
-          answer,
-        };
-      });
+      const data = tokens
+        .map(token => {
+          const id = token;
+          const element = document.getElementById(id);
+          const answer = element?.value;
+          return {
+            id,
+            answer,
+          };
+        })
+        .filter(item => item.answer); // Filter out objects with falsy answers
 
       return {
         values: data,
         template: apeFormTemplate?.value?.id,
-        report: apeFormTemplate.value?.template,
+        report: apeFormTemplate?.value?.template,
       };
     }
 

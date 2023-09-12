@@ -497,12 +497,13 @@ export default {
         console.warn('existing', existing?.apeReport);
 
         if (existing?.apeReport?.id) {
-          console.warn('payload: update', payload);
           if (status === 'done') payload.done = true;
           if (status === 'classified') payload.classify = true;
           if (status === 'completed') payload.finalize = true;
           await sdk.service('medical-records').update(encounterApeReport.value?.id, payload);
         } else {
+          // TODO: Perform copying of value from medical records to
+          // encounter ape report values
           console.warn('payload: create', payload);
           payload.type = 'ape-report';
           payload.encounter = encounter.value?.id;
