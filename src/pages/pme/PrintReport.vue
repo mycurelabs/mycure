@@ -23,6 +23,10 @@ import {
 export default {
   setup () {
     const route = useRoute();
+    const router = useRouter();
+    const userStore = useUserStore();
+    const currentUser = computed(() => userStore.$state.user);
+
     const encounterId = route.params.encounter;
     const loading = ref(false);
     const encounter = ref({});
@@ -32,9 +36,11 @@ export default {
     const encounterPatient = ref({});
     const encounterDiagnosticOrders = ref([]);
 
-    const router = useRouter();
-    const userStore = useUserStore();
-    const currentUser = computed(() => userStore.$state.user);
+    // const apeReportValues = computed(() => encounterApeReport.value?.values || []);
+    const apeReportTemplateData = computed(() => encounterApeReport.value?.templateData);
+    // const apeReportTemplateDataItems = computed(() => encounterApeReport.value?.templateData?.items || []);
+
+    const selectedApeReportTemplate = computed(() => apeReportTemplateData?.value?.template);
 
     const { TEMPLATE_TOKENS_MAP } = pmeHelper();
 
@@ -48,8 +54,18 @@ export default {
     };
 
     const templateWithValues = computed(() => {
+      const regex = /(?<=\{)\w+(?=\})/g;
       let report = encounterApeReport.value?.report || '';
-      const values = encounterApeReport.value?.values || [];
+      const tokens = selectedApeReportTemplate.value?.match(regex) || [];
+      // const values = encounterApeReport.value?.values || [];
+      const values = tokens.map(token => {
+        const found = encounterApeReport.value?.values.find(value => value.id === token);
+        if (found) return found;
+        return {
+          id: token,
+          answer: '',
+        };
+      });
 
       // UI Components
       const medicalHistoryGroupRegex = new RegExp(UI_COMPONENT_GROUP_MEDICAL_RECORD_MEDICAL_HISTORY_ID, 'gi');
@@ -207,8 +223,6 @@ export default {
 
         let answer = '';
 
-        console.warn('item', item.answer);
-
         if (matchedToken?.dataSource === 'patient') {
           answer = item.answer || matchedToken.format(dataSource?.value);
           report = report.replace(`{${item.id}}`, answer);
@@ -243,7 +257,6 @@ export default {
         encounterDiagnosticOrders.value = result.diagnosticOrders;
 
         await fakeAwait(3000);
-        // await print();
         window.focus();
         window.print();
         router.go(-1);
