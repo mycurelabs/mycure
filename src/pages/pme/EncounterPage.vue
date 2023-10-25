@@ -447,6 +447,7 @@ export default {
       try {
         loading.value = true;
         const result = await getPmeEncounter({ id: encounterId });
+        console.warn('result.diagnosticOrders', result.diagnosticOrders);
         encounter.value = result.encounter;
         encounterApeReport.value = result.apeReport;
         encounterFacility.value = result.facility;

@@ -243,13 +243,13 @@ export const getPmeEncounter = async (opts) => {
    */
   const diagnosticOrders = encounter.$populated?.diagnosticOrders?.map((order) => {
     return {
-      // ...omit(order, ['$populated']),
+      ...omit(order, ['$populated']),
       ...order?.$populated,
       diagnosticOrderTests: order?.$populated.diagnosticOrderTests?.map((test) => {
         const results = test.results?.map((result) => {
           const measure = test.$populated?.measures?.find((measure) => measure.id === result.measure);
           return {
-            // ...omit(result, ['$populated']),
+            ...omit(result, ['$populated']),
             ...result?.$populated,
             measure,
           };

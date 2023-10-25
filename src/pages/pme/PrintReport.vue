@@ -95,9 +95,9 @@ export default {
         const hepatitisBKeywords = ['hepatitis b', 'hepatitis-b', 'hepatitisb'];
         const hepatitisBTests = allLaboratoryTests.filter(test => {
           return hepatitisBKeywords.some(keyword => {
-            return test.testName?.toLowerCase().includes(keyword) ||
-              test.section?.toLowerCase().includes(keyword) ||
-              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+            return test.test?.name?.toLowerCase().includes(keyword) ||
+              test.test?.section?.toLowerCase().includes(keyword) ||
+              test.test?.tags?.some(tag => tag.toLowerCase().includes(keyword));
           });
         });
         if (diagnosticHepatitisBGroupRegex.test(report) && hepatitisBTests.length) {
@@ -112,9 +112,9 @@ export default {
         const hematologyKeywords = ['hematology', 'cbc', 'complete blood count'];
         const hematologyTests = allLaboratoryTests.filter(test => {
           return hematologyKeywords.some(keyword => {
-            return test.testName?.toLowerCase().includes(keyword) ||
-              test.section?.toLowerCase().includes(keyword) ||
-              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+            return test.test?.name?.toLowerCase().includes(keyword) ||
+              test.test?.section?.toLowerCase().includes(keyword) ||
+              test.test?.tags?.some(tag => tag.toLowerCase().includes(keyword));
           });
         });
         if (diagnosticHematologyGroupRegex.test(report) && hematologyTests.length) {
@@ -129,9 +129,9 @@ export default {
         const urinalysisKeywords = ['urinalysis', 'urine'];
         const urinalysisTests = allLaboratoryTests.filter(test => {
           return urinalysisKeywords.some(keyword => {
-            return test.testName?.toLowerCase().includes(keyword) ||
-              test.section?.toLowerCase().includes(keyword) ||
-              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+            return test.test?.name?.toLowerCase().includes(keyword) ||
+              test.test?.section?.toLowerCase().includes(keyword) ||
+              test.test?.tags?.some(tag => tag.toLowerCase().includes(keyword));
           });
         });
         if (diagnosticUrinalysisGroupRegex.test(report) && urinalysisTests.length) {
@@ -146,9 +146,9 @@ export default {
         const fecalysisKeywords = ['fecalysis', 'stool'];
         const fecalysisTests = allLaboratoryTests.filter(test => {
           return fecalysisKeywords.some(keyword => {
-            return test.testName?.toLowerCase().includes(keyword) ||
-              test.section?.toLowerCase().includes(keyword) ||
-              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+            return test.test?.name?.toLowerCase().includes(keyword) ||
+              test.test?.section?.toLowerCase().includes(keyword) ||
+              test.test?.tags?.some(tag => tag.toLowerCase().includes(keyword));
           });
         });
         if (diagnosticFecalysisGroupRegex.test(report) && fecalysisTests.length) {
@@ -163,9 +163,9 @@ export default {
         const pregnancyKeywords = ['pregnancy', 'pregnancy test'];
         const pregnancyTests = allLaboratoryTests.filter(test => {
           return pregnancyKeywords.some(keyword => {
-            return test.testName?.toLowerCase().includes(keyword) ||
-              test.section?.toLowerCase().includes(keyword) ||
-              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+            return test.test?.name?.toLowerCase().includes(keyword) ||
+              test.test?.section?.toLowerCase().includes(keyword) ||
+              test.test?.tags?.some(tag => tag.toLowerCase().includes(keyword));
           });
         });
         if (diagnosticPregnancyGroupRegex.test(report) && pregnancyTests.length) {
@@ -180,9 +180,9 @@ export default {
         const hepatitisAKeywords = ['hepatitis a', 'hepatitis-a', 'hepatitisa'];
         const hepatitisATests = allLaboratoryTests.filter(test => {
           return hepatitisAKeywords.some(keyword => {
-            return test.testName?.toLowerCase().includes(keyword) ||
-              test.section?.toLowerCase().includes(keyword) ||
-              test.tags?.some(tag => tag.toLowerCase().includes(keyword));
+            return test.test?.name?.toLowerCase().includes(keyword) ||
+              test.test?.section?.toLowerCase().includes(keyword) ||
+              test.test?.tags?.some(tag => tag.toLowerCase().includes(keyword));
           });
         });
         if (diagnosticHepatitisAGroupRegex.test(report) && hepatitisATests.length) {
